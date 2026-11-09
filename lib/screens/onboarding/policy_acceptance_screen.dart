@@ -34,8 +34,17 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
     if (!_isAgreed) return;
 
     setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    authController.acceptPolicies();
+    try {
+      await authController.acceptPolicies();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save your acceptance. Please try again.')),
+      );
+      return;
+    }
+    if (!mounted) return;
     setState(() => _isSubmitting = false);
 
     // Continue to next onboarding step (Create PIN) or target

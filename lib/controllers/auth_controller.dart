@@ -1,20 +1,33 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent, AuthState;
 import '../core/constants/app_constants.dart';
 import '../data/models/admin_models.dart';
+import '../services/auth_service.dart';
 import 'admin_controller.dart';
 
 /// Central authentication and session authorization controller.
 ///
-/// NOTE: This implementation is for frontend demonstration only.
-/// In production, real authentication tokens, server-side authorization,
-/// and secure biometric / hardware-backed PIN verifications must be enforced.
+/// Two modes:
+/// * **Supabase mode** (when `SUPABASE_URL` / `SUPABASE_ANON_KEY` are provided at
+///   build time): real email/password + Google sign-in, profiles & roles from
+///   `public.profiles`, and a server-side hashed 6-digit security PIN.
+/// * **Demo mode** (no keys): the original frontend-only demonstration flow.
 class AuthController extends GetxController {
+  /// Navigation hook registered by `main.dart` so async auth events
+  /// (e.g. returning from Google sign-in) can route the user.
+  static void Function(String route)? navigate;
+
+  bool get backendEnabled => AuthService.isEnabled;
+
   // Login form state
   final loginEmail = ''.obs;
   final loginPassword = ''.obs;
   final rememberMe = false.obs;
   final loginLoading = false.obs;
   final loginPasswordVisible = false.obs;
+  final googleLoading = false.obs;
 
   // Registration form state
   final regFullName = ''.obs;
@@ -27,6 +40,10 @@ class AuthController extends GetxController {
   final regPasswordVisible = false.obs;
   final regConfirmPasswordVisible = false.obs;
 
+  // Feedback for the UI (errors / info such as "check your email")
+  final authError = ''.obs;
+  final authInfo = ''.obs;
+
   // Authentication & session state
   final isLoggedIn = false.obs;
   final isSessionUnlocked = false.obs;
@@ -37,29 +54,143 @@ class AuthController extends GetxController {
   final acceptedTermsVersion = ''.obs;
   final acceptedPrivacyVersion = ''.obs;
 
-  // Security PIN setup (6 digits)
+  // Security PIN setup (6 digits). In Supabase mode the PIN itself is never
+  // kept on the client; only [pinConfigured] is tracked.
   final securityPin = ''.obs;
+  final pinConfigured = false.obs;
 
   // Redirect destination after completing auth/onboarding (internal state, non-observable)
   String intendedRoute = '';
 
-  // Registered user demo profile
+  // Registered user profile
+  final userId = ''.obs;
   final userFullName = 'Demo User'.obs;
   final userEmail = 'demo@resolva.ng'.obs;
+  final userAvatarUrl = ''.obs;
+
+  StreamSubscription<AuthState>? _authSub;
 
   // Helper getters
   bool get hasAcceptedCurrentPolicies =>
       acceptedTermsVersion.value == AppConstants.termsVersion &&
       acceptedPrivacyVersion.value == AppConstants.privacyVersion;
 
-  bool get hasConfiguredPin =>
-      securityPin.value.isNotEmpty && securityPin.value.length == 6;
+  bool get hasConfiguredPin => backendEnabled
+      ? pinConfigured.value
+      : securityPin.value.isNotEmpty && securityPin.value.length == 6;
 
   bool get isFullyAuthorized =>
       isLoggedIn.value &&
       hasAcceptedCurrentPolicies &&
       hasConfiguredPin &&
       isSessionUnlocked.value;
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (backendEnabled) {
+      _authSub = AuthService.onAuthStateChange.listen(_onAuthStateChange);
+    }
+  }
+
+  @override
+  void onClose() {
+    _authSub?.cancel();
+    super.onClose();
+  }
+
+  // ──────────────────── SUPABASE SESSION HANDLING ────────────────────
+
+  /// Restores a persisted Supabase session (called once at app start).
+  Future<void> restoreSession() async {
+    if (!backendEnabled || AuthService.currentSession == null) return;
+    try {
+      await _loadSessionFromBackend(recordLogin: false);
+    } catch (e) {
+      authError.value = AuthService.describeError(e);
+    }
+  }
+
+  Future<void> _onAuthStateChange(AuthState state) async {
+    switch (state.event) {
+      case AuthChangeEvent.signedIn:
+        // Fired after password login, sign-up with auto-confirm, and when
+        // returning from Google OAuth. Only handle it if we aren't logged in yet.
+        if (isLoggedIn.value || state.session == null) return;
+        try {
+          final ok = await _loadSessionFromBackend(recordLogin: true);
+          if (ok) navigate?.call(getNextAuthRoute());
+        } catch (e) {
+          authError.value = AuthService.describeError(e);
+        } finally {
+          googleLoading.value = false;
+        }
+        break;
+      case AuthChangeEvent.signedOut:
+        if (isLoggedIn.value) {
+          _clearSession();
+          navigate?.call('/login');
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  /// Loads profile, role, policy and PIN state for the current Supabase user.
+  /// Returns false (and signs out) if the account is suspended or missing.
+  Future<bool> _loadSessionFromBackend({required bool recordLogin}) async {
+    final profile = await AuthService.fetchMyProfile();
+    if (profile == null) {
+      authError.value =
+          'Your account profile could not be found. Please contact support.';
+      await AuthService.signOut();
+      return false;
+    }
+    if (profile.isSuspended) {
+      authError.value = 'This account has been suspended. Please contact support.';
+      await AuthService.signOut();
+      return false;
+    }
+
+    final hasPin = await AuthService.hasSecurityPin();
+
+    userId.value = profile.id;
+    userEmail.value = profile.email;
+    userFullName.value =
+        profile.fullName.isNotEmpty ? profile.fullName : profile.email.split('@').first;
+    userAvatarUrl.value = profile.avatarUrl ?? '';
+    isAdmin.value = profile.isAdmin;
+    acceptedTermsVersion.value = profile.acceptedTermsVersion;
+    acceptedPrivacyVersion.value = profile.acceptedPrivacyVersion;
+    pinConfigured.value = hasPin;
+    securityPin.value = '';
+    isSessionUnlocked.value = false;
+    isLoggedIn.value = true;
+    authError.value = '';
+
+    if (recordLogin) {
+      unawaited(AuthService.recordLogin().catchError((_) {}));
+    }
+    if (isAdmin.value && Get.isRegistered<AdminController>()) {
+      unawaited(Get.find<AdminController>().loadFromBackend());
+    }
+    return true;
+  }
+
+  void _clearSession() {
+    isLoggedIn.value = false;
+    isSessionUnlocked.value = false;
+    isAdmin.value = false;
+    pinConfigured.value = false;
+    securityPin.value = '';
+    acceptedTermsVersion.value = '';
+    acceptedPrivacyVersion.value = '';
+    userId.value = '';
+    userAvatarUrl.value = '';
+    intendedRoute = '';
+    loginPassword.value = '';
+  }
 
   /// Returns the next route the user should visit based on their onboarding state.
   String getNextAuthRoute() {
@@ -103,7 +234,7 @@ class AuthController extends GetxController {
     regConfirmPasswordVisible.value = !regConfirmPasswordVisible.value;
   }
 
-  /// Sets up credentials for demonstration testing.
+  /// Sets up credentials for demonstration testing (demo mode only).
   /// If [isReturningUser] is true, configures terms acceptance and existing PIN '123456'.
   /// If [isAdminUser] is true, configures an Administrator account with PIN '123456'.
   void prepareDemoUser({
@@ -143,9 +274,31 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Simulates a login (frontend demo only).
+  // ──────────────────── SIGN IN ────────────────────
+
+  /// Signs in with email & password (Supabase) or simulates it (demo mode).
   Future<bool> login() async {
     if (loginEmail.value.isEmpty || loginPassword.value.isEmpty) return false;
+    authError.value = '';
+    authInfo.value = '';
+
+    if (backendEnabled) {
+      loginLoading.value = true;
+      try {
+        await AuthService.signInWithPassword(
+          loginEmail.value.trim(),
+          loginPassword.value,
+        );
+        return await _loadSessionFromBackend(recordLogin: true);
+      } catch (e) {
+        authError.value = AuthService.describeError(e);
+        return false;
+      } finally {
+        loginPassword.value = '';
+        loginLoading.value = false;
+      }
+    }
+
     loginLoading.value = true;
     await Future.delayed(const Duration(milliseconds: 600));
     loginLoading.value = false;
@@ -178,7 +331,43 @@ class AuthController extends GetxController {
     return true;
   }
 
-  /// Simulates registration (frontend demo only).
+  /// Starts "Continue with Google". On web the page redirects to Google and
+  /// the session is completed in [_onAuthStateChange] when the user returns.
+  Future<void> signInWithGoogle() async {
+    authError.value = '';
+    authInfo.value = '';
+    if (!backendEnabled) {
+      authError.value =
+          'Google sign-in is not configured yet. Connect Supabase to enable it.';
+      return;
+    }
+    googleLoading.value = true;
+    try {
+      await AuthService.signInWithGoogle();
+    } catch (e) {
+      authError.value = AuthService.describeError(e);
+      googleLoading.value = false;
+    }
+  }
+
+  /// Sends a password reset email (Supabase mode).
+  Future<bool> sendPasswordReset(String email) async {
+    if (!backendEnabled) return true;
+    try {
+      await AuthService.sendPasswordReset(email.trim());
+      return true;
+    } catch (e) {
+      authError.value = AuthService.describeError(e);
+      return false;
+    }
+  }
+
+  // ──────────────────── SIGN UP ────────────────────
+
+  /// Registers a new account (Supabase) or simulates it (demo mode).
+  ///
+  /// In Supabase mode, if email confirmation is enabled the user is not
+  /// signed in yet: this returns false and sets [authInfo].
   Future<bool> register() async {
     if (regFullName.value.isEmpty ||
         regEmail.value.isEmpty ||
@@ -188,6 +377,34 @@ class AuthController extends GetxController {
         !regAcceptTerms.value) {
       return false;
     }
+    authError.value = '';
+    authInfo.value = '';
+
+    if (backendEnabled) {
+      regLoading.value = true;
+      try {
+        final res = await AuthService.signUp(
+          email: regEmail.value.trim(),
+          password: regPassword.value,
+          fullName: regFullName.value.trim(),
+          phone: regPhone.value.trim(),
+        );
+        if (res.session == null) {
+          authInfo.value =
+              'Account created! Check ${regEmail.value.trim()} for a confirmation link, then sign in.';
+          return false;
+        }
+        return await _loadSessionFromBackend(recordLogin: true);
+      } catch (e) {
+        authError.value = AuthService.describeError(e);
+        return false;
+      } finally {
+        regPassword.value = '';
+        regConfirmPassword.value = '';
+        regLoading.value = false;
+      }
+    }
+
     regLoading.value = true;
     await Future.delayed(const Duration(milliseconds: 600));
     regLoading.value = false;
@@ -216,38 +433,62 @@ class AuthController extends GetxController {
     return true;
   }
 
+  // ──────────────────── ONBOARDING ────────────────────
+
   /// Marks terms and privacy policy as accepted for the current versions.
-  void acceptPolicies() {
+  Future<void> acceptPolicies() async {
+    if (backendEnabled) {
+      await AuthService.acceptPolicies(
+        AppConstants.termsVersion,
+        AppConstants.privacyVersion,
+      );
+    }
     acceptedTermsVersion.value = AppConstants.termsVersion;
     acceptedPrivacyVersion.value = AppConstants.privacyVersion;
   }
 
   /// Configures a new 6-digit security PIN and unlocks the active session.
-  void setSecurityPin(String pin) {
-    if (pin.length == 6) {
+  Future<void> setSecurityPin(String pin) async {
+    if (pin.length != 6) return;
+    if (backendEnabled) {
+      await AuthService.setSecurityPin(pin);
+      pinConfigured.value = true;
+    } else {
       securityPin.value = pin;
-      isSessionUnlocked.value = true;
     }
+    isSessionUnlocked.value = true;
   }
 
-  /// Verifies entered PIN against stored demonstration PIN.
-  bool verifyPin(String enteredPin) {
-    final valid = enteredPin == securityPin.value;
+  /// Verifies the entered PIN (server-side in Supabase mode).
+  Future<bool> verifyPin(String enteredPin) async {
+    final valid = backendEnabled
+        ? await AuthService.verifySecurityPin(enteredPin)
+        : enteredPin == securityPin.value;
     if (valid) {
       isSessionUnlocked.value = true;
     }
     return valid;
   }
 
-  /// Resets user PIN during forgot-pin recovery.
-  void resetPinForDemo() {
+  /// Resets the user's PIN during forgot-pin recovery.
+  Future<void> resetPinForDemo() async {
+    if (backendEnabled) {
+      await AuthService.resetSecurityPin();
+      pinConfigured.value = false;
+    }
     securityPin.value = '';
     isSessionUnlocked.value = false;
   }
 
-  /// Standard logout: clears active session and authentication,
-  /// preserving stored PIN and policy acceptance for demonstration returning-user flow.
+  /// Standard logout: clears active session and authentication.
+  /// In demo mode the stored PIN and policy acceptance are preserved for the
+  /// returning-user demonstration flow.
   void logout() {
+    if (backendEnabled) {
+      _clearSession();
+      AuthService.signOut().catchError((_) {});
+      return;
+    }
     if (isLoggedIn.value && Get.isRegistered<AdminController>()) {
       Get.find<AdminController>().recordUserLogout(email: userEmail.value);
     }

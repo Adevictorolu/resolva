@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
@@ -111,6 +112,20 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  void _showAuthFeedback() {
+    if (!mounted) return;
+    final error = controller.authError.value;
+    final info = controller.authInfo.value;
+    if (error.isEmpty && info.isEmpty) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error.isNotEmpty ? error : info),
+        backgroundColor: error.isNotEmpty ? AppColors.error : AppColors.emeraldGreen,
+        duration: const Duration(seconds: 5),
+      ),
+    );
+  }
+
   void _handleLogin() async {
     if (_loginFormKey.currentState!.validate()) {
       controller.loginEmail.value = _loginEmailController.text.trim();
@@ -119,6 +134,8 @@ class _AuthScreenState extends State<AuthScreen> {
       if (ok && mounted) {
         final nextRoute = controller.getNextAuthRoute();
         widget.onNavigate(nextRoute);
+      } else {
+        _showAuthFeedback();
       }
     }
   }
@@ -136,8 +153,75 @@ class _AuthScreenState extends State<AuthScreen> {
       if (ok && mounted) {
         final nextRoute = controller.getNextAuthRoute();
         widget.onNavigate(nextRoute);
+      } else {
+        if (controller.authInfo.value.isNotEmpty && mounted) {
+          // Email confirmation required: switch to Sign In with the email pre-filled.
+          setState(() {
+            _isRegister = false;
+            _loginEmailController.text = controller.regEmail.value;
+          });
+        }
+        _showAuthFeedback();
       }
     }
+  }
+
+  void _handleGoogle() async {
+    await controller.signInWithGoogle();
+    _showAuthFeedback();
+  }
+
+  Widget _buildGoogleButton() {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: Obx(
+            () => OutlinedButton(
+              onPressed: controller.googleLoading.value ? null : _handleGoogle,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: const BorderSide(color: AppColors.cardBorder),
+                backgroundColor: AppColors.white,
+                foregroundColor: AppColors.primaryNavy,
+              ),
+              child: controller.googleLoading.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const FaIcon(FontAwesomeIcons.google, size: 16, color: Color(0xFFDB4437)),
+                        const SizedBox(width: 10),
+                        Text(
+                          _isRegister ? 'Sign up with Google' : 'Continue with Google',
+                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            const Expanded(child: Divider(color: AppColors.cardBorder)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                'or use your email',
+                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+              ),
+            ),
+            const Expanded(child: Divider(color: AppColors.cardBorder)),
+          ],
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
   }
 
   @override
@@ -288,8 +372,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               const SizedBox(height: 20),
 
-                              // Quick Fill Demo Options
-                              Container(
+                              // Quick Fill Demo Options (demo mode only — hidden once Supabase is connected)
+                              if (!controller.backendEnabled) Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: AppColors.cardBackground,
@@ -358,7 +442,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              if (!controller.backendEnabled) const SizedBox(height: 24),
+
+                              // Google sign-in / sign-up
+                              _buildGoogleButton(),
 
                               // Forms
                               if (!_isRegister) _buildLoginForm() else _buildRegisterForm(),

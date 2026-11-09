@@ -9,6 +9,7 @@ import 'controllers/dashboard_controller.dart';
 import 'controllers/exam_controller.dart';
 import 'controllers/social_controller.dart';
 import 'controllers/admin_controller.dart';
+import 'services/auth_service.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/exam/exam_pins_screen.dart';
 import 'screens/social/social_media_screen.dart';
@@ -25,8 +26,19 @@ import 'screens/onboarding/forgot_pin_screen.dart';
 import 'screens/legal/legal_screens.dart';
 import 'screens/info/info_screens.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Connect to Supabase (no-op in demo mode when keys are not provided).
+  await AuthService.initialize();
+
+  // Register core controllers up-front so a saved Supabase session can be
+  // restored before the first route guard runs.
+  Get.put(AdminController(), permanent: true);
+  final auth = Get.put(AuthController(), permanent: true);
+  AuthController.navigate = navigateTo;
+  await auth.restoreSession();
+
   runApp(const ResolvaApp());
 }
 
@@ -198,8 +210,12 @@ class InitialBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(NavigationController(), permanent: true);
-    Get.put(AdminController(), permanent: true);
-    Get.put(AuthController(), permanent: true);
+    if (!Get.isRegistered<AdminController>()) {
+      Get.put(AdminController(), permanent: true);
+    }
+    if (!Get.isRegistered<AuthController>()) {
+      Get.put(AuthController(), permanent: true);
+    }
     Get.put(OnboardingController(), permanent: true);
     Get.put(DashboardController(), permanent: true);
     Get.put(ExamController(), permanent: true);

@@ -60,7 +60,17 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
     if (_pin == expected) {
       // PIN Setup Successful!
       final authController = Get.find<AuthController>();
-      authController.setSecurityPin(_pin);
+      try {
+        await authController.setSecurityPin(_pin);
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = 'Could not save your PIN. Please try again.';
+          _pin = '';
+        });
+        return;
+      }
+      if (!mounted) return;
       onboardingController.resetAll();
 
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../controllers/auth_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/shared/app_navigation.dart';
 import '../../widgets/shared/app_footer.dart';
@@ -29,11 +31,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      await Future.delayed(const Duration(milliseconds: 700));
+      final auth = Get.find<AuthController>();
+      final ok = auth.backendEnabled
+          ? await auth.sendPasswordReset(_emailController.text)
+          : await Future.delayed(const Duration(milliseconds: 700), () => true);
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _isSent = true;
+        _isSent = ok;
       });
+      if (!ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(auth.authError.value), backgroundColor: AppColors.error),
+        );
+      }
     }
   }
 

@@ -64,7 +64,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
     setState(() => _isLoading = false);
 
     // Identity verified! Reset PIN and redirect to Create Security PIN step
-    authController.resetPinForDemo();
+    await authController.resetPinForDemo();
     onboardingController.resetAll();
 
     if (!mounted) return;

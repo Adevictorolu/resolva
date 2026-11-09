@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../data/models/admin_models.dart';
 import '../data/mock/mock_data.dart';
+import '../services/auth_service.dart';
 
 /// Controller managing the RESOLVA Admin Dashboard:
 /// - Adding & removing users
@@ -29,10 +30,54 @@ class AdminController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (AuthService.isEnabled) {
+      // Real users are loaded from Supabase once an administrator signs in.
+      return;
+    }
     users.assignAll(mockAdminUsers);
     filteredUsers.assignAll(mockAdminUsers);
     activityLogs.assignAll(mockAdminActivityLogs);
     filteredActivityLogs.assignAll(mockAdminActivityLogs);
+  }
+
+  // ──────────────────── SUPABASE BACKEND ────────────────────
+
+  final isLoadingUsers = false.obs;
+  final backendError = ''.obs;
+
+  /// Loads every profile from Supabase (admins only; enforced by RLS).
+  Future<void> loadFromBackend() async {
+    if (!AuthService.isEnabled) return;
+    isLoadingUsers.value = true;
+    backendError.value = '';
+    try {
+      final profiles = await AuthService.adminListProfiles();
+      users.assignAll(profiles.map(_recordFromProfile));
+      _applyUserFilters();
+    } catch (e) {
+      backendError.value = AuthService.describeError(e);
+    } finally {
+      isLoadingUsers.value = false;
+    }
+  }
+
+  AdminUserRecord _recordFromProfile(UserProfile p) {
+    return AdminUserRecord(
+      id: p.id,
+      fullName: p.fullName.isNotEmpty ? p.fullName : p.email.split('@').first,
+      email: p.email,
+      phone: p.phone,
+      role: p.isAdmin ? UserRole.admin : UserRole.customer,
+      status: switch (p.status) {
+        'active' => UserStatus.active,
+        'suspended' => UserStatus.suspended,
+        _ => UserStatus.pendingOnboarding,
+      },
+      joinedAt: p.createdAt,
+      lastLoginAt: p.lastLoginAt,
+      hasPinConfigured: p.status != 'pendingOnboarding',
+      hasAcceptedPolicies: p.acceptedTermsVersion.isNotEmpty,
+    );
   }
 
   // ──────────────────── ANALYTICS GETTERS ────────────────────
@@ -246,6 +291,13 @@ class AdminController extends GetxController {
     }
     _applyUserFilters();
 
+    if (AuthService.isEnabled) {
+      AuthService.adminDeleteUser(userId).catchError((Object e) {
+        backendError.value = AuthService.describeError(e);
+        loadFromBackend();
+      });
+    }
+
     recordActivity(
       userId: removed.id,
       userName: removed.fullName,
@@ -276,6 +328,13 @@ class AdminController extends GetxController {
       selectedUser.value = updated;
     }
     _applyUserFilters();
+
+    if (AuthService.isEnabled) {
+      AuthService.adminSetUserStatus(userId, nextStatus.name).catchError((Object e) {
+        backendError.value = AuthService.describeError(e);
+        loadFromBackend();
+      });
+    }
 
     recordActivity(
       userId: updated.id,

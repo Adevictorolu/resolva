@@ -54,7 +54,13 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
     if (_pin.length != 6) return;
 
     final authController = Get.find<AuthController>();
-    final isValid = authController.verifyPin(_pin);
+    bool isValid;
+    try {
+      isValid = await authController.verifyPin(_pin);
+    } catch (_) {
+      isValid = false;
+    }
+    if (!mounted) return;
 
     if (isValid) {
       ScaffoldMessenger.of(context).showSnackBar(
