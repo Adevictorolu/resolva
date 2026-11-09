@@ -32,7 +32,7 @@ jobs:
           flutter build web --release
           --base-href "/${{ github.event.repository.name }}/"
           --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL || 'https://jykwnzabsrbxcvaiykih.supabase.co' }}
-          --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}
+          --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY || 'sb_publishable_qwWqoND6dPiWH9cQC_S9Gg_AW8XVCkG' }}
 
       - name: SPA fallback (404.html)
         run: cp build/web/index.html build/web/404.html

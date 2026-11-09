@@ -20,7 +20,10 @@ class SupabaseConfig {
     'SUPABASE_URL',
     defaultValue: 'https://jykwnzabsrbxcvaiykih.supabase.co',
   );
-  static const String anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  static const String anonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'sb_publishable_qwWqoND6dPiWH9cQC_S9Gg_AW8XVCkG',
+  );
 
   /// Optional override for the OAuth redirect URL (defaults to the current page URL on web).
   static const String redirectUrl = String.fromEnvironment('SUPABASE_REDIRECT_URL');
