@@ -110,7 +110,7 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
                             onPressed: () => onNavigate('/login'),
                             child: Text(
                               'Login',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
@@ -161,7 +161,7 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 14,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             color: isActive ? AppColors.royalBlue : AppColors.textSecondary,
@@ -288,7 +288,7 @@ class ResolvaDrawer extends StatelessWidget {
       leading: Icon(icon, size: 22, color: AppColors.textSecondary),
       title: Text(
         label,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.montserrat(
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,

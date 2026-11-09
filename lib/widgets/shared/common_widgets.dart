@@ -86,7 +86,7 @@ class _ServiceCardState extends State<ServiceCard> {
                         ),
                         child: Text(
                           'Coming Soon',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppColors.warning,
@@ -99,7 +99,7 @@ class _ServiceCardState extends State<ServiceCard> {
                 const SizedBox(height: 20),
                 Text(
                   widget.title,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -108,7 +108,7 @@ class _ServiceCardState extends State<ServiceCard> {
                 const SizedBox(height: 8),
                 Text(
                   widget.description,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 14,
                     color: AppColors.textSecondary,
                     height: 1.6,
@@ -128,7 +128,7 @@ class _ServiceCardState extends State<ServiceCard> {
                       ),
                       child: Text(
                         tag,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textSecondary,
@@ -227,7 +227,7 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.montserrat(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: color,
@@ -276,7 +276,7 @@ class SummaryCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
@@ -285,7 +285,7 @@ class SummaryCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
@@ -334,7 +334,7 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               title,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -344,7 +344,7 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 14,
                 color: AppColors.textSecondary,
                 height: 1.5,
@@ -440,7 +440,7 @@ class ResolvaLogo extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           'RESOLVA',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: fontSize,
             fontWeight: FontWeight.w800,
             color: isLightOnDark ? AppColors.white : AppColors.brandBlue,
@@ -472,7 +472,7 @@ class SectionHeading extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 32,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -484,7 +484,7 @@ class SectionHeading extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             subtitle!,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 16,
               color: AppColors.textSecondary,
               height: 1.6,

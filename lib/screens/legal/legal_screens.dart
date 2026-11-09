@@ -114,7 +114,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 28 : 36,
                   fontWeight: FontWeight.w800,
                   color: AppColors.white,
@@ -123,7 +123,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Version $version • Effective Date: $lastUpdated',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 13,
                   color: AppColors.textSecondaryDark,
                 ),
@@ -151,7 +151,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           Expanded(
             child: Text(
               'Notice: This is a placeholder legal agreement for the RESOLVA frontend demonstration. Prior to production launch, these terms must be formally reviewed and ratified by qualified legal counsel.',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 12,
                 color: AppColors.primaryNavy,
                 height: 1.4,
@@ -171,7 +171,7 @@ class TermsOfServiceScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -180,7 +180,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             body,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 14,
               color: AppColors.textSecondary,
               height: 1.6,
@@ -297,7 +297,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 28 : 36,
                   fontWeight: FontWeight.w800,
                   color: AppColors.white,
@@ -306,7 +306,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Version $version • Effective Date: $lastUpdated',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 13,
                   color: AppColors.textSecondaryDark,
                 ),
@@ -334,7 +334,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           Expanded(
             child: Text(
               'Notice: This placeholder privacy policy is provided for frontend demonstration. Real production deployment requires verified compliance with the Nigeria Data Protection Act (NDPA).',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 12,
                 color: AppColors.primaryNavy,
                 height: 1.4,
@@ -354,7 +354,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -363,7 +363,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             body,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 14,
               color: AppColors.textSecondary,
               height: 1.6,

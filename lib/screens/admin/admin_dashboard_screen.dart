@@ -172,7 +172,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     ),
                                     child: Text(
                                       'ADMIN CONTROL CENTER',
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.montserrat(
                                         fontSize: 9.5,
                                         fontWeight: FontWeight.w800,
                                         color: AppColors.primaryNavy,
@@ -197,7 +197,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       ),
                                       child: Text(
                                         '${controller.onlineUsersCount} Online Now',
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.montserrat(
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.white,
@@ -213,7 +213,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   'RESOLVA Platform Administration',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.montserrat(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.white,
@@ -223,7 +223,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               const SizedBox(height: 2),
                               Text(
                                 'Manage users, monitor login/logout sessions, inspect last purchases & platform analytics.',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 12,
                                   color: AppColors.textSecondaryDark,
                                 ),
@@ -247,7 +247,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             horizontal: 20,
                             vertical: 13,
                           ),
-                          textStyle: GoogleFonts.inter(
+                          textStyle: GoogleFonts.montserrat(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
@@ -296,7 +296,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       ),
                                       child: Text(
                                         'ADMIN CONTROL CENTER',
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.montserrat(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.primaryNavy,
@@ -322,7 +322,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                         ),
                                         child: Text(
                                           '${controller.onlineUsersCount} Online Now',
-                                          style: GoogleFonts.inter(
+                                          style: GoogleFonts.montserrat(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w700,
                                             color: AppColors.white,
@@ -335,7 +335,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 const SizedBox(height: 6),
                                 Text(
                                   'RESOLVA Platform Administration',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.montserrat(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.white,
@@ -344,7 +344,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 const SizedBox(height: 2),
                                 Text(
                                   'Manage users, monitor login/logout sessions, inspect last purchases & platform analytics.',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.montserrat(
                                     fontSize: 13,
                                     color: AppColors.textSecondaryDark,
                                   ),
@@ -367,7 +367,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           horizontal: 20,
                           vertical: 14,
                         ),
-                        textStyle: GoogleFonts.inter(
+                        textStyle: GoogleFonts.montserrat(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                         ),
@@ -412,7 +412,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 if (val) setState(() => _selectedTab = index);
               },
               selectedColor: AppColors.brandBlue,
-              labelStyle: GoogleFonts.inter(
+              labelStyle: GoogleFonts.montserrat(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected ? AppColors.white : AppColors.textSecondary,
@@ -462,7 +462,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Text(
               'ADMINISTRATION',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textMuted,
@@ -491,7 +491,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 title: Text(
                   item['label'] as String,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13.5,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected
@@ -518,7 +518,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
             title: Text(
               'Sign Out Admin',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
                 color: AppColors.error,
@@ -665,7 +665,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               Text(
                 'Recent Logins & Purchases',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 15 : 18,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -719,7 +719,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: isSmall ? 11 : 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
@@ -742,7 +742,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: isSmall ? 19 : 22,
                 fontWeight: FontWeight.w800,
                 color: AppColors.primaryNavy,
@@ -753,7 +753,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             sublabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: isSmall ? 10 : 11,
               color: AppColors.textMuted,
             ),
@@ -787,7 +787,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               Text(
                 'Service Revenue Analytics',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -801,7 +801,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 child: Text(
                   'Live Metrics',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: AppColors.brandBlue,
@@ -813,7 +813,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 6),
           Text(
             'Distribution of customer purchases across RESOLVA product lines',
-            style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+            style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 20),
 
@@ -864,7 +864,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Text(
                 title,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -874,7 +874,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(width: 8),
             Text(
               amount,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: color,
@@ -909,7 +909,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           Text(
             'User Security & Session Status',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 16,
               fontWeight: FontWeight.w800,
               color: AppColors.primaryNavy,
@@ -918,7 +918,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 6),
           Text(
             'Real-time account compliance and session states',
-            style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+            style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 20),
           _buildStatRow(
@@ -966,7 +966,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               fontWeight: FontWeight.w500,
               color: AppColors.textSecondary,
@@ -975,7 +975,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppColors.primaryNavy,
@@ -996,7 +996,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         if (isMobile) ...[
           Text(
             'User Directory & Account Control',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: AppColors.primaryNavy,
@@ -1005,7 +1005,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 4),
           Text(
             'Add or remove users, inspect user information, login/logout timestamps, and last purchase.',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 12.5,
               color: AppColors.textSecondary,
             ),
@@ -1036,7 +1036,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     Text(
                       'User Directory & Account Control',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryNavy,
@@ -1045,7 +1045,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'Add or remove users, inspect user information, login/logout timestamps, and last purchase.',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: AppColors.textSecondary,
                       ),
@@ -1109,7 +1109,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     onSelected: (_) => controller.filterUsersByStatus(filter),
                     selectedColor: AppColors.brandBlue,
                     checkmarkColor: AppColors.white,
-                    labelStyle: GoogleFonts.inter(
+                    labelStyle: GoogleFonts.montserrat(
                       fontSize: 12.5,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected
@@ -1145,7 +1145,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'No matching users found',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryNavy,
@@ -1154,7 +1154,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'Try clearing your search query or switching status filters.',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
@@ -1236,7 +1236,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
                                     .join()
                                 : 'U',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: AppColors.brandBlue,
@@ -1272,7 +1272,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             children: [
                               Text(
                                 user.fullName,
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryNavy,
@@ -1289,7 +1289,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 ),
                                 child: Text(
                                   user.id,
-                                  style: GoogleFonts.jetBrainsMono(
+                                  style: GoogleFonts.montserrat(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textSecondary,
@@ -1308,7 +1308,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   ),
                                   child: Text(
                                     'ADMIN',
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.montserrat(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w800,
                                       color: AppColors.accentGold,
@@ -1326,7 +1326,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 ),
                                 child: Text(
                                   statusLabel,
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.montserrat(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
                                     color: statusColor,
@@ -1338,7 +1338,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           const SizedBox(height: 4),
                           Text(
                             '${user.email}  •  ${user.phone}',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 13,
                               color: AppColors.textSecondary,
                             ),
@@ -1364,7 +1364,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         horizontal: 12,
                         vertical: 8,
                       ),
-                      textStyle: GoogleFonts.inter(
+                      textStyle: GoogleFonts.montserrat(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1410,7 +1410,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         horizontal: 12,
                         vertical: 8,
                       ),
-                      textStyle: GoogleFonts.inter(
+                      textStyle: GoogleFonts.montserrat(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1433,7 +1433,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         horizontal: 12,
                         vertical: 8,
                       ),
-                      textStyle: GoogleFonts.inter(
+                      textStyle: GoogleFonts.montserrat(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1518,7 +1518,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Flexible(
             child: Text.rich(
               TextSpan(
-                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+                style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
                 children: [
                   TextSpan(
                     text: '$label: ',
@@ -1526,7 +1526,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                   TextSpan(
                     text: value,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryNavy,
@@ -1551,7 +1551,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       children: [
         Text(
           'User Activity & Login/Logout Session Logs',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: AppColors.primaryNavy,
@@ -1560,7 +1560,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         const SizedBox(height: 4),
         Text(
           'Real-time audit trail showing when users log in, log out, verify PINs, and complete purchases.',
-          style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+          style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 20),
 
@@ -1601,7 +1601,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     onSelected: (_) => controller.filterActivities(filter),
                     selectedColor: AppColors.brandBlue,
                     checkmarkColor: AppColors.white,
-                    labelStyle: GoogleFonts.inter(
+                    labelStyle: GoogleFonts.montserrat(
                       fontSize: 12.5,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected
@@ -1629,7 +1629,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Center(
                 child: Text(
                   'No activity logs match your filter.',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 14,
                     color: AppColors.textSecondary,
                   ),
@@ -1727,7 +1727,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                       child: Text(
                         badgeLabel,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                           color: color,
@@ -1736,7 +1736,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     Text(
                       log.userName,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primaryNavy,
@@ -1744,7 +1744,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     Text(
                       '(${log.userEmail})',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 12,
                         color: AppColors.textMuted,
                       ),
@@ -1754,7 +1754,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 6),
                 Text(
                   log.description,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13.5,
                     color: AppColors.textPrimary,
                   ),
@@ -1766,7 +1766,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     Text(
                       _dateTimeFormat.format(log.timestamp),
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textSecondary,
@@ -1774,7 +1774,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     Text(
                       '•  ${log.ipOrDevice}',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 11.5,
                         color: AppColors.textMuted,
                       ),
@@ -1788,7 +1788,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             const SizedBox(width: 8),
             Text(
               '₦${_currencyFormat.format(log.amount)}',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 color: AppColors.brandBlue,
@@ -1817,7 +1817,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           Text(
             'Last Purchase by User',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: AppColors.primaryNavy,
@@ -1826,7 +1826,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 4),
           Text(
             'Track the most recent examination e-pin or social media order placed by each customer.',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               color: AppColors.textSecondary,
             ),
@@ -1880,7 +1880,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             children: [
                               Text(
                                 lp.productName,
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryNavy,
@@ -1889,7 +1889,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               const SizedBox(height: 2),
                               Text(
                                 'Purchased by ${user.fullName} (${user.email})',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 13,
                                   color: AppColors.textSecondary,
                                 ),
@@ -1897,7 +1897,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 'Order ${lp.orderId}  •  ${_dateTimeFormat.format(lp.date)}',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 11.5,
                                   color: AppColors.textMuted,
                                 ),
@@ -1916,7 +1916,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             children: [
                               Text(
                                 '₦${_currencyFormat.format(lp.amount)}',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.brandBlue,
@@ -1934,7 +1934,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             children: [
                               Text(
                                 '₦${_currencyFormat.format(lp.amount)}',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.brandBlue,
@@ -2000,7 +2000,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       children: [
                         Text(
                           'Add New User',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
                             color: AppColors.primaryNavy,
@@ -2015,7 +2015,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'Create a new customer or administrator profile directly.',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: AppColors.textSecondary,
                       ),
@@ -2024,7 +2024,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     Text(
                       'Full Name',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2043,7 +2043,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     Text(
                       'Email Address',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2064,7 +2064,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     Text(
                       'Phone Number (11 digits)',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2095,7 +2095,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     Text(
                       'Account Role',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2193,7 +2193,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Remove User Account?',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 19,
                     fontWeight: FontWeight.w800,
                     color: AppColors.primaryNavy,
@@ -2203,7 +2203,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Text(
                   'Are you sure you want to permanently remove ${user.fullName} (${user.email}) from RESOLVA?',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13.5,
                     color: AppColors.textSecondary,
                     height: 1.5,
@@ -2274,7 +2274,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     Text(
                       'User Profile & Session Dossier',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 19,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryNavy,
@@ -2354,7 +2354,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 // Last Purchase Box
                 Text(
                   'Last Purchase Details',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryNavy,
@@ -2377,7 +2377,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       children: [
                         Text(
                           user.lastPurchase!.productName,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: AppColors.primaryNavy,
@@ -2386,7 +2386,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'Order ID: ${user.lastPurchase!.orderId} • Category: ${user.lastPurchase!.category}',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
@@ -2394,7 +2394,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'Amount: ₦${_currencyFormat.format(user.lastPurchase!.amount)} • Date: ${_dateTimeFormat.format(user.lastPurchase!.date)}',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: AppColors.brandBlue,
@@ -2406,7 +2406,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 else
                   Text(
                     'This user has not completed any purchases yet.',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
@@ -2416,7 +2416,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const SizedBox(height: 18),
                   Text(
                     'Recent Session & Activity History',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryNavy,
@@ -2436,7 +2436,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           Expanded(
                             child: Text(
                               '${l.description} (${_dateTimeFormat.format(l.timestamp)})',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.montserrat(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
@@ -2470,14 +2470,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 12.5, color: AppColors.textSecondary),
+          style: GoogleFonts.montserrat(fontSize: 12.5, color: AppColors.textSecondary),
         ),
         const SizedBox(width: 12),
         Flexible(
           child: Text(
             value,
             textAlign: TextAlign.end,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,

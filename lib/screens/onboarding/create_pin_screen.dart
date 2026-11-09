@@ -89,7 +89,7 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                     Text(
                       'Create Your Security PIN',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: isMobile ? 22 : 24,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryNavy,
@@ -99,7 +99,7 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                     Text(
                       'Create a secure PIN to protect access to your RESOLVA services.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                         height: 1.4,
@@ -135,7 +135,7 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                         ),
                         child: Text(
                           'Continue',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),

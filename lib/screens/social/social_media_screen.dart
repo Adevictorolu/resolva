@@ -107,7 +107,7 @@ class _ServiceListView extends StatelessWidget {
                                 onSelected: (_) => controller.selectCategory(cat),
                                 selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.1),
                                 checkmarkColor: AppColors.emeraldGreen,
-                                labelStyle: GoogleFonts.inter(
+                                labelStyle: GoogleFonts.montserrat(
                                   fontSize: 13,
                                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                   color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
@@ -222,7 +222,7 @@ class _PlatformSelector extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   platform.name,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected ? platform.color : AppColors.textSecondary,
@@ -302,11 +302,11 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
                       children: [
                         Text(
                           p.name,
-                          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: p.color),
+                          style: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w600, color: p.color),
                         ),
                         Text(
                           s.category,
-                          style: GoogleFonts.inter(fontSize: 11, color: AppColors.textTertiary),
+                          style: GoogleFonts.montserrat(fontSize: 11, color: AppColors.textTertiary),
                         ),
                       ],
                     ),
@@ -316,7 +316,7 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
               const SizedBox(height: 14),
               Text(
                 s.name,
-                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                style: GoogleFonts.montserrat(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -324,7 +324,7 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
               Expanded(
                 child: Text(
                   s.description,
-                  style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
+                  style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -337,12 +337,12 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
                   const SizedBox(width: 4),
                   Text(
                     s.estimatedDelivery,
-                    style: GoogleFonts.inter(fontSize: 11, color: AppColors.textTertiary),
+                    style: GoogleFonts.montserrat(fontSize: 11, color: AppColors.textTertiary),
                   ),
                   const Spacer(),
                   Text(
                     '${_fmt.format(s.minQuantity)} – ${_fmt.format(s.maxQuantity)}',
-                    style: GoogleFonts.inter(fontSize: 11, color: AppColors.textTertiary),
+                    style: GoogleFonts.montserrat(fontSize: 11, color: AppColors.textTertiary),
                   ),
                 ],
               ),
@@ -355,11 +355,11 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
                     children: [
                       Text(
                         'From',
-                        style: GoogleFonts.inter(fontSize: 11, color: AppColors.textTertiary),
+                        style: GoogleFonts.montserrat(fontSize: 11, color: AppColors.textTertiary),
                       ),
                       Text(
                         '₦${_fmt.format(s.startingPrice)}',
-                        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primaryNavy),
+                        style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primaryNavy),
                       ),
                     ],
                   ),
@@ -369,7 +369,7 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: p.color,
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                      textStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+                      textStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                     child: const Text('Order Now'),
                   ),
@@ -490,7 +490,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                             children: [
                               Text(
                                 'Place Order',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary,
@@ -514,7 +514,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                       const SizedBox(width: 10),
                                       Text(
                                         platform.name,
-                                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                                        style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
                                       ),
                                     ],
                                   ],
@@ -534,7 +534,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                 ),
                                 child: Text(
                                   service.name,
-                                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                                  style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
                                 ),
                               ),
                               const SizedBox(height: 20),
@@ -556,7 +556,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                               const SizedBox(height: 8),
                               Text(
                                 'Never share your password. We only need the public URL.',
-                                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textTertiary),
+                                style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textTertiary),
                               ),
                               const SizedBox(height: 20),
                               // Quantity
@@ -587,7 +587,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                             keyboardType: TextInputType.number,
                                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                             textAlign: TextAlign.center,
-                                            style: GoogleFonts.inter(
+                                            style: GoogleFonts.montserrat(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -624,7 +624,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                   Flexible(
                                     child: Text(
                                       'Min: ${_fmt.format(service.minQuantity)} — Max: ${_fmt.format(service.maxQuantity)}',
-                                      style: GoogleFonts.inter(fontSize: 12, color: AppColors.textTertiary),
+                                      style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textTertiary),
                                     ),
                                   ),
                                 ],
@@ -632,7 +632,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                               const SizedBox(height: 8),
                               Text(
                                 'Estimated delivery: ${service.estimatedDelivery}',
-                                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textTertiary),
+                                style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textTertiary),
                               ),
                               const SizedBox(height: 28),
                               // Order summary
@@ -648,7 +648,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                   children: [
                                     Text(
                                       'Order Summary',
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.montserrat(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.textPrimary,
@@ -670,11 +670,11 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                       children: [
                                         Text(
                                           'Estimated Total',
-                                          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
+                                          style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700),
                                         ),
                                         Text(
                                           '₦${_fmt.format(ctrl.totalPrice)}',
-                                          style: GoogleFonts.inter(
+                                          style: GoogleFonts.montserrat(
                                             fontSize: 24,
                                             fontWeight: FontWeight.w800,
                                             color: AppColors.primaryNavy,
@@ -697,7 +697,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: platform?.color ?? AppColors.royalBlue,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
-                                    textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
+                                    textStyle: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700),
                                   ),
                                   child: const Text('Continue'),
                                 ),
@@ -706,7 +706,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                               Center(
                                 child: Text(
                                   'This is a frontend demonstration. No real order will be placed.',
-                                  style: GoogleFonts.inter(fontSize: 12, color: AppColors.textTertiary),
+                                  style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textTertiary),
                                 ),
                               ),
                             ],
@@ -728,7 +728,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
   Widget _fieldLabel(String text) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.montserrat(
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: AppColors.textSecondary,
@@ -740,9 +740,9 @@ class _OrderFormViewState extends State<_OrderFormView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
+        Text(label, style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary)),
         Flexible(
-          child: Text(value, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.end),
+          child: Text(value, style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.end),
         ),
       ],
     );
@@ -772,12 +772,12 @@ class _OrderFormViewState extends State<_OrderFormView> {
                 const SizedBox(height: 20),
                 Text(
                   'Demo Order Review',
-                  style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700),
+                  style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'This is a demonstration order review. No order has been sent to a real supplier.',
-                  style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                  style: GoogleFonts.montserrat(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -823,8 +823,8 @@ class _OrderFormViewState extends State<_OrderFormView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
-        Flexible(child: Text(value, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.end)),
+        Text(label, style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary)),
+        Flexible(child: Text(value, style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.end)),
       ],
     );
   }

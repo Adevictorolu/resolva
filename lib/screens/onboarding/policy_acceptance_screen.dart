@@ -78,7 +78,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                   children: [
                     Text(
                       'Terms of Service (v${AppConstants.termsVersion})',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primaryNavy,
@@ -148,7 +148,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                   children: [
                     Text(
                       'Privacy Policy (v${AppConstants.privacyVersion})',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primaryNavy,
@@ -206,7 +206,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -215,7 +215,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
           const SizedBox(height: 4),
           Text(
             body,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               color: AppColors.textSecondary,
               height: 1.5,
@@ -271,7 +271,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                           Text(
                             'Welcome to RESOLVA',
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: isMobile ? 22 : 26,
                               fontWeight: FontWeight.w800,
                               color: AppColors.primaryNavy,
@@ -281,7 +281,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                           Text(
                             'Before accessing our services, please review and accept our customer agreements.',
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 14,
                               color: AppColors.textSecondary,
                               height: 1.4,
@@ -349,7 +349,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                               onTap: () => setState(() => _isAgreed = !_isAgreed),
                               child: Text(
                                 'I have reviewed and agree to the RESOLVA Terms of Service (v${AppConstants.termsVersion}) and Privacy Policy (v${AppConstants.privacyVersion}).',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
@@ -384,7 +384,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                               )
                             : Text(
                                 'Accept and Continue',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -399,7 +399,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                         onPressed: _handleDecline,
                         child: Text(
                           'Decline and Logout',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.error,
@@ -461,7 +461,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                       children: [
                         Text(
                           title,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.primaryNavy,
@@ -475,7 +475,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                           ),
                           child: Text(
                             version,
-                            style: GoogleFonts.jetBrainsMono(
+                            style: GoogleFonts.montserrat(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: AppColors.royalBlue,
@@ -493,7 +493,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
                       ),
                       child: Text(
                         buttonLabel,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.royalBlue,
@@ -508,7 +508,7 @@ class _PolicyAcceptanceScreenState extends State<PolicyAcceptanceScreen> {
           const SizedBox(height: 8),
           Text(
             desc,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 12,
               color: AppColors.textSecondary,
               height: 1.4,

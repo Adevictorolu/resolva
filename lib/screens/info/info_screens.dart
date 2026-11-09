@@ -65,7 +65,7 @@ class AboutScreen extends StatelessWidget {
                 ),
                 child: Text(
                   'ABOUT RESOLVA',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.accentGold,
@@ -77,7 +77,7 @@ class AboutScreen extends StatelessWidget {
               Text(
                 'Powering Digital Services & Enterprise in Nigeria',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 30 : 44,
                   fontWeight: FontWeight.w800,
                   color: AppColors.white,
@@ -88,7 +88,7 @@ class AboutScreen extends StatelessWidget {
               Text(
                 'RESOLVA is a premier digital utility platform built to eliminate the stress of acquiring essential credentials, scaling digital visibility, and legitimizing Nigerian businesses.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 16,
                   color: AppColors.textSecondaryDark,
                   height: 1.6,
@@ -118,7 +118,7 @@ class AboutScreen extends StatelessWidget {
                       children: [
                         Text(
                           'OUR MISSION',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: AppColors.royalBlue,
@@ -128,7 +128,7 @@ class AboutScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Democratizing access to essential digital solutions with transparency & speed',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: isMobile ? 24 : 32,
                             fontWeight: FontWeight.w800,
                             color: AppColors.primaryNavy,
@@ -138,7 +138,7 @@ class AboutScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         Text(
                           'From students needing instant WAEC and JAMB examination pins at midnight, to content creators and entrepreneurs scaling social reach, and founders seeking friction-free corporate registration, RESOLVA serves as your dependable technological backbone.',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 15,
                             color: AppColors.textSecondary,
                             height: 1.6,
@@ -163,7 +163,7 @@ class AboutScreen extends StatelessWidget {
                           const SizedBox(height: 20),
                           Text(
                             'Trusted by Over 50,000 Users',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               color: AppColors.white,
@@ -172,7 +172,7 @@ class AboutScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             '99.98% successful automated token deliveries across Nigeria and the diaspora.',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 13,
                               color: AppColors.textSecondaryDark,
                             ),
@@ -220,7 +220,7 @@ class AboutScreen extends StatelessWidget {
             children: [
               Text(
                 'Our Core Pillars',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 26 : 34,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -281,7 +281,7 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             p['title'] as String,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -290,7 +290,7 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             p['desc'] as String,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 14,
               color: AppColors.textSecondary,
               height: 1.5,
@@ -318,7 +318,7 @@ class AboutScreen extends StatelessWidget {
                 Text(
                   'Ready to experience seamless digital services?',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: isMobile ? 24 : 32,
                     fontWeight: FontWeight.w800,
                     color: AppColors.white,
@@ -328,7 +328,7 @@ class AboutScreen extends StatelessWidget {
                 Text(
                   'Join thousands of satisfied students, schools, and brands today.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 15,
                     color: AppColors.textSecondaryDark,
                   ),
@@ -340,7 +340,7 @@ class AboutScreen extends StatelessWidget {
                     backgroundColor: AppColors.accentGold,
                     foregroundColor: AppColors.primaryNavy,
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-                    textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 15),
+                    textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w700, fontSize: 15),
                   ),
                   child: const Text('Get Started Now'),
                 ),
@@ -476,7 +476,7 @@ class _ContactScreenState extends State<ContactScreen> {
             children: [
               Text(
                 'We are Here to Help',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 28 : 38,
                   fontWeight: FontWeight.w800,
                   color: AppColors.white,
@@ -486,7 +486,7 @@ class _ContactScreenState extends State<ContactScreen> {
               Text(
                 'Reach out to our support team for any inquiries, bulk purchases, or order assistance. Average response time is under 15 minutes.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 15,
                   color: AppColors.textSecondaryDark,
                 ),
@@ -535,7 +535,7 @@ class _ContactScreenState extends State<ContactScreen> {
       children: [
         Text(
           'Direct Channels',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: AppColors.primaryNavy,
@@ -568,7 +568,7 @@ class _ContactScreenState extends State<ContactScreen> {
                     children: [
                       Text(
                         c['title'] as String,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryNavy,
@@ -577,12 +577,12 @@ class _ContactScreenState extends State<ContactScreen> {
                       const SizedBox(height: 2),
                       Text(
                         c['desc'] as String,
-                        style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+                        style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         c['val'] as String,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.royalBlue,
@@ -625,7 +625,7 @@ class _ContactScreenState extends State<ContactScreen> {
             const SizedBox(height: 20),
             Text(
               'Message Sent Successfully!',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: AppColors.primaryNavy,
@@ -635,7 +635,7 @@ class _ContactScreenState extends State<ContactScreen> {
             Text(
               'Thank you ${_nameController.text.isNotEmpty ? _nameController.text : "user"}. An agent has been assigned to your ticket and will reply to ${_emailController.text} promptly.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary),
+              style: GoogleFonts.montserrat(fontSize: 14, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
             OutlinedButton(
@@ -667,7 +667,7 @@ class _ContactScreenState extends State<ContactScreen> {
           children: [
             Text(
               'Send Us a Message',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: AppColors.primaryNavy,
@@ -676,7 +676,7 @@ class _ContactScreenState extends State<ContactScreen> {
             const SizedBox(height: 4),
             Text(
               'Fill out the form below and we will get back to you in no time.',
-              style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+              style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
             const Divider(),
@@ -685,7 +685,7 @@ class _ContactScreenState extends State<ContactScreen> {
             // Name
             Text(
               'Your Name',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -701,7 +701,7 @@ class _ContactScreenState extends State<ContactScreen> {
             // Email
             Text(
               'Email Address',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -718,7 +718,7 @@ class _ContactScreenState extends State<ContactScreen> {
             // Category
             Text(
               'Inquiry Category',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
@@ -733,7 +733,7 @@ class _ContactScreenState extends State<ContactScreen> {
                         child: Text(
                           c,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(fontSize: 14),
+                          style: GoogleFonts.montserrat(fontSize: 14),
                         ),
                       ))
                   .toList(),
@@ -746,7 +746,7 @@ class _ContactScreenState extends State<ContactScreen> {
             // Subject
             Text(
               'Subject',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -762,7 +762,7 @@ class _ContactScreenState extends State<ContactScreen> {
             // Message
             Text(
               'Detailed Message',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -929,7 +929,7 @@ class _FaqScreenState extends State<FaqScreen> {
                                         if (val) setState(() => _selectedCategory = cat);
                                       },
                                       selectedColor: AppColors.royalBlue,
-                                      labelStyle: GoogleFonts.inter(
+                                      labelStyle: GoogleFonts.montserrat(
                                         fontSize: 13,
                                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                         color: isSelected ? AppColors.white : AppColors.textSecondary,
@@ -948,7 +948,7 @@ class _FaqScreenState extends State<FaqScreen> {
                                 alignment: Alignment.center,
                                 child: Text(
                                   'No answers found matching your query.',
-                                  style: GoogleFonts.inter(
+                                  style: GoogleFonts.montserrat(
                                     fontSize: 16,
                                     color: AppColors.textSecondary,
                                   ),
@@ -967,7 +967,7 @@ class _FaqScreenState extends State<FaqScreen> {
                                     shape: const Border(),
                                     title: Text(
                                       item['q']!,
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.montserrat(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.textPrimary,
@@ -978,7 +978,7 @@ class _FaqScreenState extends State<FaqScreen> {
                                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                                         child: Text(
                                           item['a']!,
-                                          style: GoogleFonts.inter(
+                                          style: GoogleFonts.montserrat(
                                             fontSize: 14,
                                             color: AppColors.textSecondary,
                                             height: 1.5,
@@ -1017,7 +1017,7 @@ class _FaqScreenState extends State<FaqScreen> {
               Text(
                 'Help & Frequently Asked Questions',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 26 : 38,
                   fontWeight: FontWeight.w800,
                   color: AppColors.white,
@@ -1027,7 +1027,7 @@ class _FaqScreenState extends State<FaqScreen> {
               Text(
                 'Find immediate answers to everything about result tokens, social visibility, payments, and business incorporation.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 15,
                   color: AppColors.textSecondaryDark,
                 ),

@@ -118,7 +118,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           const SizedBox(height: 18),
           Text(
             'Forgot Password',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 24,
               fontWeight: FontWeight.w800,
               color: AppColors.primaryNavy,
@@ -128,7 +128,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           Text(
             'Enter the email associated with your RESOLVA account and we will send password reset instructions.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               color: AppColors.textSecondary,
               height: 1.4,
@@ -139,7 +139,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               'Email Address',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(height: 8),
@@ -178,7 +178,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             onPressed: () => widget.onNavigate('/login'),
             child: Text(
               'Back to Sign In',
-              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+              style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -200,7 +200,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         const SizedBox(height: 20),
         Text(
           'Check Your Email',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: AppColors.primaryNavy,
@@ -210,7 +210,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'We have dispatched password recovery instructions to ${_emailController.text}. Follow the link in the message to set your new password.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 13,
             color: AppColors.textSecondary,
             height: 1.5,

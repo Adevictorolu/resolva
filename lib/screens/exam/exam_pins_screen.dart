@@ -122,7 +122,7 @@ class _ProductListView extends StatelessWidget {
                                 onSelected: (_) => controller.selectCategory(cat),
                                 selectedColor: AppColors.royalBlue.withValues(alpha: 0.1),
                                 checkmarkColor: AppColors.royalBlue,
-                                labelStyle: GoogleFonts.inter(
+                                labelStyle: GoogleFonts.montserrat(
                                   fontSize: 13,
                                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                   color: isSelected ? AppColors.royalBlue : AppColors.textSecondary,
@@ -247,7 +247,7 @@ class _ExamProductCardState extends State<_ExamProductCard> {
                     ),
                     child: Text(
                       p.provider,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppColors.royalBlue,
@@ -261,7 +261,7 @@ class _ExamProductCardState extends State<_ExamProductCard> {
               const SizedBox(height: 14),
               Text(
                 p.name,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -273,7 +273,7 @@ class _ExamProductCardState extends State<_ExamProductCard> {
               Expanded(
                 child: Text(
                   p.description,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                     height: 1.5,
@@ -285,7 +285,7 @@ class _ExamProductCardState extends State<_ExamProductCard> {
               const SizedBox(height: 12),
               Text(
                 '₦${widget.fmt.format(p.price)}',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -299,7 +299,7 @@ class _ExamProductCardState extends State<_ExamProductCard> {
                       onPressed: widget.onViewDetails,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        textStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                        textStyle: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       child: const Text('View Details'),
                     ),
@@ -310,7 +310,7 @@ class _ExamProductCardState extends State<_ExamProductCard> {
                       onPressed: p.isAvailable ? widget.onBuyNow : null,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        textStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                        textStyle: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       child: const Text('Buy Now'),
                     ),
@@ -436,7 +436,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                                   ),
                                   child: Text(
                                     product.provider,
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.montserrat(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.royalBlue,
@@ -450,7 +450,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                             const SizedBox(height: 20),
                             Text(
                               product.name,
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.montserrat(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.textPrimary,
@@ -459,7 +459,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                             const SizedBox(height: 12),
                             Text(
                               product.description,
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.montserrat(
                                 fontSize: 15,
                                 color: AppColors.textSecondary,
                                 height: 1.6,
@@ -471,7 +471,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                             // Price
                             Text(
                               'Price',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.montserrat(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textSecondary,
@@ -480,7 +480,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                             const SizedBox(height: 4),
                             Text(
                               '₦${_fmt.format(product.price)}',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.montserrat(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.primaryNavy,
@@ -490,7 +490,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                             // Quantity
                             Text(
                               'Quantity',
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.montserrat(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textSecondary,
@@ -522,7 +522,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                                           keyboardType: TextInputType.number,
                                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                           textAlign: TextAlign.center,
-                                          style: GoogleFonts.inter(
+                                          style: GoogleFonts.montserrat(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -579,7 +579,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                                     children: [
                                       Text(
                                         'Total',
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.montserrat(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.textPrimary,
@@ -587,7 +587,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                                       ),
                                       Text(
                                         '₦${_fmt.format(controller.totalPrice)}',
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.montserrat(
                                           fontSize: 22,
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.primaryNavy,
@@ -607,7 +607,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                                     : null,
                                 style: ElevatedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(vertical: 16),
-                                  textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
+                                  textStyle: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700),
                                 ),
                                 child: const Text('Continue to Checkout'),
                               ),
@@ -616,7 +616,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                             Center(
                               child: Text(
                                 'This is a frontend demonstration. No real purchase will occur.',
-                                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textTertiary),
+                                style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textTertiary),
                               ),
                             ),
                           ],
@@ -638,8 +638,8 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary)),
-        Text(value, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        Text(label, style: GoogleFonts.montserrat(fontSize: 14, color: AppColors.textSecondary)),
+        Text(value, style: GoogleFonts.montserrat(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
       ],
     );
   }
@@ -668,12 +668,12 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                 const SizedBox(height: 20),
                 Text(
                   'Order Preview',
-                  style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700),
+                  style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'This is a demonstration confirmation screen. No real purchase has been made.',
-                  style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                  style: GoogleFonts.montserrat(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -719,11 +719,11 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
+        Text(label, style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary)),
         Flexible(
           child: Text(
             value,
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
             textAlign: TextAlign.end,
           ),
         ),

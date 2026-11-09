@@ -126,7 +126,7 @@ class _HeroSection extends StatelessWidget {
                 child: Text(
                   'Digital Services Platform',
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white.withValues(alpha: 0.9),
@@ -139,7 +139,7 @@ class _HeroSection extends StatelessWidget {
         const SizedBox(height: 24),
         Text(
           'Everything You Need.\nAll in One Place.',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: isMobile ? 36 : 52,
             fontWeight: FontWeight.w800,
             color: AppColors.white,
@@ -151,7 +151,7 @@ class _HeroSection extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           'Get your examination e-pins, explore social media growth services, and discover convenient digital solutions with RESOLVA.',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: isMobile ? 15 : 17,
             color: AppColors.white.withValues(alpha: 0.8),
             height: 1.6,
@@ -180,7 +180,7 @@ class _HeroSection extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Explore Services', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                    Text('Explore Services', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
                     const SizedBox(width: 8),
                     const Icon(Icons.arrow_forward_rounded, size: 18),
                   ],
@@ -200,7 +200,7 @@ class _HeroSection extends StatelessWidget {
               ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Get Started', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                child: Text('Get Started', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -270,7 +270,7 @@ class _HeroSection extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white,
@@ -279,7 +279,7 @@ class _HeroSection extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   sub,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 12,
                     color: AppColors.white.withValues(alpha: 0.6),
                   ),
@@ -463,7 +463,7 @@ class _HowItWorksSection extends StatelessWidget {
           child: Center(
             child: Text(
               '$number',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: AppColors.white,
@@ -476,7 +476,7 @@ class _HowItWorksSection extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           step.title,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
@@ -486,7 +486,7 @@ class _HowItWorksSection extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           step.description,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 14,
             color: AppColors.textSecondary,
             height: 1.5,
@@ -590,7 +590,7 @@ class _WhyChooseSection extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             reason.title,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -600,7 +600,7 @@ class _WhyChooseSection extends StatelessWidget {
           Flexible(
             child: Text(
               reason.description,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 13,
                 color: AppColors.textSecondary,
                 height: 1.5,
@@ -673,7 +673,7 @@ class _FaqPreviewSection extends StatelessWidget {
                         childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                         title: Text(
                           faq.$1,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -682,7 +682,7 @@ class _FaqPreviewSection extends StatelessWidget {
                         children: [
                           Text(
                             faq.$2,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 14,
                               color: AppColors.textSecondary,
                               height: 1.6,
@@ -733,7 +733,7 @@ class _CtaSection extends StatelessWidget {
                 children: [
                   Text(
                     'Ready to Get Started?',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: isMobile ? 28 : 36,
                       fontWeight: FontWeight.w800,
                       color: AppColors.white,
@@ -744,7 +744,7 @@ class _CtaSection extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Join RESOLVA and access examination e-pins, social media services, and more from one convenient platform.',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 16,
                       color: AppColors.white.withValues(alpha: 0.8),
                       height: 1.6,
@@ -764,7 +764,7 @@ class _CtaSection extends StatelessWidget {
                           foregroundColor: AppColors.primaryNavy,
                           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                         ),
-                        child: Text('Create Account', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                        child: Text('Create Account', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
                       ),
                       OutlinedButton(
                         onPressed: () => onNavigate('/exam-pins'),
@@ -773,7 +773,7 @@ class _CtaSection extends StatelessWidget {
                           side: BorderSide(color: AppColors.white.withValues(alpha: 0.4)),
                           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                         ),
-                        child: Text('Browse Services', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                        child: Text('Browse Services', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
                       ),
                     ],
                   ),

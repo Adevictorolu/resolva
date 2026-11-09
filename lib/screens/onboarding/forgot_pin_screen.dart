@@ -131,7 +131,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                     Center(
                       child: Text(
                         'Reset Security PIN',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: isMobile ? 22 : 24,
                           fontWeight: FontWeight.w800,
                           color: AppColors.primaryNavy,
@@ -143,7 +143,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                       child: Text(
                         'Verify your registered email address to safely reset your six-digit PIN.',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 13,
                           color: AppColors.textSecondary,
                         ),
@@ -156,7 +156,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                     // Registered email display
                     Text(
                       'Registered Email Destination',
-                      style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -176,7 +176,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                                 authController.userEmail.value.isNotEmpty
                                     ? authController.userEmail.value
                                     : 'demo@resolva.ng',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primaryNavy,
@@ -228,7 +228,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                             Expanded(
                               child: Text(
                                 'Demo Code sent! Your verification code is: ${onboardingController.demoRecoveryCode}',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primaryNavy,
@@ -242,7 +242,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
 
                       Text(
                         'Enter 6-Digit Recovery Code',
-                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                        style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
                       TextField(
@@ -259,7 +259,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                         const SizedBox(height: 6),
                         Text(
                           _errorText,
-                          style: GoogleFonts.inter(fontSize: 12, color: AppColors.error),
+                          style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.error),
                         ),
                       ],
                       const SizedBox(height: 20),
@@ -292,7 +292,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                         onPressed: () => widget.onNavigate('/verify-pin'),
                         child: Text(
                           'Back to PIN Entry',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textSecondary,

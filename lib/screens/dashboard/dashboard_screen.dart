@@ -130,7 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Center(
                   child: Text(
                     'DU',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: isMobile ? 18 : 20,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -146,7 +146,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Obx(
                       () => Text(
                         'Welcome back, ${controller.fullName.value}',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: isMobile ? 20 : 24,
                           fontWeight: FontWeight.w700,
                           color: AppColors.white,
@@ -157,7 +157,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Obx(
                       () => Text(
                         controller.email.value,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 13,
                           color: AppColors.textSecondaryDark,
                         ),
@@ -215,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 if (val) setState(() => _selectedTab = index);
               },
               selectedColor: AppColors.royalBlue,
-              labelStyle: GoogleFonts.inter(
+              labelStyle: GoogleFonts.montserrat(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected ? AppColors.white : AppColors.textSecondary,
@@ -250,7 +250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Text(
               'ACCOUNT MENU',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textMuted,
@@ -275,7 +275,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 title: Text(
                   item['label'] as String,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected ? AppColors.royalBlue : AppColors.textPrimary,
@@ -296,7 +296,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             title: Text(
               'Sign Out',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.error,
@@ -333,7 +333,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Text(
                         'Direct Support',
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryNavy,
@@ -345,7 +345,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 6),
                 Text(
                   'Have inquiries with a PIN or service delivery?',
-                  style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+                  style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -354,7 +354,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onPressed: () => widget.onNavigate('/contact'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
-                      textStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+                      textStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                     child: const Text('Contact Support'),
                   ),
@@ -438,7 +438,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(
               'Recent Orders',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primaryNavy,
@@ -489,7 +489,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
@@ -509,7 +509,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: AppColors.primaryNavy,
@@ -528,7 +528,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Text(
           'Your Orders',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: AppColors.primaryNavy,
@@ -573,7 +573,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     selected: isSelected,
                     onSelected: (_) => controller.filterOrders(filter),
                     selectedColor: AppColors.royalBlue,
-                    labelStyle: GoogleFonts.inter(
+                    labelStyle: GoogleFonts.montserrat(
                       fontSize: 13,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected ? AppColors.white : AppColors.textSecondary,
@@ -603,7 +603,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'No orders found',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primaryNavy,
@@ -612,7 +612,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 6),
                   Text(
                     'Try adjusting your filter or search keywords.',
-                    style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+                    style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -679,7 +679,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     child: Text(
                       o.id,
-                      style: GoogleFonts.jetBrainsMono(
+                      style: GoogleFonts.montserrat(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryNavy,
@@ -689,7 +689,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(width: 8),
                   Text(
                     o.category,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textMuted,
@@ -706,7 +706,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 child: Text(
                   statusText,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: statusColor,
@@ -718,7 +718,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 12),
           Text(
             o.productName,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -729,7 +729,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Text(
                 '₦${_currencyFormat.format(o.amount)}',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: AppColors.royalBlue,
@@ -738,7 +738,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(width: 12),
               Text(
                 '•  Qty: ${o.quantity}',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 13,
                   color: AppColors.textSecondary,
                 ),
@@ -746,7 +746,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const Spacer(),
               Text(
                 _dateFormat.format(o.createdAt),
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 11,
                   color: AppColors.textMuted,
                 ),
@@ -765,7 +765,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 label: const Text('View Details'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  textStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+                  textStyle: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -794,7 +794,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       Text(
                         'Order Details',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: AppColors.primaryNavy,
@@ -843,7 +843,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 20),
                     Text(
                       'Your Generated Examination PIN(s)',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primaryNavy,
@@ -865,7 +865,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Expanded(
                                 child: Text(
                                   p,
-                                  style: GoogleFonts.jetBrainsMono(
+                                  style: GoogleFonts.montserrat(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primaryNavy,
@@ -917,14 +917,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+          style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
         ),
         const SizedBox(width: 16),
         Flexible(
           child: Text(
             value,
             textAlign: TextAlign.end,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -943,7 +943,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Text(
           'Transactions & Billing',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: AppColors.primaryNavy,
@@ -983,7 +983,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           Text(
                             tx.description,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primaryNavy,
@@ -992,14 +992,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           const SizedBox(height: 4),
                           Text(
                             '${tx.reference} • ${_dateFormat.format(tx.date)}',
-                            style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted),
+                            style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textMuted),
                           ),
                         ],
                       ),
                     ),
                     Text(
                       '-₦${_currencyFormat.format(tx.amount)}',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -1026,7 +1026,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(
               'Notification Center',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: AppColors.primaryNavy,
@@ -1075,7 +1075,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           Text(
                             n.title,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 14,
                               fontWeight: n.isRead ? FontWeight.w600 : FontWeight.w700,
                               color: AppColors.primaryNavy,
@@ -1084,12 +1084,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           const SizedBox(height: 4),
                           Text(
                             n.message,
-                            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+                            style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             _dateFormat.format(n.date),
-                            style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted),
+                            style: GoogleFonts.montserrat(fontSize: 11, color: AppColors.textMuted),
                           ),
                         ],
                       ),
@@ -1123,7 +1123,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Text(
             'Personal Profile Settings',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: AppColors.primaryNavy,
@@ -1132,7 +1132,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 6),
           Text(
             'Update your personal information and contact preferences for e-pin deliveries.',
-            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+            style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 24),
           const Divider(),
@@ -1140,7 +1140,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           Text(
             'Full Name',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -1151,7 +1151,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           Text(
             'Email Address (Delivery Destination)',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -1162,7 +1162,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           Text(
             'Phone Number (WhatsApp delivery notifications)',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -1204,7 +1204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Security PIN Section
           Text(
             'Security & PIN Protection',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -1213,7 +1213,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 6),
           Text(
             'Your six-digit Security PIN protects access to e-pins, orders, and payment checkouts.',
-            style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+            style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
 
@@ -1241,7 +1241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       Text(
                         'Security PIN Active (••••••)',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryNavy,
@@ -1250,7 +1250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 2),
                       Text(
                         'PIN verification enforced on each active login session.',
-                        style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+                        style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -1277,7 +1277,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.logout_rounded, size: 18, color: AppColors.error),
             label: Text(
               'Sign Out of RESOLVA',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppColors.error),
+              style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, color: AppColors.error),
             ),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.error.withValues(alpha: 0.4)),

@@ -126,7 +126,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                     Text(
                       'Enter Your Security PIN',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: isMobile ? 22 : 24,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryNavy,
@@ -136,7 +136,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                     Text(
                       'Enter your six-digit PIN to continue to RESOLVA.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                         height: 1.4,
@@ -158,7 +158,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                         child: Text(
                           _errorMessage,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.error,
@@ -191,7 +191,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                         ),
                         child: Text(
                           'Confirm',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -220,7 +220,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                           ),
                           child: Text(
                             'Switch Account',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
@@ -236,7 +236,7 @@ class _VerifyPinScreenState extends State<VerifyPinScreen> {
                           ),
                           child: Text(
                             'Forgot PIN?',
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               color: AppColors.royalBlue,

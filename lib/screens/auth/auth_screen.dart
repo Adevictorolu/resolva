@@ -198,7 +198,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         const SizedBox(width: 10),
                         Text(
                           _isRegister ? 'Sign up with Google' : 'Continue with Google',
-                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.montserrat(fontSize: 14, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -213,7 +213,7 @@ class _AuthScreenState extends State<AuthScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 'or use your email',
-                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+                style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
               ),
             ),
             const Expanded(child: Divider(color: AppColors.cardBorder)),
@@ -273,7 +273,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               const SizedBox(height: 16),
                               Text(
                                 _isRegister ? 'Create an Account' : 'Welcome Back',
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.primaryNavy,
@@ -285,7 +285,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     ? 'Join thousands accessing exam PINs & digital services'
                                     : 'Sign in to access your orders, e-pins, and account',
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.inter(
+                                style: GoogleFonts.montserrat(
                                   fontSize: 13,
                                   color: AppColors.textSecondary,
                                 ),
@@ -321,7 +321,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                           alignment: Alignment.center,
                                           child: Text(
                                             'Sign In',
-                                            style: GoogleFonts.inter(
+                                            style: GoogleFonts.montserrat(
                                               fontSize: 14,
                                               fontWeight: !_isRegister
                                                   ? FontWeight.w700
@@ -354,7 +354,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                           alignment: Alignment.center,
                                           child: Text(
                                             'Register',
-                                            style: GoogleFonts.inter(
+                                            style: GoogleFonts.montserrat(
                                               fontSize: 14,
                                               fontWeight: _isRegister
                                                   ? FontWeight.w700
@@ -391,7 +391,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                           const SizedBox(width: 6),
                                           Text(
                                             'Demo Test Accounts',
-                                            style: GoogleFonts.inter(
+                                            style: GoogleFonts.montserrat(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                               color: AppColors.primaryNavy,
@@ -408,7 +408,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                             onPressed: _fillNewDemoUser,
                                             style: OutlinedButton.styleFrom(
                                               padding: const EdgeInsets.symmetric(vertical: 8),
-                                              textStyle: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600),
+                                              textStyle: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w600),
                                             ),
                                             child: const Text('New User Flow'),
                                           ),
@@ -419,7 +419,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                             onPressed: _fillReturningDemoUser,
                                             style: OutlinedButton.styleFrom(
                                               padding: const EdgeInsets.symmetric(vertical: 8),
-                                              textStyle: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600),
+                                              textStyle: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w600),
                                             ),
                                             child: const Text('Returning User (PIN)'),
                                           ),
@@ -435,7 +435,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                         label: const Text('Admin Dashboard Account (PIN: 123456)'),
                                         style: OutlinedButton.styleFrom(
                                           padding: const EdgeInsets.symmetric(vertical: 8),
-                                          textStyle: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700),
+                                          textStyle: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w700),
                                         ),
                                       ),
                                     ),
@@ -473,7 +473,7 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           Text(
             'Email Address',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -488,7 +488,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 18),
           Text(
             'Password',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -533,7 +533,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   const SizedBox(width: 4),
                   Text(
                     'Remember me',
-                    style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+                    style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -546,7 +546,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 child: Text(
                   'Forgot password?',
-                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -587,7 +587,7 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           Text(
             'Full Name',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -601,7 +601,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           Text(
             'Email Address',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -616,7 +616,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           Text(
             'Phone Number (WhatsApp)',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -641,7 +641,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           Text(
             'Password',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -667,7 +667,7 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           Text(
             'Confirm Password',
-            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -712,7 +712,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 Expanded(
                   child: Text(
                     'Terms of Service & Privacy Policy review will be requested upon account creation.',
-                    style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+                    style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
               ],

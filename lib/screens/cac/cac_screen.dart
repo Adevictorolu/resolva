@@ -128,7 +128,7 @@ class _CacScreenState extends State<CacScreen> {
                         child: Text(
                           'UPCOMING SERVICE • LAUNCHING SOON',
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             color: AppColors.accentGold,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -145,7 +145,7 @@ class _CacScreenState extends State<CacScreen> {
                 Text(
                   'CAC Business Registration\nMade Fast, Legitimate & Effortless',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: isMobile ? 32 : 46,
                     fontWeight: FontWeight.w800,
                     color: AppColors.white,
@@ -161,7 +161,7 @@ class _CacScreenState extends State<CacScreen> {
                   child: Text(
                     'Legitimize your enterprise with accredited CAC agents. From business name reservation to tax identification number (TIN) and digital incorporation certificates, RESOLVA is bringing business incorporation directly to your screen.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: isMobile ? 15 : 17,
                       color: AppColors.textSecondaryDark,
                       height: 1.6,
@@ -191,7 +191,7 @@ class _CacScreenState extends State<CacScreen> {
                         backgroundColor: AppColors.accentGold,
                         foregroundColor: AppColors.primaryNavy,
                         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
-                        textStyle: GoogleFonts.inter(
+                        textStyle: GoogleFonts.montserrat(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                         ),
@@ -205,7 +205,7 @@ class _CacScreenState extends State<CacScreen> {
                         foregroundColor: AppColors.white,
                         side: const BorderSide(color: Colors.white24),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                        textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
+                        textStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                     ),
                   ],
@@ -265,7 +265,7 @@ class _CacScreenState extends State<CacScreen> {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: AppColors.accentGold,
@@ -275,7 +275,7 @@ class _CacScreenState extends State<CacScreen> {
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 13,
             color: AppColors.textSecondaryDark,
           ),
@@ -345,7 +345,7 @@ class _CacScreenState extends State<CacScreen> {
             children: [
               Text(
                 'Anticipated Packages & Tariffs',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 26 : 34,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -355,7 +355,7 @@ class _CacScreenState extends State<CacScreen> {
               Text(
                 'Straightforward all-inclusive packages with zero surprise fees when we launch.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 16,
                   color: AppColors.textSecondary,
                 ),
@@ -431,7 +431,7 @@ class _CacScreenState extends State<CacScreen> {
               child: Text(
                 'RECOMMENDED FOR MOST BUSINESSES',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
@@ -446,7 +446,7 @@ class _CacScreenState extends State<CacScreen> {
               children: [
                 Text(
                   pkg['title'] as String,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryNavy,
@@ -455,7 +455,7 @@ class _CacScreenState extends State<CacScreen> {
                 const SizedBox(height: 8),
                 Text(
                   pkg['desc'] as String,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                     height: 1.4,
@@ -464,7 +464,7 @@ class _CacScreenState extends State<CacScreen> {
                 const SizedBox(height: 20),
                 Text(
                   pkg['price'] as String,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: isHighlight ? AppColors.royalBlue : AppColors.primaryNavy,
@@ -479,7 +479,7 @@ class _CacScreenState extends State<CacScreen> {
                       child: Text(
                         pkg['duration'] as String,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textMuted,
@@ -493,7 +493,7 @@ class _CacScreenState extends State<CacScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'What will be included:',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.montserrat(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -515,7 +515,7 @@ class _CacScreenState extends State<CacScreen> {
                         Expanded(
                           child: Text(
                             f,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 13,
                               color: AppColors.textSecondary,
                             ),
@@ -571,7 +571,7 @@ class _CacScreenState extends State<CacScreen> {
             children: [
               Text(
                 'How It Will Work',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 26 : 34,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -581,7 +581,7 @@ class _CacScreenState extends State<CacScreen> {
               Text(
                 'Four seamless steps from conception to an officially registered corporate identity.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 16,
                   color: AppColors.textSecondary,
                 ),
@@ -638,7 +638,7 @@ class _CacScreenState extends State<CacScreen> {
             ),
             child: Text(
               s['step']!,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: AppColors.royalBlue,
@@ -648,7 +648,7 @@ class _CacScreenState extends State<CacScreen> {
           const SizedBox(height: 16),
           Text(
             s['title']!,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 17,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -657,7 +657,7 @@ class _CacScreenState extends State<CacScreen> {
           const SizedBox(height: 8),
           Text(
             s['desc']!,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               color: AppColors.textSecondary,
               height: 1.5,
@@ -704,7 +704,7 @@ class _CacScreenState extends State<CacScreen> {
             children: [
               Text(
                 'Why Choose RESOLVA for CAC?',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 26 : 34,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -757,7 +757,7 @@ class _CacScreenState extends State<CacScreen> {
                                 children: [
                                   Text(
                                     f['title'] as String,
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.montserrat(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.primaryNavy,
@@ -766,7 +766,7 @@ class _CacScreenState extends State<CacScreen> {
                                   const SizedBox(height: 6),
                                   Text(
                                     f['desc'] as String,
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.montserrat(
                                       fontSize: 13,
                                       color: AppColors.textSecondary,
                                       height: 1.4,
@@ -845,7 +845,7 @@ class _CacScreenState extends State<CacScreen> {
                   children: [
                     Text(
                       'Join the Early Access Waitlist',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: isMobile ? 20 : 24,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryNavy,
@@ -853,7 +853,7 @@ class _CacScreenState extends State<CacScreen> {
                     ),
                     Text(
                       'Get 15% discount coupon on your first registration when we launch.',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: AppColors.textSecondary,
                       ),
@@ -870,7 +870,7 @@ class _CacScreenState extends State<CacScreen> {
           // Full Name
           Text(
             'Your Full Name',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -891,7 +891,7 @@ class _CacScreenState extends State<CacScreen> {
           if (isMobile) ...[
             Text(
               'Email Address',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -910,7 +910,7 @@ class _CacScreenState extends State<CacScreen> {
             const SizedBox(height: 18),
             Text(
               'Phone Number (WhatsApp)',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -945,7 +945,7 @@ class _CacScreenState extends State<CacScreen> {
                     children: [
                       Text(
                         'Email Address',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -972,7 +972,7 @@ class _CacScreenState extends State<CacScreen> {
                     children: [
                       Text(
                         'Phone Number (WhatsApp)',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -1009,7 +1009,7 @@ class _CacScreenState extends State<CacScreen> {
           // Target Entity Type
           Text(
             'Preferred Registration Type',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -1025,7 +1025,7 @@ class _CacScreenState extends State<CacScreen> {
             items: _entityTypes
                 .map((t) => DropdownMenuItem(
                       value: t,
-                      child: Text(t, style: GoogleFonts.inter(fontSize: 14)),
+                      child: Text(t, style: GoogleFonts.montserrat(fontSize: 14)),
                     ))
                 .toList(),
             onChanged: (v) {
@@ -1037,7 +1037,7 @@ class _CacScreenState extends State<CacScreen> {
           // Business Name Idea
           Text(
             'Proposed Business Name Idea (Optional)',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -1073,7 +1073,7 @@ class _CacScreenState extends State<CacScreen> {
                     )
                   : Text(
                       'Join Launch Waitlist Now',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1085,7 +1085,7 @@ class _CacScreenState extends State<CacScreen> {
             child: Text(
               'No spam guaranteed. We will only notify you when CAC service registrations open.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.montserrat(
                 fontSize: 12,
                 color: AppColors.textMuted,
               ),
@@ -1119,7 +1119,7 @@ class _CacScreenState extends State<CacScreen> {
         Text(
           'You are on the Early Access List!',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: AppColors.primaryNavy,
@@ -1129,7 +1129,7 @@ class _CacScreenState extends State<CacScreen> {
         Text(
           'Thank you ${_nameController.text.isNotEmpty ? _nameController.text : "valued user"}! We have reserved your spot for $_selectedEntityType. As soon as the CAC onboarding portal goes live, you will receive priority support and your 15% discount token.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 14,
             color: AppColors.textSecondary,
             height: 1.5,
@@ -1195,7 +1195,7 @@ class _CacScreenState extends State<CacScreen> {
             children: [
               Text(
                 'Frequently Asked Questions',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: isMobile ? 26 : 34,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primaryNavy,
@@ -1215,7 +1215,7 @@ class _CacScreenState extends State<CacScreen> {
                       shape: const Border(),
                       title: Text(
                         item['q']!,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -1226,7 +1226,7 @@ class _CacScreenState extends State<CacScreen> {
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                           child: Text(
                             item['a']!,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.montserrat(
                               fontSize: 14,
                               color: AppColors.textSecondary,
                               height: 1.5,

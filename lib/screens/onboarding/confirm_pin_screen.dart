@@ -137,7 +137,7 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                     Text(
                       'Confirm Your Security PIN',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: isMobile ? 22 : 24,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryNavy,
@@ -147,7 +147,7 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                     Text(
                       'Re-enter your six-digit PIN to confirm it matches.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.montserrat(
                         fontSize: 14,
                         color: AppColors.textSecondary,
                         height: 1.4,
@@ -169,7 +169,7 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                         child: Text(
                           _errorMessage,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.error,
@@ -202,7 +202,7 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                         ),
                         child: Text(
                           'Confirm Security PIN',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.montserrat(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -216,7 +216,7 @@ class _ConfirmPinScreenState extends State<ConfirmPinScreen> {
                       onPressed: () => widget.onNavigate('/create-pin'),
                       child: Text(
                         'Change Original PIN',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.montserrat(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,

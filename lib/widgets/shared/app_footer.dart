@@ -136,7 +136,7 @@ class ResolvaFooter extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           'A convenient platform for digital products and services in Nigeria.',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 14,
             color: AppColors.textSecondaryDark,
             height: 1.6,
@@ -152,7 +152,7 @@ class ResolvaFooter extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.montserrat(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: AppColors.white,
@@ -167,7 +167,7 @@ class ResolvaFooter extends StatelessWidget {
               onTap: () => onNavigate(link.route),
               child: Text(
                 link.label,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 14,
                   color: AppColors.textSecondaryDark,
                   height: 1.5,
@@ -187,7 +187,7 @@ class ResolvaFooter extends StatelessWidget {
               Text(
                 '© 2026 RESOLVA. All rights reserved.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 13,
                   color: AppColors.white.withValues(alpha: 0.65),
                 ),
@@ -212,7 +212,7 @@ class ResolvaFooter extends StatelessWidget {
             children: [
               Text(
                 '© 2026 RESOLVA. All rights reserved.',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.montserrat(
                   fontSize: 13,
                   color: AppColors.white.withValues(alpha: 0.65),
                 ),
@@ -234,7 +234,7 @@ class ResolvaFooter extends StatelessWidget {
       onTap: () => onNavigate(route),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.montserrat(
           fontSize: 13,
           color: AppColors.white.withValues(alpha: 0.65),
         ),

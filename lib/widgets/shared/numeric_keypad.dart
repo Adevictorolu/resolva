@@ -266,7 +266,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
           alignment: Alignment.center,
           child: Text(
             digit,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.montserrat(
               fontSize: 24,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryNavy,
@@ -305,7 +305,7 @@ class _NumericKeypadState extends State<NumericKeypad> {
                 ? Icon(icon, color: AppColors.textSecondary, size: 22)
                 : Text(
                     label ?? '',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.montserrat(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
