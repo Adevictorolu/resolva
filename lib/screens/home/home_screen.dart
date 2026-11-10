@@ -12,6 +12,20 @@ class HomeScreen extends StatelessWidget {
 
   const HomeScreen({super.key, required this.onNavigate});
 
+  static final GlobalKey servicesKey = GlobalKey();
+  static final GlobalKey howItWorksKey = GlobalKey();
+
+  static void scrollToSection(GlobalKey key) {
+    final ctx = key.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 550),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -28,8 +42,17 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _HeroSection(onNavigate: onNavigate, isMobile: isMobileView),
-                  _ServicesSection(onNavigate: onNavigate, isMobile: isMobileView),
-                  _HowItWorksSection(isMobile: isMobileView),
+                  Container(
+                    key: servicesKey,
+                    child: _ServicesSection(
+                      onNavigate: onNavigate,
+                      isMobile: isMobileView,
+                    ),
+                  ),
+                  Container(
+                    key: howItWorksKey,
+                    child: _HowItWorksSection(isMobile: isMobileView),
+                  ),
                   _WhyChooseSection(isMobile: isMobileView),
                   _FaqPreviewSection(isMobile: isMobileView),
                   _CtaSection(onNavigate: onNavigate, isMobile: isMobileView),
@@ -165,15 +188,17 @@ class _HeroSection extends StatelessWidget {
           alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: () => onNavigate('/exam-pins'),
+              onPressed: () => onNavigate('/#services'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.white,
                 foregroundColor: AppColors.primaryNavy,
+                elevation: 4,
+                shadowColor: Colors.black.withValues(alpha: 0.2),
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 14 : 28,
-                  vertical: 14,
+                  horizontal: isMobile ? 20 : 28,
+                  vertical: 16,
                 ),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
               ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -191,16 +216,23 @@ class _HeroSection extends StatelessWidget {
               onPressed: () => onNavigate('/register'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.white,
-                side: BorderSide(color: AppColors.white.withValues(alpha: 0.4), width: 1.5),
+                side: BorderSide(color: AppColors.white.withValues(alpha: 0.45), width: 1.5),
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 14 : 28,
-                  vertical: 14,
+                  horizontal: isMobile ? 20 : 28,
+                  vertical: 16,
                 ),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
               ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Get Started', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Get Started', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.rocket_launch_rounded, size: 16),
+                  ],
+                ),
               ),
             ),
           ],
@@ -215,42 +247,61 @@ class _HeroSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.14)),
       ),
       child: Column(
         children: [
           _buildMiniServiceCard(
             Icons.school_rounded,
             'Examination E-Pins',
-            'WAEC, NECO, NABTEB',
+            'WAEC • NECO • NABTEB • JAMB',
             AppColors.royalBlue,
+            const [
+              'assets/images/waec_logo.png',
+              'assets/images/neco_logo.png',
+              'assets/images/nabteb_logo.png',
+              'assets/images/jamb_logo.png',
+            ],
           ),
           const SizedBox(height: 12),
           _buildMiniServiceCard(
             Icons.trending_up_rounded,
             'Social Media Services',
-            'Instagram, TikTok, YouTube',
+            'Instagram • TikTok • YouTube • X',
             AppColors.emeraldGreen,
+            const [
+              'assets/images/instagram_logo.png',
+              'assets/images/tiktok_logo.png',
+              'assets/images/youtube_logo.png',
+              'assets/images/x_logo.png',
+            ],
           ),
           const SizedBox(height: 12),
           _buildMiniServiceCard(
-            Icons.business_rounded,
+            Icons.domain_verification_rounded,
             'CAC Registration',
             'Coming Soon',
             AppColors.warning,
+            const [],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMiniServiceCard(IconData icon, String title, String sub, Color color) {
+  Widget _buildMiniServiceCard(
+    IconData icon,
+    String title,
+    String sub,
+    Color color,
+    List<String> logoAssets,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.white.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [
@@ -258,7 +309,7 @@ class _HeroSection extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
+              color: color.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: AppColors.white, size: 22),
@@ -272,7 +323,7 @@ class _HeroSection extends StatelessWidget {
                   title,
                   style: GoogleFonts.montserrat(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.white,
                   ),
                 ),
@@ -281,13 +332,33 @@ class _HeroSection extends StatelessWidget {
                   sub,
                   style: GoogleFonts.montserrat(
                     fontSize: 12,
-                    color: AppColors.white.withValues(alpha: 0.6),
+                    color: AppColors.white.withValues(alpha: 0.65),
                   ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: AppColors.white.withValues(alpha: 0.4), size: 20),
+          if (logoAssets.isNotEmpty)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: logoAssets.take(3).map((asset) {
+                return Container(
+                  width: 28,
+                  height: 28,
+                  margin: const EdgeInsets.only(left: 4),
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(asset, fit: BoxFit.contain),
+                  ),
+                );
+              }).toList(),
+            )
+          else
+            Icon(Icons.chevron_right_rounded, color: AppColors.white.withValues(alpha: 0.4), size: 20),
         ],
       ),
     );
@@ -353,8 +424,14 @@ class _ServicesSection extends StatelessWidget {
           icon: Icons.school_rounded,
           iconColor: AppColors.royalBlue,
           title: 'Examination E-Pins',
-          description: 'Find examination pins and result-checking products for your academic needs.',
-          tags: const ['WAEC', 'NECO', 'NABTEB'],
+          description: 'Find examination pins and result-checking scratch cards for your academic needs.',
+          tags: const ['WAEC', 'NECO', 'NABTEB', 'JAMB'],
+          tagLogos: const {
+            'WAEC': 'assets/images/waec_logo.png',
+            'NECO': 'assets/images/neco_logo.png',
+            'NABTEB': 'assets/images/nabteb_logo.png',
+            'JAMB': 'assets/images/jamb_logo.png',
+          },
           buttonText: 'Explore E-Pins',
           onTap: () => onNavigate('/exam-pins'),
         ),
@@ -365,8 +442,15 @@ class _ServicesSection extends StatelessWidget {
           icon: Icons.trending_up_rounded,
           iconColor: AppColors.emeraldGreen,
           title: 'Social Media Services',
-          description: 'Explore engagement services for creators, brands, and businesses.',
+          description: 'Explore high-retention engagement services for creators, brands, and businesses.',
           tags: const ['Instagram', 'TikTok', 'Facebook', 'YouTube', 'X'],
+          tagLogos: const {
+            'Instagram': 'assets/images/instagram_logo.png',
+            'TikTok': 'assets/images/tiktok_logo.png',
+            'Facebook': 'assets/images/facebook_logo.png',
+            'YouTube': 'assets/images/youtube_logo.png',
+            'X': 'assets/images/x_logo.png',
+          },
           buttonText: 'Explore Services',
           onTap: () => onNavigate('/social-media'),
         ),
@@ -374,7 +458,7 @@ class _ServicesSection extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.all(8),
         child: ServiceCard(
-          icon: Icons.business_rounded,
+          icon: Icons.domain_verification_rounded,
           iconColor: AppColors.warning,
           title: 'CAC Registration',
           description: 'Business registration services are coming soon to RESOLVA.',
@@ -757,23 +841,27 @@ class _CtaSection extends StatelessWidget {
                     runSpacing: 12,
                     alignment: WrapAlignment.center,
                     children: [
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: () => onNavigate('/register'),
+                        icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                        label: Text('Create Account', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.white,
                           foregroundColor: AppColors.primaryNavy,
                           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                         ),
-                        child: Text('Create Account', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
                       ),
-                      OutlinedButton(
-                        onPressed: () => onNavigate('/exam-pins'),
+                      OutlinedButton.icon(
+                        onPressed: () => onNavigate('/#services'),
+                        icon: const Icon(Icons.explore_rounded, size: 18),
+                        label: Text('Browse Services', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.white,
-                          side: BorderSide(color: AppColors.white.withValues(alpha: 0.4)),
+                          side: BorderSide(color: AppColors.white.withValues(alpha: 0.45)),
                           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                         ),
-                        child: Text('Browse Services', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
                       ),
                     ],
                   ),

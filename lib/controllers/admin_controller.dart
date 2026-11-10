@@ -30,12 +30,13 @@ class AdminController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    users.assignAll(mockAdminUsers);
-    filteredUsers.assignAll(mockAdminUsers);
-    activityLogs.assignAll(mockAdminActivityLogs);
-    filteredActivityLogs.assignAll(mockAdminActivityLogs);
     if (AuthService.isEnabled) {
       loadFromBackend();
+    } else {
+      users.assignAll(mockAdminUsers);
+      filteredUsers.assignAll(mockAdminUsers);
+      activityLogs.assignAll(mockAdminActivityLogs);
+      filteredActivityLogs.assignAll(mockAdminActivityLogs);
     }
   }
 
@@ -51,11 +52,9 @@ class AdminController extends GetxController {
     backendError.value = '';
     try {
       final profiles = await AuthService.adminListProfiles();
-      if (profiles.isNotEmpty) {
-        final backendRecords = profiles.map(_recordFromProfile).toList();
-        users.assignAll(backendRecords);
-        _applyUserFilters();
-      }
+      final backendRecords = profiles.map(_recordFromProfile).toList();
+      users.assignAll(backendRecords);
+      _applyUserFilters();
     } catch (e) {
       backendError.value = AuthService.describeError(e);
     } finally {
@@ -496,6 +495,45 @@ class AdminController extends GetxController {
         userEmail: existing.email,
         type: ActivityType.logout,
         description: 'User logged out of RESOLVA session',
+      );
+    }
+  }
+
+  /// Records a live purchase event for a customer.
+  void recordUserPurchase({
+    required String email,
+    required String orderId,
+    required String productName,
+    required String category,
+    required double amount,
+  }) {
+    final now = DateTime.now();
+    final idx = users.indexWhere(
+      (u) => u.email.toLowerCase() == email.toLowerCase(),
+    );
+
+    if (idx != -1) {
+      final existing = users[idx];
+      users[idx] = existing.copyWith(
+        totalOrders: existing.totalOrders + 1,
+        totalSpent: existing.totalSpent + amount,
+        lastPurchase: LastPurchaseInfo(
+          orderId: orderId,
+          productName: productName,
+          category: category,
+          amount: amount,
+          date: now,
+        ),
+      );
+      _applyUserFilters();
+
+      recordActivity(
+        userId: existing.id,
+        userName: existing.fullName,
+        userEmail: existing.email,
+        type: ActivityType.purchase,
+        description: 'Purchased $productName ($orderId)',
+        amount: amount,
       );
     }
   }

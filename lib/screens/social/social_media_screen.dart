@@ -5,12 +5,24 @@ import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import '../../controllers/dashboard_controller.dart';
 import '../../controllers/social_controller.dart';
 import '../../data/models/social_service.dart';
 import '../../widgets/shared/app_navigation.dart';
-import '../../widgets/shared/app_footer.dart';
 import '../../widgets/shared/common_widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+String? _socialLogoAsset(String platformKey) {
+  final k = platformKey.toLowerCase();
+  if (k.contains('instagram') || k == 'ig') return 'assets/images/instagram_logo.png';
+  if (k.contains('tiktok') || k == 'tt') return 'assets/images/tiktok_logo.png';
+  if (k.contains('facebook') || k == 'fb') return 'assets/images/facebook_logo.png';
+  if (k.contains('youtube') || k == 'yt') return 'assets/images/youtube_logo.png';
+  if (k.contains('twitter') || k == 'x') return 'assets/images/x_logo.png';
+  if (k.contains('whatsapp') || k == 'wa') return 'assets/images/whatsapp_logo.png';
+  if (k.contains('pinterest')) return 'assets/images/pinterest_logo.png';
+  return null;
+}
 
 /// Social Media Services marketplace screen.
 class SocialMediaScreen extends StatelessWidget {
@@ -86,7 +98,7 @@ class _ServiceListView extends StatelessWidget {
                     children: [
                       const SectionHeading(
                         title: 'Grow Your Social Presence',
-                        subtitle: 'Explore engagement services for your content, brand, or business.',
+                        subtitle: 'High-retention followers, views, likes & engagement services across major platforms.',
                       ),
                       const SizedBox(height: 36),
                       // Platform cards
@@ -105,11 +117,14 @@ class _ServiceListView extends StatelessWidget {
                                 label: Text(cat),
                                 selected: isSelected,
                                 onSelected: (_) => controller.selectCategory(cat),
-                                selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.1),
+                                selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.12),
                                 checkmarkColor: AppColors.emeraldGreen,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
                                 labelStyle: GoogleFonts.montserrat(
                                   fontSize: 13,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                   color: isSelected ? AppColors.emeraldGreen : AppColors.textSecondary,
                                 ),
                                 side: BorderSide(
@@ -131,7 +146,7 @@ class _ServiceListView extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: AppConstants.maxContentWidth + 48),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
                 child: Obx(() {
                   if (controller.filteredServices.isEmpty) {
                     return const EmptyState(
@@ -171,7 +186,6 @@ class _ServiceListView extends StatelessWidget {
               ),
             ),
           ),
-          ResolvaFooter(onNavigate: onNavigate),
         ],
       ),
     );
@@ -192,20 +206,21 @@ class _PlatformSelector extends StatelessWidget {
       alignment: WrapAlignment.center,
       children: controller.platforms.map((platform) {
         final isSelected = controller.selectedPlatformId.value == platform.id;
+        final logoAsset = _socialLogoAsset(platform.name) ?? _socialLogoAsset(platform.id);
         return InkWell(
           onTap: () => controller.selectPlatform(platform.id),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(999),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding: EdgeInsets.symmetric(
               horizontal: isMobile ? 16 : 20,
-              vertical: isMobile ? 10 : 14,
+              vertical: isMobile ? 10 : 12,
             ),
             decoration: BoxDecoration(
               color: isSelected
                   ? platform.color.withValues(alpha: 0.1)
                   : AppColors.background,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(999),
               border: Border.all(
                 color: isSelected ? platform.color : AppColors.border,
                 width: isSelected ? 2 : 1,
@@ -214,17 +229,27 @@ class _PlatformSelector extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                FaIcon(
-                  platform.icon,
-                  size: 18,
-                  color: isSelected ? platform.color : AppColors.textSecondary,
-                ),
+                if (logoAsset != null)
+                  ClipOval(
+                    child: Image.asset(
+                      logoAsset,
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
+                    ),
+                  )
+                else
+                  FaIcon(
+                    platform.icon,
+                    size: 18,
+                    color: isSelected ? platform.color : AppColors.textSecondary,
+                  ),
                 const SizedBox(width: 8),
                 Text(
                   platform.name,
                   style: GoogleFonts.montserrat(
                     fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                     color: isSelected ? platform.color : AppColors.textSecondary,
                   ),
                 ),
@@ -260,21 +285,22 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
   Widget build(BuildContext context) {
     final s = widget.service;
     final p = widget.platform;
+    final logoAsset = _socialLogoAsset(p.name) ?? _socialLogoAsset(p.id);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        transform: Matrix4.translationValues(0, _hovered ? -3 : 0, 0),
+        transform: Matrix4.translationValues(0, _hovered ? -4 : 0, 0),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _hovered ? p.color.withValues(alpha: 0.3) : AppColors.border),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _hovered ? p.color.withValues(alpha: 0.35) : AppColors.border),
           boxShadow: [
             BoxShadow(
-              color: _hovered ? p.color.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.02),
-              blurRadius: _hovered ? 16 : 4,
+              color: _hovered ? p.color.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.02),
+              blurRadius: _hovered ? 18 : 6,
               offset: const Offset(0, 4),
             ),
           ],
@@ -289,11 +315,14 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
                   Container(
                     width: 40,
                     height: 40,
+                    padding: logoAsset != null ? const EdgeInsets.all(5) : EdgeInsets.zero,
                     decoration: BoxDecoration(
                       color: p.color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(child: FaIcon(p.icon, size: 18, color: p.color)),
+                    child: logoAsset != null
+                        ? ClipOval(child: Image.asset(logoAsset, fit: BoxFit.contain))
+                        : Center(child: FaIcon(p.icon, size: 18, color: p.color)),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -302,7 +331,7 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
                       children: [
                         Text(
                           p.name,
-                          style: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w600, color: p.color),
+                          style: GoogleFonts.montserrat(fontSize: 11.5, fontWeight: FontWeight.w700, color: p.color),
                         ),
                         Text(
                           s.category,
@@ -333,7 +362,7 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
               // Meta info
               Row(
                 children: [
-                  Icon(Icons.timer_outlined, size: 14, color: AppColors.textTertiary),
+                  const Icon(Icons.timer_outlined, size: 14, color: AppColors.textTertiary),
                   const SizedBox(width: 4),
                   Text(
                     s.estimatedDelivery,
@@ -364,14 +393,16 @@ class _SocialServiceCardState extends State<_SocialServiceCard> {
                     ],
                   ),
                   const Spacer(),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: widget.onOrder,
+                    icon: const Icon(Icons.bolt_rounded, size: 15),
+                    label: const Text('Order Now'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: p.color,
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                      textStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                      textStyle: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w700),
                     ),
-                    child: const Text('Order Now'),
                   ),
                 ],
               ),
@@ -688,25 +719,25 @@ class _OrderFormViewState extends State<_OrderFormView> {
                               const SizedBox(height: 24),
                               SizedBox(
                                 width: double.infinity,
-                                child: ElevatedButton(
+                                child: ElevatedButton.icon(
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
-                                      _showDemoConfirmation(context, service, platform);
+                                      _handlePlaceOrder(context, service, platform);
                                     }
                                   },
+                                  icon: const Icon(Icons.rocket_launch_rounded, size: 18),
+                                  label: const Text('Place Order'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: platform?.color ?? AppColors.royalBlue,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
-                                    textStyle: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    textStyle: GoogleFonts.montserrat(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                  child: const Text('Continue'),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Center(
-                                child: Text(
-                                  'This is a frontend demonstration. No real order will be placed.',
-                                  style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textTertiary),
                                 ),
                               ),
                             ],
@@ -719,7 +750,6 @@ class _OrderFormViewState extends State<_OrderFormView> {
               ),
             ),
           ),
-          ResolvaFooter(onNavigate: widget.onNavigate),
         ],
       ),
     );
@@ -748,13 +778,29 @@ class _OrderFormViewState extends State<_OrderFormView> {
     );
   }
 
-  void _showDemoConfirmation(BuildContext context, SocialService service, SocialPlatform? platform) {
+  void _handlePlaceOrder(BuildContext context, SocialService service, SocialPlatform? platform) {
+    final dashCtrl = Get.find<DashboardController>();
+    final total = widget.controller.totalPrice;
+    final qty = widget.controller.quantity.value;
+    final method = dashCtrl.walletBalance.value >= total ? 'Wallet Balance' : 'Instant Checkout';
+
+    final order = dashCtrl.placeOrder(
+      productName: service.name,
+      category: 'Social Media Services',
+      amount: total,
+      quantity: qty,
+      paymentMethod: method,
+      details: '${platform?.name ?? "Social"} — ${service.name} (${_fmt.format(qty)})',
+      targetUrl: _urlController.text.trim(),
+      isInstantPin: false,
+    );
+
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
+          constraints: const BoxConstraints(maxWidth: 440),
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -764,20 +810,20 @@ class _OrderFormViewState extends State<_OrderFormView> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.1),
+                    color: AppColors.success.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check_rounded, size: 32, color: AppColors.success),
+                  child: const Icon(Icons.verified_rounded, size: 34, color: AppColors.success),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 Text(
-                  'Demo Order Review',
-                  style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700),
+                  'Order Confirmed',
+                  style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w800),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  'This is a demonstration order review. No order has been sent to a real supplier.',
-                  style: GoogleFonts.montserrat(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                  'Your ${platform?.name ?? "Social Media"} order has been submitted and is now processing.',
+                  style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -786,30 +832,52 @@ class _OrderFormViewState extends State<_OrderFormView> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.background,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
                     children: [
-                      _demoRow('Service', service.name),
+                      _receiptRow('Order ID', order.id),
                       const SizedBox(height: 6),
-                      _demoRow('Platform', platform?.name ?? ''),
+                      _receiptRow('Service', service.name),
                       const SizedBox(height: 6),
-                      Obx(() => _demoRow('Quantity', _fmt.format(widget.controller.quantity.value))),
+                      _receiptRow('Platform', platform?.name ?? ''),
                       const SizedBox(height: 6),
-                      Obx(() => _demoRow('Total', '₦${_fmt.format(widget.controller.totalPrice)}')),
+                      _receiptRow('Quantity', _fmt.format(qty)),
+                      const SizedBox(height: 6),
+                      _receiptRow('Total Paid', '₦${_fmt.format(total)}'),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      widget.controller.clearSelection();
-                    },
-                    child: const Text('Done'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          widget.controller.clearSelection();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                        ),
+                        child: const Text('Done'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          widget.controller.clearSelection();
+                          widget.onNavigate('/orders');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                        ),
+                        child: const Text('Track Order'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -819,12 +887,12 @@ class _OrderFormViewState extends State<_OrderFormView> {
     );
   }
 
-  Widget _demoRow(String label, String value) {
+  Widget _receiptRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary)),
-        Flexible(child: Text(value, style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.end)),
+        Flexible(child: Text(value, style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w700), textAlign: TextAlign.end)),
       ],
     );
   }

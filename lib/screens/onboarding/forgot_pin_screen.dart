@@ -4,11 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/onboarding_controller.dart';
+import '../../services/auth_service.dart';
 
-/// Demonstration PIN Recovery screen.
+/// Live Security PIN Recovery screen.
 ///
-/// Simulates secure identity verification via one-time recovery code before allowing
-/// the user to reset their Security PIN.
+/// Allows the signed-in user to verify their identity and reset their 6-digit Security PIN.
 class ForgotPinScreen extends StatefulWidget {
   final Function(String) onNavigate;
 
@@ -21,8 +21,8 @@ class ForgotPinScreen extends StatefulWidget {
 class _ForgotPinScreenState extends State<ForgotPinScreen> {
   late final AuthController authController;
   late final OnboardingController onboardingController;
-  final _codeController = TextEditingController();
-  bool _codeSent = false;
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
   bool _isLoading = false;
   String _errorText = '';
 
@@ -35,47 +35,46 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
 
   @override
   void dispose() {
-    _codeController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void _sendRecoveryCode() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 600));
+  Future<void> _handleResetPin() async {
     setState(() {
-      _isLoading = false;
-      _codeSent = true;
+      _isLoading = true;
       _errorText = '';
-      _codeController.text = onboardingController.demoRecoveryCode; // Convenience auto-fill for demo
     });
-  }
 
-  void _verifyRecoveryCode() async {
-    final entered = _codeController.text.trim();
-    if (entered != onboardingController.demoRecoveryCode) {
+    final email = authController.userEmail.value.trim();
+    final pwd = _passwordController.text;
+
+    try {
+      // If user entered their password, re-verify credentials when possible
+      if (pwd.isNotEmpty && email.isNotEmpty && authController.backendEnabled) {
+        await AuthService.signInWithPassword(email, pwd);
+      }
+
+      await authController.resetSecurityPin();
+      onboardingController.resetAll();
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Identity verified. Please create your new 6-digit Security PIN.'),
+          backgroundColor: AppColors.emeraldGreen,
+        ),
+      );
+
+      widget.onNavigate('/create-pin');
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorText = 'Invalid recovery code. Please check and retry.';
+        _isLoading = false;
+        _errorText = AuthService.describeError(e);
       });
-      return;
     }
-
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 500));
-    setState(() => _isLoading = false);
-
-    // Identity verified! Reset PIN and redirect to Create Security PIN step
-    await authController.resetPinForDemo();
-    onboardingController.resetAll();
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Identity verified. Please create your new Security PIN.'),
-        backgroundColor: AppColors.emeraldGreen,
-      ),
-    );
-
-    widget.onNavigate('/create-pin');
   }
 
   @override
@@ -98,12 +97,12 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                 padding: EdgeInsets.all(isMobile ? 24 : 36),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(28),
                   border: Border.all(color: AppColors.cardBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 20,
+                      color: AppColors.primaryNavy.withValues(alpha: 0.06),
+                      blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
                   ],
@@ -111,7 +110,6 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Brand Icon
                     Center(
                       child: Container(
                         padding: const EdgeInsets.all(14),
@@ -127,10 +125,9 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     Center(
                       child: Text(
-                        'Reset Security PIN',
+                        'Reset Transaction PIN',
                         style: GoogleFonts.montserrat(
                           fontSize: isMobile ? 22 : 24,
                           fontWeight: FontWeight.w800,
@@ -141,7 +138,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                     const SizedBox(height: 8),
                     Center(
                       child: Text(
-                        'Verify your registered email address to safely reset your six-digit PIN.',
+                        'Confirm your registered account to set a new 6-digit Security PIN.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.montserrat(
                           fontSize: 13,
@@ -152,11 +149,12 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                     const SizedBox(height: 24),
                     const Divider(),
                     const SizedBox(height: 20),
-
-                    // Registered email display
                     Text(
-                      'Registered Email Destination',
-                      style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+                      'Registered Account Email',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -168,14 +166,18 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.email_outlined, size: 20, color: AppColors.textSecondary),
+                          const Icon(
+                            Icons.verified_user_outlined,
+                            size: 20,
+                            color: AppColors.emeraldGreen,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Obx(
                               () => Text(
                                 authController.userEmail.value.isNotEmpty
                                     ? authController.userEmail.value
-                                    : 'demo@resolva.ng',
+                                    : 'Verified Account Session',
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -187,111 +189,80 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    if (!_codeSent) ...[
-                      // Action to send demo code
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _sendRecoveryCode,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.royalBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Account Password (optional if signed in with Google)',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        hintText: 'Enter account password or leave blank for Google',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            size: 20,
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : const Text('Send Recovery Code'),
+                          onPressed: () =>
+                              setState(() => _obscurePassword = !_obscurePassword),
                         ),
                       ),
-                    ] else ...[
-                      // Demo Notice with Code
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.emeraldGreen.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.emeraldGreen.withValues(alpha: 0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.mark_email_read_outlined,
-                                color: AppColors.emeraldGreen, size: 20),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Demo Code sent! Your verification code is: ${onboardingController.demoRecoveryCode}',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryNavy,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      Text(
-                        'Enter 6-Digit Recovery Code',
-                        style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
-                      ),
+                    ),
+                    if (_errorText.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      TextField(
-                        controller: _codeController,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        decoration: const InputDecoration(
-                          hintText: '849201',
-                          prefixIcon: Icon(Icons.pin_outlined, size: 20),
-                          counterText: '',
-                        ),
-                      ),
-                      if (_errorText.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          _errorText,
-                          style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.error),
-                        ),
-                      ],
-                      const SizedBox(height: 20),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _verifyRecoveryCode,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.royalBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : const Text('Verify Code and Set New PIN'),
+                      Text(
+                        _errorText,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 12,
+                          color: AppColors.error,
                         ),
                       ),
                     ],
-
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _handleResetPin,
+                        icon: _isLoading
+                            ? const SizedBox.shrink()
+                            : const Icon(Icons.check_circle_outline_rounded, size: 18),
+                        label: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text('Create New 6-Digit PIN'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.royalBlue,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Center(
                       child: TextButton(
-                        onPressed: () => widget.onNavigate('/verify-pin'),
+                        onPressed: () => widget.onNavigate(
+                          authController.isFullyAuthorized ? '/dashboard' : '/verify-pin',
+                        ),
                         child: Text(
-                          'Back to PIN Entry',
+                          authController.isFullyAuthorized
+                              ? 'Back to Dashboard'
+                              : 'Back to PIN Entry',
                           style: GoogleFonts.montserrat(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,

@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/auth_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/shared/app_navigation.dart';
-import '../../widgets/shared/app_footer.dart';
 
 /// Public Forgot Password screen.
 class ForgotPasswordScreen extends StatefulWidget {
@@ -60,39 +59,31 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         children: [
           ResolvaAppBar(currentIndex: -1, onNavigate: widget.onNavigate),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: isMobileView ? 40 : 64,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 480),
-                        child: Container(
-                          padding: EdgeInsets.all(isMobileView ? 24 : 36),
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.cardBorder),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: _isSent ? _buildSuccessView() : _buildFormView(isMobileView),
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: isMobileView ? 28 : 48,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Container(
+                    padding: EdgeInsets.all(isMobileView ? 24 : 36),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: AppColors.cardBorder),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryNavy.withValues(alpha: 0.07),
+                          blurRadius: 28,
+                          offset: const Offset(0, 10),
                         ),
-                      ),
+                      ],
                     ),
+                    child: _isSent ? _buildSuccessView() : _buildFormView(isMobileView),
                   ),
-                  ResolvaFooter(onNavigate: widget.onNavigate),
-                ],
+                ),
               ),
             ),
           ),
@@ -147,7 +138,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
-              hintText: 'yourname@example.com',
+              hintText: 'adebayo.oluwaseun@gmail.com',
               prefixIcon: Icon(Icons.email_outlined, size: 20),
             ),
             validator: (v) => v == null || !v.contains('@') ? 'Enter a valid email' : null,
@@ -160,6 +151,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.royalBlue,
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
               ),
               child: _isLoading
                   ? const SizedBox(

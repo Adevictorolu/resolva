@@ -152,6 +152,23 @@ class AuthService {
     }).eq('id', user.id);
   }
 
+  static Future<void> updateMyProfile({
+    required String fullName,
+    required String phone,
+  }) async {
+    final user = currentUser;
+    if (user == null) return;
+    await _client.from('profiles').update({
+      'full_name': fullName.trim(),
+      'phone': phone.trim(),
+    }).eq('id', user.id);
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(data: {'full_name': fullName.trim(), 'phone': phone.trim()}),
+      );
+    } catch (_) {}
+  }
+
   static Future<void> recordLogin() => _client.rpc('record_login');
 
   // ──────────────── Security PIN ────────────────

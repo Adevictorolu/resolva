@@ -308,7 +308,7 @@ final List<Order> mockOrders = [
     amount: 3500,
     paymentStatus: OrderPaymentStatus.paid,
     fulfilmentStatus: OrderFulfilmentStatus.completed,
-    details: 'WAEC scratch card for result checking. Serial: DEMO-XXXX-XXXX',
+    details: 'WAEC scratch card for result checking. Serial: WR-2026-8841-9023',
   ),
   Order(
     id: 'ORD-2024-002',
@@ -669,8 +669,8 @@ final List<AdminUserRecord> mockAdminUsers = [
   ),
   AdminUserRecord(
     id: 'USR-1008',
-    fullName: 'Demo User',
-    email: 'demo@resolva.ng',
+    fullName: 'Adebayo Oluwaseun',
+    email: 'adebayo.oluwaseun@gmail.com',
     phone: '08012345678',
     role: UserRole.customer,
     status: UserStatus.active,

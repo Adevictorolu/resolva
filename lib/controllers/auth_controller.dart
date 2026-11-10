@@ -65,8 +65,9 @@ class AuthController extends GetxController {
 
   // Registered user profile
   final userId = ''.obs;
-  final userFullName = 'Demo User'.obs;
-  final userEmail = 'demo@resolva.ng'.obs;
+  final userFullName = ''.obs;
+  final userEmail = ''.obs;
+  final userPhone = ''.obs;
   final userAvatarUrl = ''.obs;
 
   StreamSubscription<AuthState>? _authSub;
@@ -172,6 +173,9 @@ class AuthController extends GetxController {
         : (meta['full_name'] as String?) ??
             (meta['name'] as String?) ??
             (email.isNotEmpty ? email.split('@').first : 'User');
+    final phone = profile?.phone.isNotEmpty == true
+        ? profile!.phone
+        : (meta['phone'] as String?) ?? '';
     final avatar = profile?.avatarUrl ??
         (meta['avatar_url'] as String?) ??
         (meta['picture'] as String?) ??
@@ -182,6 +186,7 @@ class AuthController extends GetxController {
     userId.value = profile?.id ?? supaUser?.id ?? '';
     userEmail.value = email;
     userFullName.value = fullName;
+    userPhone.value = phone;
     userAvatarUrl.value = avatar;
     isAdmin.value = (profile?.isAdmin ?? false) || isPrimaryAdmin;
     acceptedTermsVersion.value = profile?.acceptedTermsVersion ?? '';
@@ -218,6 +223,9 @@ class AuthController extends GetxController {
     acceptedTermsVersion.value = '';
     acceptedPrivacyVersion.value = '';
     userId.value = '';
+    userFullName.value = '';
+    userEmail.value = '';
+    userPhone.value = '';
     userAvatarUrl.value = '';
     intendedRoute = '';
     loginPassword.value = '';
@@ -265,49 +273,9 @@ class AuthController extends GetxController {
     regConfirmPasswordVisible.value = !regConfirmPasswordVisible.value;
   }
 
-  /// Sets up credentials for demonstration testing (demo mode only).
-  /// If [isReturningUser] is true, configures terms acceptance and existing PIN '123456'.
-  /// If [isAdminUser] is true, configures an Administrator account with PIN '123456'.
-  void prepareDemoUser({
-    required bool isReturningUser,
-    bool isAdminUser = false,
-  }) {
-    isAdmin.value = isAdminUser;
-
-    if (isAdminUser) {
-      loginEmail.value = 'admin@resolva.ng';
-      loginPassword.value = 'AdminResolva2026!';
-      userFullName.value = 'Ibrahim Musa (Admin)';
-      userEmail.value = 'admin@resolva.ng';
-      acceptedTermsVersion.value = AppConstants.termsVersion;
-      acceptedPrivacyVersion.value = AppConstants.privacyVersion;
-      securityPin.value = '123456';
-      isSessionUnlocked.value = false;
-      intendedRoute = '/admin';
-      return;
-    }
-
-    loginEmail.value = 'demo@resolva.ng';
-    loginPassword.value = 'ResolvaPass2025!';
-    userFullName.value = 'Demo User';
-    userEmail.value = 'demo@resolva.ng';
-
-    if (isReturningUser) {
-      acceptedTermsVersion.value = AppConstants.termsVersion;
-      acceptedPrivacyVersion.value = AppConstants.privacyVersion;
-      securityPin.value = '123456';
-      isSessionUnlocked.value = false;
-    } else {
-      acceptedTermsVersion.value = '';
-      acceptedPrivacyVersion.value = '';
-      securityPin.value = '';
-      isSessionUnlocked.value = false;
-    }
-  }
-
   // ──────────────────── SIGN IN ────────────────────
 
-  /// Signs in with email & password (Supabase) or simulates it (demo mode).
+  /// Signs in with email & password.
   Future<bool> login() async {
     if (loginEmail.value.isEmpty || loginPassword.value.isEmpty) return false;
     authError.value = '';
@@ -514,8 +482,8 @@ class AuthController extends GetxController {
     return valid;
   }
 
-  /// Resets the user's PIN during forgot-pin recovery.
-  Future<void> resetPinForDemo() async {
+  /// Resets the user's PIN so they can configure a new 6-digit PIN.
+  Future<void> resetSecurityPin() async {
     if (backendEnabled) {
       try {
         await AuthService.resetSecurityPin();
@@ -526,9 +494,39 @@ class AuthController extends GetxController {
     isSessionUnlocked.value = false;
   }
 
+  /// Updates the current user's profile (Full Name & Phone) in Supabase and state.
+  Future<bool> updateProfile({
+    required String fullName,
+    required String phone,
+  }) async {
+    authError.value = '';
+    if (backendEnabled) {
+      try {
+        await AuthService.updateMyProfile(fullName: fullName, phone: phone);
+      } catch (e) {
+        authError.value = AuthService.describeError(e);
+        return false;
+      }
+    }
+    userFullName.value = fullName.trim();
+    userPhone.value = phone.trim();
+    return true;
+  }
+
+  /// Updates the signed-in user's account password.
+  Future<bool> updateAccountPassword(String newPassword) async {
+    authError.value = '';
+    if (!backendEnabled) return true;
+    try {
+      await AuthService.updatePassword(newPassword);
+      return true;
+    } catch (e) {
+      authError.value = AuthService.describeError(e);
+      return false;
+    }
+  }
+
   /// Standard logout: clears active session and authentication.
-  /// In demo mode the stored PIN and policy acceptance are preserved for the
-  /// returning-user demonstration flow.
   void logout() {
     if (isLoggedIn.value && Get.isRegistered<AdminController>()) {
       Get.find<AdminController>().recordUserLogout(email: userEmail.value);
@@ -544,4 +542,27 @@ class AuthController extends GetxController {
     intendedRoute = '';
     loginPassword.value = '';
   }
+
+  /// Test helper used by unit/widget tests in `test/` when running without a live backend.
+  void prepareDemoUser({
+    required bool isReturningUser,
+    bool isAdminUser = false,
+  }) {
+    isAdmin.value = isAdminUser;
+    if (isReturningUser) {
+      acceptedTermsVersion.value = AppConstants.termsVersion;
+      acceptedPrivacyVersion.value = AppConstants.privacyVersion;
+      securityPin.value = '123456';
+      pinConfigured.value = true;
+    } else {
+      acceptedTermsVersion.value = '';
+      acceptedPrivacyVersion.value = '';
+      securityPin.value = '';
+      pinConfigured.value = false;
+    }
+    isSessionUnlocked.value = false;
+  }
+
+  /// Alias for `resetSecurityPin` used by `test/security_flow_test.dart`.
+  Future<void> resetPinForDemo() => resetSecurityPin();
 }

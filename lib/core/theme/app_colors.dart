@@ -8,6 +8,7 @@ class AppColors {
   static const Color brandBlue = Color(0xFF0C4CB0);
   static const Color primaryNavy = Color(0xFF09367D);
   static const Color royalBlue = Color(0xFF0C4CB0);
+  static const Color electricBlue = Color(0xFF2563EB);
   static const Color emeraldGreen = Color(0xFF10B981);
   static const Color accentGold = Color(0xFFF59E0B);
 

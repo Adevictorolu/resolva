@@ -4,12 +4,27 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import '../../controllers/dashboard_controller.dart';
 import '../../controllers/exam_controller.dart';
 import '../../data/models/exam_product.dart';
 import '../../widgets/shared/app_navigation.dart';
-import '../../widgets/shared/app_footer.dart';
 import '../../widgets/shared/common_widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+String? _examLogoAsset(String provider) {
+  switch (provider.toUpperCase()) {
+    case 'WAEC':
+      return 'assets/images/waec_logo.png';
+    case 'NECO':
+      return 'assets/images/neco_logo.png';
+    case 'NABTEB':
+      return 'assets/images/nabteb_logo.png';
+    case 'JAMB':
+      return 'assets/images/jamb_logo.png';
+    default:
+      return null;
+  }
+}
 
 /// Examination E-Pins marketplace screen.
 class ExamPinsScreen extends StatelessWidget {
@@ -87,7 +102,7 @@ class _ProductListView extends StatelessWidget {
                     children: [
                       const SectionHeading(
                         title: 'Examination E-Pins',
-                        subtitle: 'Find the examination products you need in one convenient place.',
+                        subtitle: 'Instant WAEC, NECO, NABTEB & JAMB examination pins and scratch cards.',
                       ),
                       const SizedBox(height: 32),
                       // Search
@@ -101,30 +116,44 @@ class _ProductListView extends StatelessWidget {
                             filled: true,
                             fillColor: AppColors.background,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(999),
                               borderSide: BorderSide.none,
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Category filters
+                      // Category filters with brand logos
                       Obx(() => SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: controller.categories.map((cat) {
                             final isSelected = controller.selectedCategory.value == cat;
+                            final logo = _examLogoAsset(cat);
                             return Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: FilterChip(
+                                avatar: logo != null
+                                    ? ClipOval(
+                                        child: Image.asset(
+                                          logo,
+                                          width: 18,
+                                          height: 18,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      )
+                                    : null,
                                 label: Text(cat),
                                 selected: isSelected,
                                 onSelected: (_) => controller.selectCategory(cat),
-                                selectedColor: AppColors.royalBlue.withValues(alpha: 0.1),
+                                selectedColor: AppColors.royalBlue.withValues(alpha: 0.12),
                                 checkmarkColor: AppColors.royalBlue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
                                 labelStyle: GoogleFonts.montserrat(
                                   fontSize: 13,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                   color: isSelected ? AppColors.royalBlue : AppColors.textSecondary,
                                 ),
                                 side: BorderSide(
@@ -146,7 +175,7 @@ class _ProductListView extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: AppConstants.maxContentWidth + 48),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
                 child: Obx(() {
                   if (controller.filteredProducts.isEmpty) {
                     return const EmptyState(
@@ -165,7 +194,7 @@ class _ProductListView extends StatelessWidget {
                           crossAxisCount: crossCount,
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
-                          childAspectRatio: crossCount == 1 ? 1.6 : 0.85,
+                          childAspectRatio: crossCount == 1 ? 1.55 : 0.85,
                         ),
                         itemCount: controller.filteredProducts.length,
                         itemBuilder: (context, index) {
@@ -184,7 +213,6 @@ class _ProductListView extends StatelessWidget {
               ),
             ),
           ),
-          ResolvaFooter(onNavigate: onNavigate),
         ],
       ),
     );
@@ -214,20 +242,26 @@ class _ExamProductCardState extends State<_ExamProductCard> {
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
+    final logoAsset = _examLogoAsset(p.provider);
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        transform: Matrix4.translationValues(0, _hovered ? -3 : 0, 0),
+        transform: Matrix4.translationValues(0, _hovered ? -4 : 0, 0),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _hovered ? AppColors.royalBlue.withValues(alpha: 0.3) : AppColors.border),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: _hovered ? AppColors.royalBlue.withValues(alpha: 0.35) : AppColors.border,
+          ),
           boxShadow: [
             BoxShadow(
-              color: _hovered ? AppColors.royalBlue.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.02),
-              blurRadius: _hovered ? 16 : 4,
+              color: _hovered
+                  ? AppColors.royalBlue.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.02),
+              blurRadius: _hovered ? 20 : 6,
               offset: const Offset(0, 4),
             ),
           ],
@@ -240,18 +274,33 @@ class _ExamProductCardState extends State<_ExamProductCard> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: AppColors.royalBlue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      color: AppColors.royalBlue.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: AppColors.royalBlue.withValues(alpha: 0.2)),
                     ),
-                    child: Text(
-                      p.provider,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.royalBlue,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (logoAsset != null) ...[
+                          Image.asset(
+                            logoAsset,
+                            width: 18,
+                            height: 18,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(width: 6),
+                        ],
+                        Text(
+                          p.provider,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.royalBlue,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const Spacer(),
@@ -298,21 +347,34 @@ class _ExamProductCardState extends State<_ExamProductCard> {
                     child: OutlinedButton(
                       onPressed: widget.onViewDetails,
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        textStyle: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        textStyle: GoogleFonts.montserrat(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      child: const Text('View Details'),
+                      child: const Text('Details'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
                       onPressed: p.isAvailable ? widget.onBuyNow : null,
+                      icon: const Icon(Icons.bolt_rounded, size: 16),
+                      label: const Text('Buy Now'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        textStyle: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        textStyle: GoogleFonts.montserrat(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      child: const Text('Buy Now'),
                     ),
                   ),
                 ],
@@ -601,22 +663,22 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                             const SizedBox(height: 24),
                             SizedBox(
                               width: double.infinity,
-                              child: ElevatedButton(
+                              child: ElevatedButton.icon(
                                 onPressed: product.isAvailable
-                                    ? () => _showDemoConfirmation(context, product)
+                                    ? () => _handleCheckout(context, product)
                                     : null,
+                                icon: const Icon(Icons.lock_outline_rounded, size: 18),
+                                label: const Text('Complete Purchase'),
                                 style: ElevatedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(vertical: 16),
-                                  textStyle: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w700),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  textStyle: GoogleFonts.montserrat(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                                child: const Text('Continue to Checkout'),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Center(
-                              child: Text(
-                                'This is a frontend demonstration. No real purchase will occur.',
-                                style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textTertiary),
                               ),
                             ),
                           ],
@@ -628,7 +690,6 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
               ),
             ),
           ),
-          ResolvaFooter(onNavigate: onNavigate),
         ],
       ),
     );
@@ -644,13 +705,28 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
     );
   }
 
-  void _showDemoConfirmation(BuildContext context, ExamProduct product) {
+  void _handleCheckout(BuildContext context, ExamProduct product) {
+    final dashCtrl = Get.find<DashboardController>();
+    final total = controller.totalPrice;
+    final qty = controller.quantity.value;
+    final method = dashCtrl.walletBalance.value >= total ? 'Wallet Balance' : 'Instant Checkout';
+
+    final order = dashCtrl.placeOrder(
+      productName: product.name,
+      category: 'Examination E-Pins',
+      amount: total,
+      quantity: qty,
+      paymentMethod: method,
+      details: '${product.provider} — ${product.name} (x$qty)',
+      isInstantPin: true,
+    );
+
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
+          constraints: const BoxConstraints(maxWidth: 440),
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -660,20 +736,20 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.1),
+                    color: AppColors.success.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check_rounded, size: 32, color: AppColors.success),
+                  child: const Icon(Icons.verified_rounded, size: 34, color: AppColors.success),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 Text(
-                  'Order Preview',
-                  style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700),
+                  'Order Completed',
+                  style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w800),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  'This is a demonstration confirmation screen. No real purchase has been made.',
-                  style: GoogleFonts.montserrat(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                  'Your ${product.provider} e-pin(s) have been generated and saved to your dashboard.',
+                  style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -682,30 +758,63 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.background,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
                     children: [
-                      _demoRow('Product', product.name),
+                      _receiptRow('Order ID', order.id),
                       const SizedBox(height: 6),
-                      _demoRow('Provider', product.provider),
+                      _receiptRow('Product', product.name),
                       const SizedBox(height: 6),
-                      Obx(() => _demoRow('Quantity', '${controller.quantity.value}')),
+                      _receiptRow('Provider', product.provider),
                       const SizedBox(height: 6),
-                      Obx(() => _demoRow('Total', '₦${_fmt.format(controller.totalPrice)}')),
+                      _receiptRow('Quantity', '$qty'),
+                      const SizedBox(height: 6),
+                      _receiptRow('Total Paid', '₦${_fmt.format(total)}'),
+                      if (order.pins != null && order.pins!.isNotEmpty) ...[
+                        const Divider(height: 20),
+                        Text(
+                          'Generated E-PIN: ${order.pins!.first}',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.royalBlue,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      controller.clearSelection();
-                    },
-                    child: const Text('Done'),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          controller.clearSelection();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                        ),
+                        child: const Text('Done'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          controller.clearSelection();
+                          onNavigate('/orders');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                        ),
+                        child: const Text('View Order'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -715,7 +824,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
     );
   }
 
-  Widget _demoRow(String label, String value) {
+  Widget _receiptRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -723,7 +832,7 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
         Flexible(
           child: Text(
             value,
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w700),
             textAlign: TextAlign.end,
           ),
         ),

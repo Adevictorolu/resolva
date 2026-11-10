@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../widgets/shared/app_navigation.dart';
-import '../../widgets/shared/app_footer.dart';
 
 /// CAC Business Registration landing and waitlist pre-registration screen.
 class CacScreen extends StatefulWidget {
@@ -75,7 +74,6 @@ class _CacScreenState extends State<CacScreen> {
                   _buildFeaturesGrid(isMobileView),
                   _buildWaitlistSection(isMobileView),
                   _buildCacFaq(isMobileView),
-                  ResolvaFooter(onNavigate: widget.onNavigate),
                 ],
               ),
             ),

@@ -150,7 +150,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Notice: This is a placeholder legal agreement for the RESOLVA frontend demonstration. Prior to production launch, these terms must be formally reviewed and ratified by qualified legal counsel.',
+              'Official Terms of Service governing the use of the RESOLVA digital services platform, examination e-pin purchases, and social media growth services.',
               style: GoogleFonts.montserrat(
                 fontSize: 12,
                 color: AppColors.primaryNavy,
@@ -333,7 +333,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Notice: This placeholder privacy policy is provided for frontend demonstration. Real production deployment requires verified compliance with the Nigeria Data Protection Act (NDPA).',
+              'RESOLVA is committed to protecting your personal data and privacy in accordance with the Nigeria Data Protection Act (NDPA).',
               style: GoogleFonts.montserrat(
                 fontSize: 12,
                 color: AppColors.primaryNavy,

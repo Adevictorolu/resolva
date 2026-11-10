@@ -3,13 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/constants/app_constants.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/shared/app_navigation.dart';
-import '../../widgets/shared/app_footer.dart';
 import '../../widgets/shared/common_widgets.dart';
 
-/// Authentication Screen supporting both Sign In and Sign Up tabs with demo pre-fill options.
+/// Modern Authentication Dialog Screen supporting Sign In, Sign Up, and Google OAuth.
 class AuthScreen extends StatefulWidget {
   final Function(String) onNavigate;
   final bool initialRegister;
@@ -39,6 +37,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _regConfirmPasswordController = TextEditingController();
 
   late bool _isRegister;
+  bool _googleHovered = false;
 
   @override
   void initState() {
@@ -63,54 +62,6 @@ class _AuthScreenState extends State<AuthScreen> {
     super.dispose();
   }
 
-  void _fillReturningDemoUser() {
-    setState(() {
-      _isRegister = false;
-      controller.prepareDemoUser(isReturningUser: true);
-      _loginEmailController.text = controller.loginEmail.value;
-      _loginPasswordController.text = controller.loginPassword.value;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Loaded Returning Demo User (Configured PIN: 123456)'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _fillNewDemoUser() {
-    setState(() {
-      _isRegister = false;
-      controller.prepareDemoUser(isReturningUser: false);
-      _loginEmailController.text = controller.loginEmail.value;
-      _loginPasswordController.text = controller.loginPassword.value;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Loaded New Demo User (Requires Policy Acceptance & PIN Setup)'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _fillAdminDemoUser() {
-    setState(() {
-      _isRegister = false;
-      controller.prepareDemoUser(isReturningUser: true, isAdminUser: true);
-      _loginEmailController.text = controller.loginEmail.value;
-      _loginPasswordController.text = controller.loginPassword.value;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Loaded Admin Account (PIN: 123456 • Opens Admin Dashboard)'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
   void _showAuthFeedback() {
     if (!mounted) return;
     final error = controller.authError.value;
@@ -119,7 +70,8 @@ class _AuthScreenState extends State<AuthScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(error.isNotEmpty ? error : info),
-        backgroundColor: error.isNotEmpty ? AppColors.error : AppColors.emeraldGreen,
+        backgroundColor:
+            error.isNotEmpty ? AppColors.error : AppColors.emeraldGreen,
         duration: const Duration(seconds: 5),
       ),
     );
@@ -154,7 +106,6 @@ class _AuthScreenState extends State<AuthScreen> {
         widget.onNavigate(nextRoute);
       } else {
         if (controller.authInfo.value.isNotEmpty && mounted) {
-          // Email confirmation required: switch to Sign In with the email pre-filled.
           setState(() {
             _isRegister = false;
             _loginEmailController.text = controller.regEmail.value;
@@ -173,60 +124,90 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildGoogleButton() {
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
+        MouseRegion(
+          onEnter: (_) => setState(() => _googleHovered = true),
+          onExit: (_) => setState(() => _googleHovered = false),
           child: Obx(
-            () => OutlinedButton(
-              onPressed: controller.googleLoading.value ? null : _handleGoogle,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                side: const BorderSide(color: AppColors.cardBorder),
-                backgroundColor: AppColors.white,
-                foregroundColor: AppColors.primaryNavy,
-              ),
-              child: controller.googleLoading.value
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: Image.asset(
+            () => GestureDetector(
+              onTap: controller.googleLoading.value ? null : _handleGoogle,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: _googleHovered
+                      ? AppColors.surfaceLight
+                      : AppColors.white,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: _googleHovered
+                        ? AppColors.royalBlue.withValues(alpha: 0.45)
+                        : AppColors.cardBorder,
+                    width: 1.4,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _googleHovered
+                          ? AppColors.royalBlue.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.03),
+                      blurRadius: _googleHovered ? 16 : 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: controller.googleLoading.value
+                    ? const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
                             'assets/images/google_logo.png',
-                            width: 22,
-                            height: 22,
+                            width: 20,
+                            height: 20,
                             fit: BoxFit.contain,
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          _isRegister ? 'Sign up with Google' : 'Continue with Google',
-                          style: GoogleFonts.montserrat(fontSize: 14, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 12),
+                          Text(
+                            _isRegister
+                                ? 'Continue with Google'
+                                : 'Continue with Google',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primaryNavy,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
         Row(
           children: [
             const Expanded(child: Divider(color: AppColors.cardBorder)),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Text(
-                'or use your email',
-                style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
+                'or continue with email',
+                style: GoogleFonts.montserrat(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
             const Expanded(child: Divider(color: AppColors.cardBorder)),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
       ],
     );
   }
@@ -243,227 +224,197 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           ResolvaAppBar(currentIndex: -1, onNavigate: widget.onNavigate),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isMobileView ? 16 : 24,
-                      vertical: isMobileView ? 24 : 64,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 480),
-                        child: Container(
-                          padding: EdgeInsets.all(isMobileView ? 20 : 36),
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.cardBorder),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Logo
-                              const ResolvaLogo(
-                                size: 64,
-                                useBoxedBadge: true,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _isRegister ? 'Create an Account' : 'Welcome Back',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.primaryNavy,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                _isRegister
-                                    ? 'Join thousands accessing exam PINs & digital services'
-                                    : 'Sign in to access your orders, e-pins, and account',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 13,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-
-                              // Mode switcher tabs
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: AppColors.cardBackground,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _isRegister = false),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: !_isRegister ? AppColors.white : Colors.transparent,
-                                            borderRadius: BorderRadius.circular(8),
-                                            boxShadow: !_isRegister
-                                                ? [
-                                                    BoxShadow(
-                                                      color: Colors.black.withValues(alpha: 0.05),
-                                                      blurRadius: 4,
-                                                    ),
-                                                  ]
-                                                : null,
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            'Sign In',
-                                            style: GoogleFonts.montserrat(
-                                              fontSize: 14,
-                                              fontWeight: !_isRegister
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w500,
-                                              color: !_isRegister
-                                                  ? AppColors.royalBlue
-                                                  : AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _isRegister = true),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: _isRegister ? AppColors.white : Colors.transparent,
-                                            borderRadius: BorderRadius.circular(8),
-                                            boxShadow: _isRegister
-                                                ? [
-                                                    BoxShadow(
-                                                      color: Colors.black.withValues(alpha: 0.05),
-                                                      blurRadius: 4,
-                                                    ),
-                                                  ]
-                                                : null,
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            'Register',
-                                            style: GoogleFonts.montserrat(
-                                              fontSize: 14,
-                                              fontWeight: _isRegister
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w500,
-                                              color: _isRegister
-                                                  ? AppColors.royalBlue
-                                                  : AppColors.textSecondary,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-
-                              // Quick Fill Demo Options (demo mode only — hidden once Supabase is connected)
-                              if (!controller.backendEnabled) Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.cardBackground,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: AppColors.cardBorder),
-                                ),
-                                child: Column(
-                                  children: [
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.flash_on_rounded, size: 16, color: AppColors.accentGold),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Demo Test Accounts',
-                                            style: GoogleFonts.montserrat(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.primaryNavy,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: OutlinedButton(
-                                            onPressed: _fillNewDemoUser,
-                                            style: OutlinedButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(vertical: 8),
-                                              textStyle: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w600),
-                                            ),
-                                            child: const Text('New User Flow'),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: OutlinedButton(
-                                            onPressed: _fillReturningDemoUser,
-                                            style: OutlinedButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(vertical: 8),
-                                              textStyle: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w600),
-                                            ),
-                                            child: const Text('Returning User (PIN)'),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: OutlinedButton.icon(
-                                        onPressed: _fillAdminDemoUser,
-                                        icon: const Icon(Icons.admin_panel_settings_rounded, size: 15),
-                                        label: const Text('Admin Dashboard Account (PIN: 123456)'),
-                                        style: OutlinedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          textStyle: GoogleFonts.montserrat(fontSize: 11, fontWeight: FontWeight.w700),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (!controller.backendEnabled) const SizedBox(height: 24),
-
-                              // Google sign-in / sign-up
-                              _buildGoogleButton(),
-
-                              // Forms
-                              if (!_isRegister) _buildLoginForm() else _buildRegisterForm(),
-                            ],
-                          ),
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobileView ? 16 : 24,
+                  vertical: isMobileView ? 20 : 40,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(
+                        color: AppColors.cardBorder,
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryNavy.withValues(alpha: 0.07),
+                          blurRadius: 32,
+                          offset: const Offset(0, 14),
                         ),
+                        BoxShadow(
+                          color: AppColors.royalBlue.withValues(alpha: 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Subtle top accent gradient bar
+                          Container(
+                            height: 5,
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.royalBlue,
+                                  AppColors.electricBlue,
+                                  AppColors.emeraldGreen,
+                                ],
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              isMobileView ? 22 : 36,
+                              isMobileView ? 26 : 34,
+                              isMobileView ? 22 : 36,
+                              isMobileView ? 26 : 36,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const ResolvaLogo(
+                                  size: 56,
+                                  useBoxedBadge: true,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _isRegister ? 'Create Your Account' : 'Welcome Back',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primaryNavy,
+                                    letterSpacing: -0.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  _isRegister
+                                      ? 'Get instant access to examination e-pins & digital services'
+                                      : 'Sign in to manage your orders, wallet & e-pins',
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+
+                                // Modern Pill Mode Switcher
+                                Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.cardBackground,
+                                    borderRadius: BorderRadius.circular(999),
+                                    border: Border.all(color: AppColors.cardBorder),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () => setState(() => _isRegister = false),
+                                          child: AnimatedContainer(
+                                            duration: const Duration(milliseconds: 180),
+                                            padding: const EdgeInsets.symmetric(vertical: 11),
+                                            decoration: BoxDecoration(
+                                              color: !_isRegister
+                                                  ? AppColors.white
+                                                  : Colors.transparent,
+                                              borderRadius: BorderRadius.circular(999),
+                                              boxShadow: !_isRegister
+                                                  ? [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(alpha: 0.06),
+                                                        blurRadius: 8,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ]
+                                                  : null,
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'Sign In',
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 13.5,
+                                                fontWeight: !_isRegister
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w600,
+                                                color: !_isRegister
+                                                    ? AppColors.royalBlue
+                                                    : AppColors.textSecondary,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () => setState(() => _isRegister = true),
+                                          child: AnimatedContainer(
+                                            duration: const Duration(milliseconds: 180),
+                                            padding: const EdgeInsets.symmetric(vertical: 11),
+                                            decoration: BoxDecoration(
+                                              color: _isRegister
+                                                  ? AppColors.white
+                                                  : Colors.transparent,
+                                              borderRadius: BorderRadius.circular(999),
+                                              boxShadow: _isRegister
+                                                  ? [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(alpha: 0.06),
+                                                        blurRadius: 8,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ]
+                                                  : null,
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              'Create Account',
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 13.5,
+                                                fontWeight: _isRegister
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w600,
+                                                color: _isRegister
+                                                    ? AppColors.royalBlue
+                                                    : AppColors.textSecondary,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+
+                                // Google OAuth Button
+                                _buildGoogleButton(),
+
+                                // Active Form
+                                if (!_isRegister)
+                                  _buildLoginForm()
+                                else
+                                  _buildRegisterForm(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  ResolvaFooter(onNavigate: widget.onNavigate),
-                ],
+                ),
               ),
             ),
           ),
@@ -480,22 +431,31 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           Text(
             'Email Address',
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _loginEmailController,
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
-              hintText: 'yourname@example.com',
+              hintText: 'adebayo.oluwaseun@gmail.com',
               prefixIcon: Icon(Icons.email_outlined, size: 20),
             ),
-            validator: (v) => v == null || !v.contains('@') ? 'Enter a valid email' : null,
+            validator: (v) =>
+                v == null || !v.contains('@') ? 'Enter a valid email address' : null,
           ),
           const SizedBox(height: 18),
           Text(
             'Password',
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -504,7 +464,7 @@ class _AuthScreenState extends State<AuthScreen> {
               obscureText: !controller.loginPasswordVisible.value,
               decoration: InputDecoration(
                 hintText: '••••••••',
-                prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                 suffixIcon: IconButton(
                   icon: Icon(
                     controller.loginPasswordVisible.value
@@ -515,7 +475,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   onPressed: controller.toggleLoginPasswordVisibility,
                 ),
               ),
-              validator: (v) => v == null || v.length < 6 ? 'Password is too short' : null,
+              validator: (v) =>
+                  v == null || v.length < 6 ? 'Password must be at least 6 characters' : null,
             ),
           ),
           const SizedBox(height: 14),
@@ -540,7 +501,10 @@ class _AuthScreenState extends State<AuthScreen> {
                   const SizedBox(width: 4),
                   Text(
                     'Remember me',
-                    style: GoogleFonts.montserrat(fontSize: 13, color: AppColors.textSecondary),
+                    style: GoogleFonts.montserrat(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -553,7 +517,10 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 child: Text(
                   'Forgot password?',
-                  style: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -566,7 +533,11 @@ class _AuthScreenState extends State<AuthScreen> {
                 onPressed: controller.loginLoading.value ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.royalBlue,
+                  foregroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
                 child: controller.loginLoading.value
                     ? const SizedBox(
@@ -577,7 +548,20 @@ class _AuthScreenState extends State<AuthScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text('Sign In to Account'),
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Sign In to Account',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 18),
+                        ],
+                      ),
               ),
             ),
           ),
@@ -594,36 +578,50 @@ class _AuthScreenState extends State<AuthScreen> {
         children: [
           Text(
             'Full Name',
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _regNameController,
             decoration: const InputDecoration(
-              hintText: 'John Doe',
-              prefixIcon: Icon(Icons.person_outline, size: 20),
+              hintText: 'Adebayo Oluwaseun',
+              prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
             ),
-            validator: (v) => v == null || v.isEmpty ? 'Enter full name' : null,
+            validator: (v) =>
+                v == null || v.trim().isEmpty ? 'Enter your full name' : null,
           ),
           const SizedBox(height: 16),
           Text(
             'Email Address',
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _regEmailController,
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
-              hintText: 'john@example.com',
+              hintText: 'adebayo.oluwaseun@gmail.com',
               prefixIcon: Icon(Icons.email_outlined, size: 20),
             ),
-            validator: (v) => v == null || !v.contains('@') ? 'Enter a valid email' : null,
+            validator: (v) =>
+                v == null || !v.contains('@') ? 'Enter a valid email address' : null,
           ),
           const SizedBox(height: 16),
           Text(
             'Phone Number (WhatsApp)',
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -635,7 +633,7 @@ class _AuthScreenState extends State<AuthScreen> {
               LengthLimitingTextInputFormatter(11),
             ],
             decoration: const InputDecoration(
-              hintText: '08012345678',
+              hintText: '08034567890',
               prefixIcon: Icon(Icons.phone_outlined, size: 20),
               counterText: '',
             ),
@@ -648,7 +646,11 @@ class _AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 16),
           Text(
             'Password',
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -657,7 +659,7 @@ class _AuthScreenState extends State<AuthScreen> {
               obscureText: !controller.regPasswordVisible.value,
               decoration: InputDecoration(
                 hintText: '••••••••',
-                prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                 suffixIcon: IconButton(
                   icon: Icon(
                     controller.regPasswordVisible.value
@@ -668,13 +670,18 @@ class _AuthScreenState extends State<AuthScreen> {
                   onPressed: controller.toggleRegPasswordVisibility,
                 ),
               ),
-              validator: (v) => v == null || v.length < 6 ? 'Password is too short' : null,
+              validator: (v) =>
+                  v == null || v.length < 6 ? 'Password must be at least 6 characters' : null,
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'Confirm Password',
-            style: GoogleFonts.montserrat(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -683,7 +690,7 @@ class _AuthScreenState extends State<AuthScreen> {
               obscureText: !controller.regConfirmPasswordVisible.value,
               decoration: InputDecoration(
                 hintText: '••••••••',
-                prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                 suffixIcon: IconButton(
                   icon: Icon(
                     controller.regConfirmPasswordVisible.value
@@ -702,31 +709,7 @@ class _AuthScreenState extends State<AuthScreen> {
               },
             ),
           ),
-          const SizedBox(height: 18),
-
-          // Notice of policy acceptance on next step
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.cardBackground,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.cardBorder),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.shield_outlined, size: 18, color: AppColors.royalBlue),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Terms of Service & Privacy Policy review will be requested upon account creation.',
-                    style: GoogleFonts.montserrat(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                ),
-              ],
-            ),
-          ),
           const SizedBox(height: 24),
-
           SizedBox(
             width: double.infinity,
             child: Obx(
@@ -734,7 +717,11 @@ class _AuthScreenState extends State<AuthScreen> {
                 onPressed: controller.regLoading.value ? null : _handleRegister,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.royalBlue,
+                  foregroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
                 child: controller.regLoading.value
                     ? const SizedBox(
@@ -745,7 +732,20 @@ class _AuthScreenState extends State<AuthScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text('Create Account'),
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Create Account',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 18),
+                        ],
+                      ),
               ),
             ),
           ),

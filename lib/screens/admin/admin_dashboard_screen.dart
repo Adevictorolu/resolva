@@ -9,7 +9,6 @@ import '../../controllers/admin_controller.dart';
 import '../../controllers/auth_controller.dart';
 import '../../data/models/admin_models.dart';
 import '../../widgets/shared/app_navigation.dart';
-import '../../widgets/shared/app_footer.dart';
 
 /// RESOLVA Admin Dashboard Screen.
 ///
@@ -103,7 +102,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                     ),
                   ),
-                  ResolvaFooter(onNavigate: widget.onNavigate),
                 ],
               ),
             ),

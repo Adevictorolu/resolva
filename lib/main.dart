@@ -47,6 +47,23 @@ void navigateTo(String route) {
   final navController = Get.find<NavigationController>();
   final authController = Get.find<AuthController>();
 
+  // Handle homepage section anchors (Our Services & How It Works)
+  if (route == '/#services' || route == '/#how-it-works') {
+    final targetKey = route == '/#services'
+        ? HomeScreen.servicesKey
+        : HomeScreen.howItWorksKey;
+    navController.changePage(0);
+    if (Get.currentRoute != '/') {
+      Get.toNamed('/');
+      Future.delayed(const Duration(milliseconds: 260), () {
+        HomeScreen.scrollToSection(targetKey);
+      });
+    } else {
+      HomeScreen.scrollToSection(targetKey);
+    }
+    return;
+  }
+
   // Enforce strict separation between Customer Dashboard and Admin Portal
   if (authController.isFullyAuthorized) {
     if (authController.isAdmin.value &&
