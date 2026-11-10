@@ -30,14 +30,13 @@ class AdminController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (AuthService.isEnabled) {
-      // Real users are loaded from Supabase once an administrator signs in.
-      return;
-    }
     users.assignAll(mockAdminUsers);
     filteredUsers.assignAll(mockAdminUsers);
     activityLogs.assignAll(mockAdminActivityLogs);
     filteredActivityLogs.assignAll(mockAdminActivityLogs);
+    if (AuthService.isEnabled) {
+      loadFromBackend();
+    }
   }
 
   // ──────────────────── SUPABASE BACKEND ────────────────────
@@ -52,8 +51,11 @@ class AdminController extends GetxController {
     backendError.value = '';
     try {
       final profiles = await AuthService.adminListProfiles();
-      users.assignAll(profiles.map(_recordFromProfile));
-      _applyUserFilters();
+      if (profiles.isNotEmpty) {
+        final backendRecords = profiles.map(_recordFromProfile).toList();
+        users.assignAll(backendRecords);
+        _applyUserFilters();
+      }
     } catch (e) {
       backendError.value = AuthService.describeError(e);
     } finally {
@@ -66,7 +68,7 @@ class AdminController extends GetxController {
       id: p.id,
       fullName: p.fullName.isNotEmpty ? p.fullName : p.email.split('@').first,
       email: p.email,
-      phone: p.phone,
+      phone: p.phone.isNotEmpty ? p.phone : 'Not provided',
       role: p.isAdmin ? UserRole.admin : UserRole.customer,
       status: switch (p.status) {
         'active' => UserStatus.active,
@@ -238,6 +240,8 @@ class AdminController extends GetxController {
   // ──────────────────── USER MANAGEMENT ACTIONS ────────────────────
 
   /// Adds a new user from the Admin Dashboard or Registration flow.
+  /// If [role] is [UserRole.admin], also adds their email to `public.admin_emails`
+  /// and promotes any existing profile in Supabase.
   AdminUserRecord addUser({
     required String fullName,
     required String email,
@@ -246,11 +250,45 @@ class AdminController extends GetxController {
     UserStatus status = UserStatus.active,
     bool hasPinConfigured = true,
   }) {
+    final normalizedEmail = email.trim();
+    final existingIdx = users.indexWhere(
+      (u) => u.email.toLowerCase() == normalizedEmail.toLowerCase(),
+    );
+
+    if (existingIdx != -1) {
+      final existing = users[existingIdx];
+      final updated = existing.copyWith(
+        fullName: fullName.trim().isNotEmpty ? fullName.trim() : existing.fullName,
+        phone: phone.trim().isNotEmpty ? phone.trim() : existing.phone,
+        role: role,
+      );
+      users[existingIdx] = updated;
+      _applyUserFilters();
+
+      if (AuthService.isEnabled && role == UserRole.admin) {
+        AuthService.adminAddAdminEmail(normalizedEmail).then((_) {
+          loadFromBackend();
+        }).catchError((Object e) {
+          backendError.value = AuthService.describeError(e);
+        });
+      }
+
+      recordActivity(
+        userId: updated.id,
+        userName: updated.fullName,
+        userEmail: updated.email,
+        type: ActivityType.statusChanged,
+        description:
+            'Updated role to ${role == UserRole.admin ? "Administrator" : "Customer"}',
+      );
+      return updated;
+    }
+
     final now = DateTime.now();
     final newUser = AdminUserRecord(
       id: 'USR-${_nextUserCounter++}',
       fullName: fullName.trim(),
-      email: email.trim(),
+      email: normalizedEmail,
       phone: phone.trim(),
       role: role,
       status: status,
@@ -268,6 +306,12 @@ class AdminController extends GetxController {
     users.insert(0, newUser);
     _applyUserFilters();
 
+    if (AuthService.isEnabled && role == UserRole.admin) {
+      AuthService.adminAddAdminEmail(normalizedEmail).catchError((Object e) {
+        backendError.value = AuthService.describeError(e);
+      });
+    }
+
     recordActivity(
       userId: newUser.id,
       userName: newUser.fullName,
@@ -278,6 +322,40 @@ class AdminController extends GetxController {
     );
 
     return newUser;
+  }
+
+  /// Promotes a Customer to Administrator or demotes an Administrator to Customer.
+  void toggleUserRole(String userId) {
+    final index = users.indexWhere((u) => u.id == userId);
+    if (index == -1) return;
+
+    final current = users[index];
+    final nextRole =
+        current.role == UserRole.admin ? UserRole.customer : UserRole.admin;
+    final updated = current.copyWith(role: nextRole);
+
+    users[index] = updated;
+    if (selectedUser.value?.id == userId) {
+      selectedUser.value = updated;
+    }
+    _applyUserFilters();
+
+    if (AuthService.isEnabled) {
+      AuthService.adminSetUserRole(userId, nextRole.name).catchError((Object e) {
+        backendError.value = AuthService.describeError(e);
+        loadFromBackend();
+      });
+    }
+
+    recordActivity(
+      userId: updated.id,
+      userName: updated.fullName,
+      userEmail: updated.email,
+      type: ActivityType.statusChanged,
+      description: nextRole == UserRole.admin
+          ? 'Promoted to Administrator by Admin'
+          : 'Changed to Customer role by Admin',
+    );
   }
 
   /// Removes a user by ID from the platform.

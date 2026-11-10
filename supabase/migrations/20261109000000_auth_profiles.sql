@@ -11,7 +11,8 @@
 --   * Trigger that creates a profile whenever someone signs up (email or Google)
 --   * Row Level Security so users only see/edit their own profile, admins see all
 --   * RPCs: set_security_pin, verify_security_pin, has_security_pin,
---           reset_security_pin, record_login, admin_set_user_status, admin_delete_user
+--           reset_security_pin, record_login, admin_set_user_status,
+--           admin_set_user_role, admin_add_admin_email, admin_delete_user
 -- ============================================================================
 
 create extension if not exists pgcrypto with schema extensions;
@@ -25,11 +26,10 @@ create table if not exists public.admin_emails (
 );
 
 alter table public.admin_emails enable row level security;
--- No policies: only the SQL editor / service role can read or modify this list.
+-- No direct policies: managed via SQL editor or admin RPCs below.
 
--- >>> EDIT THIS: put your admin email address(es) here, then run the script. <<<
 insert into public.admin_emails (email) values
-  ('admin@example.com')
+  ('ademolavictor869@gmail.com')
 on conflict (email) do nothing;
 
 -- ----------------------------------------------------------------------------
@@ -311,6 +311,69 @@ begin
 end;
 $$;
 
+create or replace function public.admin_set_user_role(target uuid, new_role text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_email text;
+begin
+  if not public.is_admin() then
+    raise exception 'Administrators only';
+  end if;
+  if new_role not in ('customer', 'admin') then
+    raise exception 'Invalid role';
+  end if;
+  if target = auth.uid() and new_role <> 'admin' then
+    raise exception 'You cannot remove your own administrator role';
+  end if;
+
+  update public.profiles
+     set role = new_role
+   where id = target
+   returning email into target_email;
+
+  if target_email is not null then
+    if new_role = 'admin' then
+      insert into public.admin_emails (email)
+      values (lower(trim(target_email)))
+      on conflict (email) do nothing;
+    else
+      delete from public.admin_emails
+       where lower(email) = lower(trim(target_email));
+    end if;
+  end if;
+end;
+$$;
+
+create or replace function public.admin_add_admin_email(admin_email text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  normalized text := lower(trim(admin_email));
+begin
+  if not public.is_admin() then
+    raise exception 'Administrators only';
+  end if;
+  if normalized = '' or position('@' in normalized) = 0 then
+    raise exception 'Invalid email address';
+  end if;
+
+  insert into public.admin_emails (email)
+  values (normalized)
+  on conflict (email) do nothing;
+
+  update public.profiles
+     set role = 'admin'
+   where lower(email) = normalized;
+end;
+$$;
+
 create or replace function public.admin_delete_user(target uuid)
 returns void
 language plpgsql
@@ -343,6 +406,8 @@ revoke execute on function public.verify_security_pin(text)         from public,
 revoke execute on function public.reset_security_pin()              from public, anon;
 revoke execute on function public.record_login()                    from public, anon;
 revoke execute on function public.admin_set_user_status(uuid, text) from public, anon;
+revoke execute on function public.admin_set_user_role(uuid, text)   from public, anon;
+revoke execute on function public.admin_add_admin_email(text)       from public, anon;
 revoke execute on function public.admin_delete_user(uuid)           from public, anon;
 
 grant execute on function public.is_admin()                        to authenticated;
@@ -352,4 +417,6 @@ grant execute on function public.verify_security_pin(text)         to authentica
 grant execute on function public.reset_security_pin()              to authenticated;
 grant execute on function public.record_login()                    to authenticated;
 grant execute on function public.admin_set_user_status(uuid, text) to authenticated;
+grant execute on function public.admin_set_user_role(uuid, text)   to authenticated;
+grant execute on function public.admin_add_admin_email(text)       to authenticated;
 grant execute on function public.admin_delete_user(uuid)           to authenticated;

@@ -1011,20 +1011,39 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _showAddUserDialog(context),
-              icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-              label: const Text('Add User'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandBlue,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 13,
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _showAddUserDialog(context),
+                  icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                  label: const Text('Add User'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandBlue,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 13,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      _showAddUserDialog(context, defaultRole: UserRole.admin),
+                  icon: const Icon(Icons.admin_panel_settings_rounded, size: 18),
+                  label: const Text('Add Admin'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryNavy,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 13,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ] else ...[
           Row(
@@ -1044,7 +1063,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Add or remove users, inspect user information, login/logout timestamps, and last purchase.',
+                      'Add or remove users & admins, inspect user information, login/logout timestamps, and last purchase.',
                       style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: AppColors.textSecondary,
@@ -1053,7 +1072,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: controller.loadFromBackend,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('Sync Users'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton.icon(
+                onPressed: () =>
+                    _showAddUserDialog(context, defaultRole: UserRole.admin),
+                icon: const Icon(Icons.admin_panel_settings_rounded, size: 18),
+                label: const Text('Add Admin'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryNavy,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
               ElevatedButton.icon(
                 onPressed: () => _showAddUserDialog(context),
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
@@ -1350,7 +1395,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ),
 
-              // Action buttons: Inspect, Suspend/Activate, Remove
+              // Action buttons: Inspect, Make/Remove Admin, Suspend/Activate, Remove
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -1360,6 +1405,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     icon: const Icon(Icons.badge_outlined, size: 16),
                     label: const Text('User Info'),
                     style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      textStyle: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      final becomingAdmin = user.role != UserRole.admin;
+                      controller.toggleUserRole(user.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            becomingAdmin
+                                ? '${user.fullName} promoted to Administrator.'
+                                : '${user.fullName} changed to Customer role.',
+                          ),
+                          backgroundColor: becomingAdmin
+                              ? AppColors.emeraldGreen
+                              : AppColors.primaryNavy,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      user.role == UserRole.admin
+                          ? Icons.shield_rounded
+                          : Icons.admin_panel_settings_outlined,
+                      size: 16,
+                      color: AppColors.accentGold,
+                    ),
+                    label: Text(
+                      user.role == UserRole.admin ? 'Remove Admin' : 'Make Admin',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primaryNavy,
+                      side: BorderSide(
+                        color: AppColors.accentGold.withValues(alpha: 0.7),
+                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
@@ -1971,12 +2059,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // DIALOGS: ADD USER, REMOVE USER, INSPECT USER DETAILS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  void _showAddUserDialog(BuildContext context) {
+  void _showAddUserDialog(
+    BuildContext context, {
+    UserRole defaultRole = UserRole.customer,
+  }) {
     final formKey = GlobalKey<FormState>();
     final nameCtrl = TextEditingController();
     final emailCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
-    UserRole selectedRole = UserRole.customer;
+    UserRole selectedRole = defaultRole;
 
     showDialog(
       context: context,
@@ -1999,7 +2090,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Add New User',
+                          selectedRole == UserRole.admin
+                              ? 'Add Administrator'
+                              : 'Add New User',
                           style: GoogleFonts.montserrat(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -2014,7 +2107,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Create a new customer or administrator profile directly.',
+                      selectedRole == UserRole.admin
+                          ? 'Grant administrator privileges to an email address so they can oversee the system.'
+                          : 'Create a new customer or administrator profile directly.',
                       style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: AppColors.textSecondary,
@@ -2142,7 +2237,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Added user ${added.fullName} (${added.id})',
+                                  selectedRole == UserRole.admin
+                                      ? 'Added Administrator ${added.fullName} (${added.email})'
+                                      : 'Added user ${added.fullName} (${added.id})',
                                 ),
                                 backgroundColor: AppColors.emeraldGreen,
                               ),
@@ -2150,10 +2247,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.brandBlue,
+                          backgroundColor: selectedRole == UserRole.admin
+                              ? AppColors.primaryNavy
+                              : AppColors.brandBlue,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text('Create User Account'),
+                        child: Text(
+                          selectedRole == UserRole.admin
+                              ? 'Add Administrator'
+                              : 'Create User Account',
+                        ),
                       ),
                     ),
                   ],

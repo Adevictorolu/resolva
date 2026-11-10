@@ -180,6 +180,12 @@ class AuthService {
   static Future<void> adminSetUserStatus(String userId, String status) =>
       _client.rpc('admin_set_user_status', params: {'target': userId, 'new_status': status});
 
+  static Future<void> adminSetUserRole(String userId, String role) =>
+      _client.rpc('admin_set_user_role', params: {'target': userId, 'new_role': role});
+
+  static Future<void> adminAddAdminEmail(String email) =>
+      _client.rpc('admin_add_admin_email', params: {'admin_email': email});
+
   static Future<void> adminDeleteUser(String userId) =>
       _client.rpc('admin_delete_user', params: {'target': userId});
 

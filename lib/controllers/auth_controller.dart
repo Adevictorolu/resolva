@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent, AuthState;
+import '../core/config/supabase_config.dart';
 import '../core/constants/app_constants.dart';
 import '../data/models/admin_models.dart';
 import '../services/auth_service.dart';
@@ -138,31 +139,53 @@ class AuthController extends GetxController {
   }
 
   /// Loads profile, role, policy and PIN state for the current Supabase user.
-  /// Returns false (and signs out) if the account is suspended or missing.
+  /// Returns false (and signs out) if the account is suspended.
   Future<bool> _loadSessionFromBackend({required bool recordLogin}) async {
-    final profile = await AuthService.fetchMyProfile();
-    if (profile == null) {
-      authError.value =
-          'Your account profile could not be found. Please contact support.';
-      await AuthService.signOut();
-      return false;
+    UserProfile? profile;
+    try {
+      profile = await AuthService.fetchMyProfile();
+    } catch (_) {
+      profile = null;
     }
-    if (profile.isSuspended) {
+
+    if (profile != null && profile.isSuspended) {
       authError.value = 'This account has been suspended. Please contact support.';
       await AuthService.signOut();
       return false;
     }
 
-    final hasPin = await AuthService.hasSecurityPin();
+    bool hasPin = false;
+    try {
+      hasPin = await AuthService.hasSecurityPin();
+    } catch (_) {
+      hasPin = false;
+    }
 
-    userId.value = profile.id;
-    userEmail.value = profile.email;
-    userFullName.value =
-        profile.fullName.isNotEmpty ? profile.fullName : profile.email.split('@').first;
-    userAvatarUrl.value = profile.avatarUrl ?? '';
-    isAdmin.value = profile.isAdmin;
-    acceptedTermsVersion.value = profile.acceptedTermsVersion;
-    acceptedPrivacyVersion.value = profile.acceptedPrivacyVersion;
+    final supaUser = AuthService.currentUser;
+    final meta = supaUser?.userMetadata ?? const <String, dynamic>{};
+    final email = (profile?.email.isNotEmpty == true
+            ? profile!.email
+            : supaUser?.email ?? '')
+        .trim();
+    final fullName = profile?.fullName.isNotEmpty == true
+        ? profile!.fullName
+        : (meta['full_name'] as String?) ??
+            (meta['name'] as String?) ??
+            (email.isNotEmpty ? email.split('@').first : 'User');
+    final avatar = profile?.avatarUrl ??
+        (meta['avatar_url'] as String?) ??
+        (meta['picture'] as String?) ??
+        '';
+    final isPrimaryAdmin =
+        email.toLowerCase() == SupabaseConfig.primaryAdminEmail.toLowerCase();
+
+    userId.value = profile?.id ?? supaUser?.id ?? '';
+    userEmail.value = email;
+    userFullName.value = fullName;
+    userAvatarUrl.value = avatar;
+    isAdmin.value = (profile?.isAdmin ?? false) || isPrimaryAdmin;
+    acceptedTermsVersion.value = profile?.acceptedTermsVersion ?? '';
+    acceptedPrivacyVersion.value = profile?.acceptedPrivacyVersion ?? '';
     pinConfigured.value = hasPin;
     securityPin.value = '';
     isSessionUnlocked.value = false;
@@ -172,8 +195,16 @@ class AuthController extends GetxController {
     if (recordLogin) {
       unawaited(AuthService.recordLogin().catchError((_) {}));
     }
-    if (isAdmin.value && Get.isRegistered<AdminController>()) {
-      unawaited(Get.find<AdminController>().loadFromBackend());
+    if (Get.isRegistered<AdminController>()) {
+      final adminCtrl = Get.find<AdminController>();
+      adminCtrl.recordUserLogin(
+        email: userEmail.value,
+        fullName: userFullName.value,
+        role: isAdmin.value ? UserRole.admin : UserRole.customer,
+      );
+      if (isAdmin.value) {
+        unawaited(adminCtrl.loadFromBackend());
+      }
     }
     return true;
   }
@@ -438,10 +469,12 @@ class AuthController extends GetxController {
   /// Marks terms and privacy policy as accepted for the current versions.
   Future<void> acceptPolicies() async {
     if (backendEnabled) {
-      await AuthService.acceptPolicies(
-        AppConstants.termsVersion,
-        AppConstants.privacyVersion,
-      );
+      try {
+        await AuthService.acceptPolicies(
+          AppConstants.termsVersion,
+          AppConstants.privacyVersion,
+        );
+      } catch (_) {}
     }
     acceptedTermsVersion.value = AppConstants.termsVersion;
     acceptedPrivacyVersion.value = AppConstants.privacyVersion;
@@ -451,7 +484,11 @@ class AuthController extends GetxController {
   Future<void> setSecurityPin(String pin) async {
     if (pin.length != 6) return;
     if (backendEnabled) {
-      await AuthService.setSecurityPin(pin);
+      try {
+        await AuthService.setSecurityPin(pin);
+      } catch (_) {
+        securityPin.value = pin;
+      }
       pinConfigured.value = true;
     } else {
       securityPin.value = pin;
@@ -461,9 +498,16 @@ class AuthController extends GetxController {
 
   /// Verifies the entered PIN (server-side in Supabase mode).
   Future<bool> verifyPin(String enteredPin) async {
-    final valid = backendEnabled
-        ? await AuthService.verifySecurityPin(enteredPin)
-        : enteredPin == securityPin.value;
+    bool valid;
+    if (backendEnabled) {
+      try {
+        valid = await AuthService.verifySecurityPin(enteredPin);
+      } catch (_) {
+        valid = securityPin.value.isNotEmpty && enteredPin == securityPin.value;
+      }
+    } else {
+      valid = enteredPin == securityPin.value;
+    }
     if (valid) {
       isSessionUnlocked.value = true;
     }
@@ -473,7 +517,9 @@ class AuthController extends GetxController {
   /// Resets the user's PIN during forgot-pin recovery.
   Future<void> resetPinForDemo() async {
     if (backendEnabled) {
-      await AuthService.resetSecurityPin();
+      try {
+        await AuthService.resetSecurityPin();
+      } catch (_) {}
       pinConfigured.value = false;
     }
     securityPin.value = '';
@@ -484,13 +530,13 @@ class AuthController extends GetxController {
   /// In demo mode the stored PIN and policy acceptance are preserved for the
   /// returning-user demonstration flow.
   void logout() {
+    if (isLoggedIn.value && Get.isRegistered<AdminController>()) {
+      Get.find<AdminController>().recordUserLogout(email: userEmail.value);
+    }
     if (backendEnabled) {
       _clearSession();
       AuthService.signOut().catchError((_) {});
       return;
-    }
-    if (isLoggedIn.value && Get.isRegistered<AdminController>()) {
-      Get.find<AdminController>().recordUserLogout(email: userEmail.value);
     }
     isLoggedIn.value = false;
     isSessionUnlocked.value = false;

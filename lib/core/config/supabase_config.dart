@@ -25,6 +25,9 @@ class SupabaseConfig {
     defaultValue: 'sb_publishable_qwWqoND6dPiWH9cQC_S9Gg_AW8XVCkG',
   );
 
+  /// Primary super-administrator email for the RESOLVA platform.
+  static const String primaryAdminEmail = 'ademolavictor869@gmail.com';
+
   /// Optional override for the OAuth redirect URL (defaults to the current page URL on web).
   static const String redirectUrl = String.fromEnvironment('SUPABASE_REDIRECT_URL');
 

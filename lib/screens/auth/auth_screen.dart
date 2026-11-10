@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
@@ -194,7 +193,15 @@ class _AuthScreenState extends State<AuthScreen> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const FaIcon(FontAwesomeIcons.google, size: 16, color: Color(0xFFDB4437)),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.asset(
+                            'assets/images/google_logo.png',
+                            width: 22,
+                            height: 22,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         Text(
                           _isRegister ? 'Sign up with Google' : 'Continue with Google',
