@@ -124,6 +124,18 @@ class AuthService {
     return _client.auth.resetPasswordForEmail(email, redirectTo: redirectUrl);
   }
 
+  /// Verifies the 6-digit recovery OTP code sent to user email.
+  static Future<AuthResponse> verifyRecoveryOtp({
+    required String email,
+    required String token,
+  }) {
+    return _client.auth.verifyOTP(
+      email: email.trim(),
+      token: token.trim(),
+      type: OtpType.recovery,
+    );
+  }
+
   static Future<void> updatePassword(String newPassword) async {
     await _client.auth.updateUser(UserAttributes(password: newPassword));
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent, AuthState;
@@ -51,6 +52,7 @@ class AuthController extends GetxController {
   // Authentication & session state
   final isLoggedIn = false.obs;
   final isSessionUnlocked = false.obs;
+  final isPasswordRecoveryMode = false.obs;
   final isAdmin = false.obs;
   final showRegistration = false.obs;
 
@@ -108,9 +110,28 @@ class AuthController extends GetxController {
 
   /// Restores a persisted Supabase session (called once at app start).
   Future<void> restoreSession() async {
-    if (!backendEnabled || AuthService.currentSession == null) return;
+    // Check if recovery link was opened in the browser URL
+    if (kIsWeb) {
+      final fragment = Uri.base.fragment;
+      final query = Uri.base.queryParameters;
+      if (fragment.contains('type=recovery') ||
+          query['type'] == 'recovery' ||
+          Uri.base.path.contains('reset-password')) {
+        isPasswordRecoveryMode.value = true;
+      }
+    }
+
+    if (!backendEnabled || AuthService.currentSession == null) {
+      if (isPasswordRecoveryMode.value) {
+        Future.microtask(() => navigate?.call('/reset-password'));
+      }
+      return;
+    }
     try {
       await _loadSessionFromBackend(recordLogin: false);
+      if (isPasswordRecoveryMode.value) {
+        Future.microtask(() => navigate?.call('/reset-password'));
+      }
     } catch (e) {
       authError.value = AuthService.describeError(e);
     }
@@ -118,7 +139,23 @@ class AuthController extends GetxController {
 
   Future<void> _onAuthStateChange(AuthState state) async {
     switch (state.event) {
+      case AuthChangeEvent.passwordRecovery:
+        // Fired when user clicks the password recovery link in their email!
+        isPasswordRecoveryMode.value = true;
+        isLoggedIn.value = true;
+        isSessionUnlocked.value = true;
+        if (state.session != null) {
+          await _loadSessionFromBackend(recordLogin: false);
+        }
+        navigate?.call('/reset-password');
+        break;
+
       case AuthChangeEvent.signedIn:
+        // If this sign-in is part of a password recovery flow, route to reset-password
+        if (isPasswordRecoveryMode.value) {
+          navigate?.call('/reset-password');
+          return;
+        }
         // Fired after password login, sign-up with auto-confirm, and when
         // returning from Google OAuth. Only handle it if we aren't logged in yet.
         if (isLoggedIn.value || state.session == null) return;
@@ -550,9 +587,74 @@ class AuthController extends GetxController {
   /// Updates the signed-in user's account password.
   Future<bool> updateAccountPassword(String newPassword) async {
     authError.value = '';
-    if (!backendEnabled) return true;
+    if (!backendEnabled) {
+      isPasswordRecoveryMode.value = false;
+      isSessionUnlocked.value = true;
+      return true;
+    }
     try {
       await AuthService.updatePassword(newPassword);
+      isPasswordRecoveryMode.value = false;
+      isSessionUnlocked.value = true;
+      await _loadSessionFromBackend(recordLogin: false);
+
+      // Dispatch security alert email to user
+      if (userEmail.value.isNotEmpty) {
+        final emailHtml = EmailNotificationService.buildPasswordChangedNotificationEmail(
+          fullName: userFullName.value.isNotEmpty ? userFullName.value : 'Customer',
+          email: userEmail.value,
+          timestamp: DateTime.now().toLocal().toString().split('.').first,
+        );
+        unawaited(EmailNotificationService.logOrSendEmail(
+          recipientEmail: userEmail.value,
+          subject: 'Security Alert: RESOLVA Password Changed',
+          htmlBody: emailHtml,
+          category: 'password_reset',
+        ));
+      }
+      return true;
+    } catch (e) {
+      authError.value = AuthService.describeError(e);
+      return false;
+    }
+  }
+
+  /// Verifies the OTP recovery token sent via email, then updates the password.
+  Future<bool> verifyRecoveryOtpAndSetPassword({
+    required String email,
+    required String token,
+    required String newPassword,
+  }) async {
+    authError.value = '';
+    if (!backendEnabled) {
+      isPasswordRecoveryMode.value = false;
+      isSessionUnlocked.value = true;
+      return true;
+    }
+    try {
+      final res = await AuthService.verifyRecoveryOtp(email: email, token: token);
+      if (res.session == null && res.user == null) {
+        authError.value = 'Invalid or expired recovery code. Please request a new link.';
+        return false;
+      }
+      await AuthService.updatePassword(newPassword);
+      await _loadSessionFromBackend(recordLogin: false);
+      isPasswordRecoveryMode.value = false;
+      isSessionUnlocked.value = true;
+
+      // Dispatch security notification email
+      final targetEmail = email.trim();
+      final emailHtml = EmailNotificationService.buildPasswordChangedNotificationEmail(
+        fullName: userFullName.value.isNotEmpty ? userFullName.value : 'Customer',
+        email: targetEmail,
+        timestamp: DateTime.now().toLocal().toString().split('.').first,
+      );
+      unawaited(EmailNotificationService.logOrSendEmail(
+        recipientEmail: targetEmail,
+        subject: 'Security Alert: RESOLVA Password Changed',
+        htmlBody: emailHtml,
+        category: 'password_reset',
+      ));
       return true;
     } catch (e) {
       authError.value = AuthService.describeError(e);

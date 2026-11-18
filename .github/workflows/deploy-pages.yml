@@ -42,6 +42,34 @@ jobs:
         with:
           path: build/web
 
+      - name: Build cPanel Root Production Web Assets
+        run: |
+          flutter build web --release \
+            --base-href "/" \
+            --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL || 'https://jykwnzabsrbxcvaiykih.supabase.co' }} \
+            --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY || 'sb_publishable_qwWqoND6dPiWH9cQC_S9Gg_AW8XVCkG' }} \
+            --dart-define=PAYSTACK_PUBLIC_KEY=${{ vars.PAYSTACK_PUBLIC_KEY || 'pk_live_58d1473922bf544d0a24c1ffed660b6cb9a0c0e4' }}
+          mkdir -p cpanel_bundle
+          cp -r build/web/* cpanel_bundle/
+          cp build/web/index.html cpanel_bundle/404.html
+          cat << 'EOF' > cpanel_bundle/.htaccess
+          <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            RewriteRule ^index\.html$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule . /index.html [L]
+          </IfModule>
+          EOF
+          cd cpanel_bundle && zip -r ../resolva-cpanel-production.zip . && cd ..
+
+      - name: Upload cPanel Production ZIP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: resolva-cpanel-production
+          path: resolva-cpanel-production.zip
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

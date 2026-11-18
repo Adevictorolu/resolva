@@ -211,9 +211,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        ElevatedButton(
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => widget.onNavigate('/reset-password'),
+            icon: const Icon(Icons.key_rounded, size: 18),
+            label: const Text('Enter Reset Code / New Password'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.royalBlue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextButton(
           onPressed: () => widget.onNavigate('/login'),
-          child: const Text('Return to Login'),
+          child: Text(
+            'Return to Sign In',
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
         ),
       ],
     );

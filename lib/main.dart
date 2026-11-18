@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'core/theme/app_theme.dart';
 import 'core/guards/auth_guard.dart';
@@ -18,6 +19,7 @@ import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/auth/auth_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
+import 'screens/auth/reset_password_screen.dart';
 import 'screens/onboarding/policy_acceptance_screen.dart';
 import 'screens/onboarding/create_pin_screen.dart';
 import 'screens/onboarding/confirm_pin_screen.dart';
@@ -113,7 +115,12 @@ class ResolvaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       initialBinding: InitialBinding(),
-      initialRoute: '/',
+      initialRoute: (kIsWeb &&
+              (Uri.base.fragment.contains('type=recovery') ||
+                  Uri.base.queryParameters['type'] == 'recovery' ||
+                  Uri.base.path.contains('reset-password')))
+          ? '/reset-password'
+          : '/',
       defaultTransition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 200),
       getPages: [
@@ -135,6 +142,10 @@ class ResolvaApp extends StatelessWidget {
         GetPage(
           name: '/forgot-password',
           page: () => const ForgotPasswordScreen(onNavigate: navigateTo),
+        ),
+        GetPage(
+          name: '/reset-password',
+          page: () => const ResetPasswordScreen(onNavigate: navigateTo),
         ),
         GetPage(
           name: '/about',

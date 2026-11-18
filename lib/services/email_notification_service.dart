@@ -249,6 +249,39 @@ $_baseFooter
 ''';
   }
 
+  /// Generates the HTML security alert when a password has been updated.
+  static String buildPasswordChangedNotificationEmail({
+    required String fullName,
+    required String email,
+    required String timestamp,
+  }) {
+    return '''
+$_baseHeader
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="display: inline-block; background-color: #DCFCE7; border: 1px solid #86EFAC; border-radius: 999px; padding: 10px 20px;">
+            <span style="color: #15803D; font-weight: 700; font-size: 13px;">🛡️ Security Alert: Password Updated</span>
+          </div>
+        </div>
+
+        <h2 class="h1">Password Successfully Changed</h2>
+        <p class="p">Hello <strong>$fullName</strong>,</p>
+        <p class="p">The sign-in password for your RESOLVA account (<strong>$email</strong>) was successfully changed on <strong>$timestamp</strong>.</p>
+
+        <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin: 20px 0;">
+          <p class="p" style="margin: 0; font-size: 13px; color: #334155;">
+            <strong>Did you make this change?</strong><br>
+            If you changed your password, no further action is required. Your account is secured.
+          </p>
+        </div>
+
+        <p class="p" style="font-size: 12.5px; color: #DC2626;">
+          <strong>Did not make this change?</strong><br>
+          If you did not initiate this change, contact our support team immediately at <a href="mailto:${AppConfig.supportEmail}" style="color: #DC2626; font-weight: 700;">${AppConfig.supportEmail}</a> to secure your wallet and account.
+        </p>
+$_baseFooter
+''';
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // 3. EXAMINATION E-PINS DELIVERY TEMPLATE
   // ─────────────────────────────────────────────────────────────────────────
