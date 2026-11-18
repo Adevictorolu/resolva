@@ -36,6 +36,7 @@ jobs:
       - name: Build Optimized Split Release APKs
         run: |
           flutter build apk --release --split-per-abi \
+            --android-skip-build-dependency-validation \
             --dart-define=SUPABASE_URL="${{ vars.SUPABASE_URL || 'https://jykwnzabsrbxcvaiykih.supabase.co' }}" \
             --dart-define=SUPABASE_ANON_KEY="${{ vars.SUPABASE_ANON_KEY || 'sb_publishable_qwWqoND6dPiWH9cQC_S9Gg_AW8XVCkG' }}"
 
