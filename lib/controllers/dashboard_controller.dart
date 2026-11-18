@@ -211,7 +211,7 @@ class DashboardController extends GetxController {
         },
         details: m['details']?.toString(),
         quantity: (m['quantity'] as num?)?.toInt() ?? 1,
-        recipientEmail: m['recipientEmail']?.toString(),
+        recipientEmail: (m['recipientEmail'] ?? '').toString(),
         targetUrl: m['targetUrl']?.toString(),
         pins: (m['pins'] as List?)?.map((e) => '$e').toList(),
       );
