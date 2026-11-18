@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:get/get.dart';
 import '../data/models/order.dart';
+import '../services/auth_service.dart';
+import '../services/paystack_service.dart';
 import 'admin_controller.dart';
 import 'auth_controller.dart';
 
-/// Controller for the live Customer Dashboard, Wallet, Orders, Notifications & Settings.
+/// Controller for the live Customer Dashboard, Paystack Wallet Funding, Orders, Notifications & Settings.
 class DashboardController extends GetxController {
   final orders = <Order>[].obs;
   final filteredOrders = <Order>[].obs;
@@ -13,8 +16,11 @@ class DashboardController extends GetxController {
   final selectedOrderFilter = 'All'.obs;
   final activeTab = 0.obs; // 0: Overview, 1: Orders, 2: Wallet & Invoices, 3: Notifications, 4: Settings
 
-  // Wallet balance (in NGN)
+  // Wallet balance (in NGN) & Paystack checkout state
   final walletBalance = 0.0.obs;
+  final isFundingWallet = false.obs;
+  final fundingError = ''.obs;
+  final creditedReferences = <String>[].obs;
 
   // Profile fields synced from AuthController
   final fullName = ''.obs;
@@ -50,16 +56,28 @@ class DashboardController extends GetxController {
       ever(auth.isLoggedIn, (bool loggedIn) {
         if (loggedIn) {
           _syncFromAuth();
+          _hydrateWalletFromSupabase();
           _ensureWelcomeNotification();
         } else {
           orders.clear();
           filteredOrders.clear();
           transactions.clear();
           notifications.clear();
+          creditedReferences.clear();
           walletBalance.value = 0.0;
         }
       });
+
+      if (auth.isLoggedIn.value) {
+        _hydrateWalletFromSupabase();
+        _ensureWelcomeNotification();
+      }
     }
+  }
+
+  String get _cacheKey {
+    final mail = email.value.trim().toLowerCase();
+    return 'resolva_wallet_${mail.isNotEmpty ? mail : "default"}';
   }
 
   void _syncFromAuth() {
@@ -75,6 +93,97 @@ class DashboardController extends GetxController {
     avatarUrl.value = auth.userAvatarUrl.value;
   }
 
+  /// Hydrates the user's wallet balance, credited Paystack references, and
+  /// recent transactions from Supabase (`public.profiles` + `user_metadata`)
+  /// and local browser cache.
+  Future<void> _hydrateWalletFromSupabase() async {
+    // 1. Hydrate from local browser cache immediately if available
+    final cachedRaw = PaystackService.getCachedJson(_cacheKey);
+    if (cachedRaw != null && cachedRaw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(cachedRaw) as Map<String, dynamic>;
+        final bal = (decoded['balance'] as num?)?.toDouble();
+        if (bal != null && bal > walletBalance.value) {
+          walletBalance.value = bal;
+        }
+        final refs = (decoded['refs'] as List?)?.map((e) => '$e').toList();
+        if (refs != null) {
+          for (final r in refs) {
+            if (!creditedReferences.contains(r)) creditedReferences.add(r);
+          }
+        }
+        final txList = decoded['transactions'] as List?;
+        if (txList != null && transactions.isEmpty) {
+          for (final item in txList) {
+            if (item is Map<String, dynamic>) {
+              transactions.add(_transactionFromJson(item));
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 2. Hydrate from Supabase Auth user_metadata & profiles RPC
+    final meta = AuthService.getCurrentUserMetadata();
+    final metaRefs = (meta['resolva_credited_refs'] as List?)
+        ?.map((e) => '$e')
+        .toList();
+    if (metaRefs != null) {
+      for (final r in metaRefs) {
+        if (!creditedReferences.contains(r)) creditedReferences.add(r);
+      }
+    }
+    final metaTxs = meta['resolva_transactions'] as List?;
+    if (metaTxs != null && transactions.isEmpty) {
+      for (final item in metaTxs) {
+        if (item is Map) {
+          transactions.add(
+            _transactionFromJson(Map<String, dynamic>.from(item)),
+          );
+        }
+      }
+    }
+
+    final cloudBalance = await AuthService.fetchCloudWalletBalance();
+    if (cloudBalance != null) {
+      walletBalance.value = cloudBalance;
+      _saveLocalCache();
+    }
+  }
+
+  void _saveLocalCache() {
+    try {
+      final payload = jsonEncode({
+        'balance': walletBalance.value,
+        'refs': creditedReferences.toList(),
+        'transactions': transactions.take(40).map(_transactionToJson).toList(),
+      });
+      PaystackService.setCachedJson(_cacheKey, payload);
+    } catch (_) {}
+  }
+
+  Map<String, dynamic> _transactionToJson(Transaction t) => {
+        'reference': t.reference,
+        'description': t.description,
+        'date': t.date.toIso8601String(),
+        'amount': t.amount,
+        'paymentMethod': t.paymentMethod,
+        'status': t.status.name,
+      };
+
+  Transaction _transactionFromJson(Map<String, dynamic> m) => Transaction(
+        reference: (m['reference'] ?? '').toString(),
+        description: (m['description'] ?? 'Wallet Transaction').toString(),
+        date: DateTime.tryParse('${m['date']}') ?? DateTime.now(),
+        amount: (m['amount'] as num?)?.toDouble() ?? 0.0,
+        paymentMethod: (m['paymentMethod'] ?? 'Paystack').toString(),
+        status: switch (m['status']) {
+          'pending' => TransactionStatus.pending,
+          'failed' => TransactionStatus.failed,
+          _ => TransactionStatus.successful,
+        },
+      );
+
   void _ensureWelcomeNotification() {
     if (notifications.isNotEmpty) return;
     final displayName = fullName.value.isNotEmpty ? fullName.value : 'there';
@@ -83,7 +192,7 @@ class DashboardController extends GetxController {
         id: 'NOTIF-WELCOME',
         title: 'Welcome to RESOLVA, $displayName!',
         message:
-            'Your account is active. Fund your wallet or place your first order for Examination E-Pins and Social Media services.',
+            'Your account is active. Fund your wallet via Paystack or place your first order for Examination E-Pins and Social Media services.',
         date: DateTime.now(),
         type: NotificationType.support,
         isRead: false,
@@ -143,15 +252,165 @@ class DashboardController extends GetxController {
     activeTab.value = index;
   }
 
-  /// Credits the customer's wallet and records a transaction + notification.
+  /// Launches the live Paystack Payment Gateway popup, verifies the completed
+  /// transaction via `GET https://api.paystack.co/transaction/verify/:reference`,
+  /// and updates the user's wallet balance in Supabase and on the Dashboard.
+  Future<PaystackVerificationResult> fundWalletWithPaystack({
+    required double amount,
+    required String selectedMethod,
+  }) async {
+    fundingError.value = '';
+    if (amount < 100) {
+      fundingError.value = 'Minimum wallet top-up is ₦100.';
+      return PaystackVerificationResult.failure('', fundingError.value);
+    }
+
+    isFundingWallet.value = true;
+    try {
+      final userId = Get.isRegistered<AuthController>()
+          ? Get.find<AuthController>().userId.value
+          : '';
+      final result = await PaystackService.checkoutAndVerify(
+        email: email.value,
+        amountNaira: amount,
+        selectedMethod: selectedMethod,
+        fullName: fullName.value,
+        userId: userId,
+      );
+
+      if (result.cancelled) {
+        return result;
+      }
+
+      if (!result.isSuccess) {
+        fundingError.value = result.message;
+        return result;
+      }
+
+      await _applyVerifiedPaystackCredit(
+        result,
+        fallbackMethod: selectedMethod,
+      );
+      return result;
+    } finally {
+      isFundingWallet.value = false;
+    }
+  }
+
+  /// Verifies an existing Paystack transaction reference with Paystack's API
+  /// (`GET /transaction/verify/:reference`) and credits the wallet if not yet credited.
+  Future<PaystackVerificationResult> verifyAndCreditReference(
+    String reference,
+  ) async {
+    fundingError.value = '';
+    final cleanRef = reference.trim();
+    if (cleanRef.isEmpty) {
+      fundingError.value = 'Please enter a valid Paystack reference.';
+      return PaystackVerificationResult.failure('', fundingError.value);
+    }
+
+    if (creditedReferences.contains(cleanRef)) {
+      fundingError.value =
+          'This Paystack reference ($cleanRef) has already been credited to your wallet.';
+      return PaystackVerificationResult.failure(cleanRef, fundingError.value);
+    }
+
+    isFundingWallet.value = true;
+    try {
+      final result = await PaystackService.verifyTransaction(cleanRef);
+      if (!result.isSuccess) {
+        fundingError.value = result.message;
+        return result;
+      }
+
+      await _applyVerifiedPaystackCredit(
+        result,
+        fallbackMethod: 'Paystack',
+      );
+      return result;
+    } finally {
+      isFundingWallet.value = false;
+    }
+  }
+
+  Future<void> _applyVerifiedPaystackCredit(
+    PaystackVerificationResult result, {
+    required String fallbackMethod,
+  }) async {
+    final ref = result.reference.trim();
+    if (ref.isNotEmpty && creditedReferences.contains(ref)) {
+      return;
+    }
+    if (ref.isNotEmpty) {
+      creditedReferences.insert(0, ref);
+    }
+
+    final creditedAmount = result.amountNaira;
+    final methodLabel = PaystackService.formatChannelLabel(
+      result.channel,
+      fallback: fallbackMethod,
+    );
+
+    walletBalance.value += creditedAmount;
+
+    transactions.insert(
+      0,
+      Transaction(
+        reference: ref,
+        description: 'Wallet Top-Up ($methodLabel)',
+        date: result.paidAt,
+        amount: creditedAmount,
+        paymentMethod: methodLabel,
+        status: TransactionStatus.successful,
+      ),
+    );
+
+    notifications.insert(
+      0,
+      AppNotification(
+        id: 'NOTIF-${DateTime.now().millisecondsSinceEpoch}',
+        title: 'Paystack Payment Confirmed',
+        message:
+            'Your RESOLVA wallet has been credited with ₦${creditedAmount.toStringAsFixed(0)} via $methodLabel (Ref: $ref).',
+        date: DateTime.now(),
+        type: NotificationType.payment,
+        isRead: false,
+      ),
+    );
+
+    _saveLocalCache();
+
+    // Sync to Supabase (both public.profiles RPC + auth.users user_metadata)
+    final syncedBalance = await AuthService.creditWalletOnSupabase(
+      reference: ref,
+      amount: creditedAmount,
+      paymentMethod: methodLabel,
+      channel: result.channel,
+      newBalance: walletBalance.value,
+      creditedRefs: creditedReferences.toList(),
+      recentTransactions: transactions.map(_transactionToJson).toList(),
+      metadata: result.rawData,
+    );
+
+    if (syncedBalance != null && syncedBalance >= walletBalance.value) {
+      walletBalance.value = syncedBalance;
+      _saveLocalCache();
+    }
+  }
+
+  /// Direct wallet credit helper (used by tests or internal adjustments).
   void fundWallet({
     required double amount,
     required String paymentMethod,
+    String? reference,
   }) {
     if (amount <= 0) return;
-    walletBalance.value += amount;
     final now = DateTime.now();
-    final ref = 'TXN-${now.millisecondsSinceEpoch.toString().substring(6)}';
+    final ref = reference ?? 'RSV-${now.millisecondsSinceEpoch.toString().substring(6)}';
+    if (creditedReferences.contains(ref)) return;
+    creditedReferences.insert(0, ref);
+
+    walletBalance.value += amount;
 
     transactions.insert(
       0,
@@ -177,6 +436,17 @@ class DashboardController extends GetxController {
         isRead: false,
       ),
     );
+
+    _saveLocalCache();
+    AuthService.creditWalletOnSupabase(
+      reference: ref,
+      amount: amount,
+      paymentMethod: paymentMethod,
+      channel: 'paystack',
+      newBalance: walletBalance.value,
+      creditedRefs: creditedReferences.toList(),
+      recentTransactions: transactions.map(_transactionToJson).toList(),
+    );
   }
 
   /// Places a live customer order for Examination E-Pins or Social Media Services.
@@ -192,11 +462,12 @@ class DashboardController extends GetxController {
   }) {
     final now = DateTime.now();
     final rng = Random();
-    final orderId =
-        'ORD-${now.year}-${(1000 + rng.nextInt(9000))}';
+    final orderId = 'ORD-${now.year}-${(1000 + rng.nextInt(9000))}';
     final txnRef = 'TXN-${now.millisecondsSinceEpoch.toString().substring(6)}';
 
-    if (paymentMethod == 'Wallet Balance' && walletBalance.value >= amount) {
+    final usedWallet =
+        paymentMethod == 'Wallet Balance' && walletBalance.value >= amount;
+    if (usedWallet) {
       walletBalance.value -= amount;
     }
 
@@ -221,7 +492,8 @@ class DashboardController extends GetxController {
           : OrderFulfilmentStatus.processing,
       details: details ?? '$productName (x$quantity)',
       quantity: quantity,
-      recipientEmail: email.value.isNotEmpty ? email.value : 'customer@resolva.ng',
+      recipientEmail:
+          email.value.isNotEmpty ? email.value : 'customer@resolva.ng',
       targetUrl: targetUrl,
       pins: generatedPins,
     );
@@ -256,6 +528,19 @@ class DashboardController extends GetxController {
         isRead: false,
       ),
     );
+
+    _saveLocalCache();
+
+    if (usedWallet) {
+      AuthService.debitWalletOnSupabase(
+        reference: txnRef,
+        amount: amount,
+        description: '$productName (x$quantity)',
+        newBalance: walletBalance.value,
+        creditedRefs: creditedReferences.toList(),
+        recentTransactions: transactions.map(_transactionToJson).toList(),
+      );
+    }
 
     if (Get.isRegistered<AdminController>() && email.value.isNotEmpty) {
       Get.find<AdminController>().recordUserPurchase(

@@ -2019,19 +2019,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _showFundWalletDialog(BuildContext context) {
     final amountController = TextEditingController(text: '5000');
-    String selectedMethod = 'Bank Transfer';
-    final presets = [2000, 5000, 10000, 25000];
+    final verifyRefController = TextEditingController();
+    String selectedMethod = 'All Channels';
+    bool showVerifyRef = false;
+    bool processing = false;
+    String modalError = '';
+    final presets = [1000, 2500, 5000, 10000, 25000, 50000];
+    final channels = ['All Channels', 'Bank Transfer', 'Debit Card', 'USSD'];
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) => Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Padding(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -2055,18 +2061,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Text(
-                            'Fund Your Wallet',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primaryNavy,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Fund Your Wallet',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primaryNavy,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.verified_user_rounded,
+                                    size: 13,
+                                    color: AppColors.emeraldGreen,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Secured by Paystack · Live Gateway',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.emeraldGreen,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),
                       IconButton(
-                        onPressed: () => Navigator.pop(ctx),
+                        onPressed: processing ? null : () => Navigator.pop(ctx),
                         icon: const Icon(Icons.close_rounded),
                       ),
                     ],
@@ -2089,11 +2118,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       return ChoiceChip(
                         label: Text('₦${_currencyFormat.format(amt)}'),
                         selected: isPicked,
-                        onSelected: (_) {
-                          setModalState(() {
-                            amountController.text = '$amt';
-                          });
-                        },
+                        onSelected: processing
+                            ? null
+                            : (_) {
+                                setModalState(() {
+                                  amountController.text = '$amt';
+                                  modalError = '';
+                                });
+                              },
                         selectedColor: AppColors.royalBlue.withValues(alpha: 0.14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
@@ -2120,16 +2152,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: amountController,
+                    enabled: !processing,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (_) => setModalState(() => modalError = ''),
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.payments_outlined, size: 20),
-                      hintText: 'Enter amount in Naira',
+                      hintText: 'Enter amount in Naira (min ₦100)',
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Payment Channel',
+                    'Paystack Payment Channel',
                     style: GoogleFonts.montserrat(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
@@ -2140,12 +2174,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: ['Bank Transfer', 'Debit Card', 'USSD'].map((m) {
+                    children: channels.map((m) {
                       final active = selectedMethod == m;
                       return ChoiceChip(
                         label: Text(m),
                         selected: active,
-                        onSelected: (_) => setModalState(() => selectedMethod = m),
+                        onSelected: processing
+                            ? null
+                            : (_) => setModalState(() {
+                                  selectedMethod = m;
+                                  modalError = '';
+                                }),
                         selectedColor: AppColors.emeraldGreen.withValues(alpha: 0.14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
@@ -2160,37 +2199,113 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 24),
+                  if (modalError.isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: AppColors.error,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              modalError,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 22),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        final amount = double.tryParse(amountController.text.trim()) ?? 0;
-                        if (amount < 100) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Minimum wallet top-up is ₦100'),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
-                          return;
-                        }
-                        controller.fundWallet(
-                          amount: amount,
-                          paymentMethod: selectedMethod,
-                        );
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Wallet funded with ₦${_currencyFormat.format(amount)} via $selectedMethod!',
-                            ),
-                            backgroundColor: AppColors.emeraldGreen,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.check_circle_rounded, size: 18),
-                      label: const Text('Fund Wallet Now'),
+                      onPressed: processing
+                          ? null
+                          : () async {
+                              final amount =
+                                  double.tryParse(amountController.text.trim()) ??
+                                  0;
+                              if (amount < 100) {
+                                setModalState(() {
+                                  modalError =
+                                      'Minimum wallet top-up amount is ₦100.';
+                                });
+                                return;
+                              }
+                              setModalState(() {
+                                processing = true;
+                                modalError = '';
+                              });
+
+                              final result = await controller
+                                  .fundWalletWithPaystack(
+                                    amount: amount,
+                                    selectedMethod: selectedMethod,
+                                  );
+
+                              if (!ctx.mounted) return;
+                              setModalState(() => processing = false);
+
+                              if (result.cancelled) {
+                                setModalState(() {
+                                  modalError =
+                                      'Paystack checkout was closed before payment was completed.';
+                                });
+                                return;
+                              }
+
+                              if (!result.isSuccess) {
+                                setModalState(() {
+                                  modalError = result.message;
+                                });
+                                return;
+                              }
+
+                              Navigator.pop(ctx);
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Paystack payment verified! Wallet credited with ₦${_currencyFormat.format(result.amountNaira)} (Ref: ${result.reference}).',
+                                  ),
+                                  backgroundColor: AppColors.emeraldGreen,
+                                  duration: const Duration(seconds: 5),
+                                ),
+                              );
+                            },
+                      icon: processing
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.2,
+                                color: AppColors.white,
+                              ),
+                            )
+                          : const Icon(Icons.lock_rounded, size: 18),
+                      label: Text(
+                        processing
+                            ? 'Connecting to Paystack & Verifying...'
+                            : 'Pay with Paystack',
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.emeraldGreen,
                         foregroundColor: AppColors.white,
@@ -2201,6 +2316,95 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: processing
+                          ? null
+                          : () => setModalState(() {
+                                showVerifyRef = !showVerifyRef;
+                                modalError = '';
+                              }),
+                      icon: Icon(
+                        showVerifyRef
+                            ? Icons.expand_less_rounded
+                            : Icons.receipt_long_rounded,
+                        size: 16,
+                      ),
+                      label: Text(
+                        showVerifyRef
+                            ? 'Hide Reference Verification'
+                            : 'Already paid? Verify Paystack Reference',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (showVerifyRef) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: verifyRefController,
+                            enabled: !processing,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter Paystack Reference (e.g. RSV-PSK-...)',
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: processing
+                              ? null
+                              : () async {
+                                  final ref = verifyRefController.text.trim();
+                                  if (ref.isEmpty) {
+                                    setModalState(() {
+                                      modalError =
+                                          'Please enter your Paystack transaction reference.';
+                                    });
+                                    return;
+                                  }
+                                  setModalState(() {
+                                    processing = true;
+                                    modalError = '';
+                                  });
+                                  final res = await controller
+                                      .verifyAndCreditReference(ref);
+                                  if (!ctx.mounted) return;
+                                  setModalState(() => processing = false);
+                                  if (!res.isSuccess) {
+                                    setModalState(() {
+                                      modalError = res.message;
+                                    });
+                                    return;
+                                  }
+                                  Navigator.pop(ctx);
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Reference ${res.reference} verified! Wallet credited with ₦${_currencyFormat.format(res.amountNaira)}.',
+                                      ),
+                                      backgroundColor: AppColors.emeraldGreen,
+                                    ),
+                                  );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.royalBlue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                          child: const Text('Verify'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -32,6 +32,71 @@
 
   <title>RESOLVA — Digital Services Platform</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Paystack Official Inline Checkout SDK (https://paystack.com/docs/api/) -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script>
+    window.resolvaOpenPaystack = function(publicKey, email, amountKobo, reference, channelsCsv, fullName, userId, onSuccess, onCancel, onError) {
+      function launch() {
+        try {
+          if (typeof PaystackPop === 'undefined') {
+            if (onError) onError('Paystack SDK could not be loaded. Please check your internet connection.');
+            return;
+          }
+          var channels = channelsCsv ? channelsCsv.split(',').filter(Boolean) : ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'];
+          var handler = PaystackPop.setup({
+            key: publicKey,
+            email: email,
+            amount: Number(amountKobo),
+            currency: 'NGN',
+            ref: reference,
+            channels: channels,
+            metadata: {
+              custom_fields: [
+                {
+                  display_name: "Customer Name",
+                  variable_name: "customer_name",
+                  value: fullName || email
+                },
+                {
+                  display_name: "User ID",
+                  variable_name: "user_id",
+                  value: userId || ""
+                },
+                {
+                  display_name: "Purpose",
+                  variable_name: "purpose",
+                  value: "RESOLVA Wallet Funding"
+                }
+              ]
+            },
+            callback: function(response) {
+              var ref = (response && (response.reference || response.trxref)) ? String(response.reference || response.trxref) : String(reference);
+              if (onSuccess) onSuccess(ref);
+            },
+            onClose: function() {
+              if (onCancel) onCancel();
+            }
+          });
+          handler.openIframe();
+        } catch (err) {
+          if (onError) onError(err && err.message ? String(err.message) : String(err));
+        }
+      }
+
+      if (typeof PaystackPop !== 'undefined') {
+        launch();
+      } else {
+        var s = document.createElement('script');
+        s.src = 'https://js.paystack.co/v1/inline.js';
+        s.onload = launch;
+        s.onerror = function() {
+          if (onError) onError('Failed to load Paystack checkout script.');
+        };
+        document.head.appendChild(s);
+      }
+    };
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

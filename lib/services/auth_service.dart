@@ -206,6 +206,131 @@ class AuthService {
   static Future<void> adminDeleteUser(String userId) =>
       _client.rpc('admin_delete_user', params: {'target': userId});
 
+  // ──────────────── Wallet & Paystack Cloud Sync ────────────────
+
+  /// Fetches the user's wallet balance from `public.profiles` (via RPC) and/or
+  /// `auth.users.user_metadata` so the balance persists across devices and refreshes.
+  static Future<double?> fetchCloudWalletBalance() async {
+    if (!isEnabled) return null;
+    final user = currentUser;
+    if (user == null) return null;
+
+    double? rpcBalance;
+    try {
+      final res = await _client.rpc('get_my_wallet_balance');
+      if (res is num) {
+        rpcBalance = res.toDouble();
+      } else if (res != null) {
+        rpcBalance = double.tryParse(res.toString());
+      }
+    } catch (_) {
+      // RPC may not be installed yet if migration 20261110000000 hasn't been run.
+    }
+
+    final meta = user.userMetadata ?? const <String, dynamic>{};
+    final metaBalRaw = meta['resolva_wallet_balance'];
+    double? metaBalance;
+    if (metaBalRaw is num) {
+      metaBalance = metaBalRaw.toDouble();
+    } else if (metaBalRaw != null) {
+      metaBalance = double.tryParse(metaBalRaw.toString());
+    }
+
+    if (rpcBalance != null && metaBalance != null) {
+      return rpcBalance > metaBalance ? rpcBalance : metaBalance;
+    }
+    return rpcBalance ?? metaBalance;
+  }
+
+  /// Fetches raw metadata map from `auth.users` for wallet transactions/references.
+  static Map<String, dynamic> getCurrentUserMetadata() {
+    if (!isEnabled) return const {};
+    return currentUser?.userMetadata ?? const {};
+  }
+
+  /// Credits the user's wallet in Supabase (`credit_wallet_paystack` RPC + `user_metadata`).
+  static Future<double?> creditWalletOnSupabase({
+    required String reference,
+    required double amount,
+    required String paymentMethod,
+    required String channel,
+    required double newBalance,
+    required List<String> creditedRefs,
+    required List<Map<String, dynamic>> recentTransactions,
+    Map<String, dynamic> metadata = const {},
+  }) async {
+    if (!isEnabled || currentUser == null) return newBalance;
+
+    double effectiveBalance = newBalance;
+
+    // 1. Try SQL RPC on public.profiles + public.wallet_transactions
+    try {
+      final rpcRes = await _client.rpc(
+        'credit_wallet_paystack',
+        params: {
+          'p_reference': reference,
+          'p_amount': amount,
+          'p_payment_method': paymentMethod,
+          'p_channel': channel,
+          'p_metadata': metadata,
+        },
+      );
+      if (rpcRes is num) {
+        effectiveBalance = rpcRes.toDouble();
+      }
+    } catch (_) {}
+
+    // 2. Always persist to Supabase Auth user_metadata so balance is saved in cloud immediately
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(
+          data: {
+            'resolva_wallet_balance': effectiveBalance,
+            'resolva_credited_refs': creditedRefs.take(100).toList(),
+            'resolva_transactions': recentTransactions.take(40).toList(),
+          },
+        ),
+      );
+    } catch (_) {}
+
+    return effectiveBalance;
+  }
+
+  /// Debits the user's wallet in Supabase (`debit_wallet_for_order` RPC + `user_metadata`).
+  static Future<void> debitWalletOnSupabase({
+    required String reference,
+    required double amount,
+    required String description,
+    required double newBalance,
+    required List<String> creditedRefs,
+    required List<Map<String, dynamic>> recentTransactions,
+  }) async {
+    if (!isEnabled || currentUser == null) return;
+
+    try {
+      await _client.rpc(
+        'debit_wallet_for_order',
+        params: {
+          'p_reference': reference,
+          'p_amount': amount,
+          'p_description': description,
+        },
+      );
+    } catch (_) {}
+
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(
+          data: {
+            'resolva_wallet_balance': newBalance,
+            'resolva_credited_refs': creditedRefs.take(100).toList(),
+            'resolva_transactions': recentTransactions.take(40).toList(),
+          },
+        ),
+      );
+    } catch (_) {}
+  }
+
   /// Human-readable message for Supabase errors.
   static String describeError(Object e) {
     if (e is AuthException) return e.message;
