@@ -605,11 +605,12 @@ class AuthController extends GetxController {
           email: userEmail.value,
           timestamp: DateTime.now().toLocal().toString().split('.').first,
         );
-        unawaited(EmailNotificationService.logOrSendEmail(
+        unawaited(EmailNotificationService.sendEmail(
           recipientEmail: userEmail.value,
+          recipientName: userFullName.value.isNotEmpty ? userFullName.value : 'Customer',
           subject: 'Security Alert: RESOLVA Password Changed',
-          htmlBody: emailHtml,
-          category: 'password_reset',
+          htmlContent: emailHtml,
+          templateType: 'password_reset',
         ));
       }
       return true;
@@ -649,11 +650,12 @@ class AuthController extends GetxController {
         email: targetEmail,
         timestamp: DateTime.now().toLocal().toString().split('.').first,
       );
-      unawaited(EmailNotificationService.logOrSendEmail(
+      unawaited(EmailNotificationService.sendEmail(
         recipientEmail: targetEmail,
+        recipientName: userFullName.value.isNotEmpty ? userFullName.value : 'Customer',
         subject: 'Security Alert: RESOLVA Password Changed',
-        htmlBody: emailHtml,
-        category: 'password_reset',
+        htmlContent: emailHtml,
+        templateType: 'password_reset',
       ));
       return true;
     } catch (e) {
