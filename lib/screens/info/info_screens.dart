@@ -372,15 +372,15 @@ class _ContactScreenState extends State<ContactScreen> {
   final _emailController = TextEditingController();
   final _subjectController = TextEditingController();
   final _messageController = TextEditingController();
-  String _selectedCategory = 'Exam PIN Issue';
+  String _selectedCategory = 'Social Media Boosting Order';
   bool _isSent = false;
   bool _isLoading = false;
 
   final _categories = [
-    'Exam PIN Issue',
-    'Social Media Order Status',
+    'Social Media Boosting Order',
+    'Payment or Wallet Funding',
+    'Other Services (Exam E-Pin Issue)',
     'CAC Registration Inquiry',
-    'Payment or Billing',
     'Partnership / Bulk Order',
     'Other Inquiries',
   ];
@@ -822,44 +822,44 @@ class _FaqScreenState extends State<FaqScreen> {
 
   final List<Map<String, String>> _allFaqs = [
     {
-      'cat': 'Exam PINs',
-      'q': 'How quickly will I receive my WAEC or JAMB PIN?',
-      'a': 'Immediately. Our system is fully automated. As soon as your payment is processed, the examination PIN and serial number will display directly on your screen and will also be emailed to your inbox within seconds.',
-    },
-    {
-      'cat': 'Exam PINs',
-      'q': 'How many times can I use a WAEC scratch card PIN to check results?',
-      'a': 'According to WAEC guidelines, an authentic result checker PIN can be used up to 5 times for a single candidate examination number.',
-    },
-    {
-      'cat': 'Exam PINs',
-      'q': 'What happens if my generated PIN shows invalid on the exam portal?',
-      'a': 'Every token issued by RESOLVA is 100% verified. If you ever face an error, it is typically due to a typographical mistake on candidate examination numbers. If the issue persists, our support team will verify and replace it immediately.',
-    },
-    {
-      'cat': 'Social Media',
-      'q': 'Is my account password required for social media engagement services?',
+      'cat': 'Social Media Boosting',
+      'q': 'Is my account password required for social media boosting services?',
       'a': 'NEVER. We will never ask for your account password or sensitive login details. All we require is your public profile link or post URL. Your account security is guaranteed.',
     },
     {
-      'cat': 'Social Media',
-      'q': 'How soon does social media delivery begin after ordering?',
+      'cat': 'Social Media Boosting',
+      'q': 'How soon does social media boosting delivery begin after ordering?',
       'a': 'Orders start processing within 5 to 30 minutes of payment. Larger packages are delivered gradually and organically over 24 to 48 hours to maintain safe and authentic account growth.',
     },
     {
-      'cat': 'CAC Registration',
-      'q': 'When is CAC business registration launching on RESOLVA?',
-      'a': 'CAC services are launching in Q2 2025. You can join our Early Bird waitlist today to receive 15% discount on your first incorporation filing and gain priority support.',
+      'cat': 'Social Media Boosting',
+      'q': 'Which social media platforms can I boost on RESOLVA?',
+      'a': 'You can boost followers, likes, views, subscribers, and reactions across Instagram, TikTok, YouTube, X (Twitter), Facebook, WhatsApp Channels, and Pinterest.',
     },
     {
       'cat': 'Payments',
-      'q': 'What payment methods do you support?',
-      'a': 'We accept all Nigerian bank debit cards (Mastercard, Visa, Verve), direct bank transfers, USSD codes, and virtual account transfers.',
+      'q': 'How do I fund my wallet with Paystack?',
+      'a': 'Click "Fund Wallet" on your dashboard, select or enter your amount, and complete payment via Paystack using Bank Transfer, Debit Card, or USSD. Once Paystack confirms payment, your wallet balance updates automatically.',
     },
     {
       'cat': 'Payments',
       'q': 'Can I get a refund if I experience an unresolvable issue?',
       'a': 'Yes. We have a 100% money-back guarantee for failed transactions that cannot be fulfilled within our service level agreement.',
+    },
+    {
+      'cat': 'Other Services (Exam E-Pins)',
+      'q': 'How quickly will I receive my WAEC, NECO, NABTEB, or JAMB PIN?',
+      'a': 'Immediately. As soon as your payment is confirmed, your examination e-pin is generated and stored directly in your dashboard Order & E-PIN Vault.',
+    },
+    {
+      'cat': 'Other Services (Exam E-Pins)',
+      'q': 'How many times can I use a WAEC scratch card PIN to check results?',
+      'a': 'According to WAEC guidelines, an authentic result checker PIN can be used up to 5 times for a single candidate examination number.',
+    },
+    {
+      'cat': 'CAC Registration',
+      'q': 'When is CAC business registration launching on RESOLVA?',
+      'a': 'CAC business registration is coming soon. You can join our waitlist today to receive priority notification as soon as it goes live.',
     },
   ];
 
@@ -917,7 +917,7 @@ class _FaqScreenState extends State<FaqScreen> {
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
-                                children: ['All', 'Exam PINs', 'Social Media', 'CAC Registration', 'Payments']
+                                children: ['All', 'Social Media Boosting', 'Payments', 'Other Services (Exam E-Pins)', 'CAC Registration']
                                     .map((cat) {
                                   final isSelected = _selectedCategory == cat;
                                   return Padding(

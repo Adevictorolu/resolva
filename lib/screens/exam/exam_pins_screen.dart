@@ -101,8 +101,8 @@ class _ProductListView extends StatelessWidget {
                   child: Column(
                     children: [
                       const SectionHeading(
-                        title: 'Examination E-Pins',
-                        subtitle: 'Instant WAEC, NECO, NABTEB & JAMB examination pins and scratch cards.',
+                        title: 'Other Services — Examination E-Pins',
+                        subtitle: 'Instant WAEC, NECO, NABTEB & JAMB examination pins and result-checking scratch cards.',
                       ),
                       const SizedBox(height: 32),
                       // Search

@@ -260,3 +260,95 @@ revoke execute on function public.debit_wallet_for_order(text, numeric, text)   
 grant execute on function public.get_my_wallet_balance()                                       to authenticated;
 grant execute on function public.credit_wallet_paystack(text, numeric, text, text, jsonb)      to authenticated;
 grant execute on function public.debit_wallet_for_order(text, numeric, text)                   to authenticated;
+
+-- 5. Priority Service Orders: Social Media Boosting & Other Services (Exam E-Pins)
+create table if not exists public.social_boosting_orders (
+  id              uuid primary key default gen_random_uuid(),
+  order_code      text not null unique,
+  user_id         uuid not null references auth.users (id) on delete cascade,
+  category        text not null default 'Social Media Boosting',
+  product_name    text not null,
+  target_url      text,
+  quantity        int not null default 1 check (quantity > 0),
+  amount          numeric(14, 2) not null check (amount >= 0),
+  payment_method  text not null default 'Wallet Balance',
+  status          text not null default 'processing'
+                    check (status in ('pending', 'processing', 'completed', 'cancelled')),
+  details         text not null default '',
+  pins            text[],
+  created_at      timestamptz not null default now()
+);
+
+create index if not exists social_boosting_orders_user_idx
+  on public.social_boosting_orders (user_id, created_at desc);
+
+alter table public.social_boosting_orders enable row level security;
+
+drop policy if exists "social_boosting_orders: read own"        on public.social_boosting_orders;
+drop policy if exists "social_boosting_orders: admins read all" on public.social_boosting_orders;
+
+create policy "social_boosting_orders: read own"
+  on public.social_boosting_orders for select
+  to authenticated
+  using (user_id = auth.uid());
+
+create policy "social_boosting_orders: admins read all"
+  on public.social_boosting_orders for select
+  to authenticated
+  using (public.is_admin());
+
+grant select on public.social_boosting_orders to authenticated;
+
+create or replace function public.create_service_order(
+  p_order_code     text,
+  p_category       text,
+  p_product_name   text,
+  p_target_url     text,
+  p_quantity       int,
+  p_amount         numeric,
+  p_payment_method text,
+  p_status         text default 'processing',
+  p_details        text default '',
+  p_pins           text[] default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  insert into public.social_boosting_orders (
+    order_code,
+    user_id,
+    category,
+    product_name,
+    target_url,
+    quantity,
+    amount,
+    payment_method,
+    status,
+    details,
+    pins
+  ) values (
+    trim(p_order_code),
+    auth.uid(),
+    coalesce(nullif(trim(p_category), ''), 'Social Media Boosting'),
+    trim(p_product_name),
+    p_target_url,
+    greatest(coalesce(p_quantity, 1), 1),
+    greatest(coalesce(p_amount, 0), 0),
+    coalesce(nullif(trim(p_payment_method), ''), 'Wallet Balance'),
+    coalesce(nullif(trim(p_status), ''), 'processing'),
+    coalesce(p_details, ''),
+    p_pins
+  )
+  on conflict (order_code) do nothing;
+end;
+$$;
+
+revoke execute on function public.create_service_order(text, text, text, text, int, numeric, text, text, text, text[]) from public, anon;
+grant execute on function public.create_service_order(text, text, text, text, int, numeric, text, text, text, text[])  to authenticated;

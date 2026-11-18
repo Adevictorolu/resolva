@@ -120,6 +120,15 @@ class DashboardController extends GetxController {
             }
           }
         }
+        final orderList = decoded['orders'] as List?;
+        if (orderList != null && orders.isEmpty) {
+          for (final item in orderList) {
+            if (item is Map<String, dynamic>) {
+              orders.add(_orderFromJson(item));
+            }
+          }
+          filterOrders(selectedOrderFilter.value);
+        }
       } catch (_) {}
     }
 
@@ -143,6 +152,15 @@ class DashboardController extends GetxController {
         }
       }
     }
+    final metaOrders = meta['resolva_orders'] as List?;
+    if (metaOrders != null && orders.isEmpty) {
+      for (final item in metaOrders) {
+        if (item is Map) {
+          orders.add(_orderFromJson(Map<String, dynamic>.from(item)));
+        }
+      }
+      filterOrders(selectedOrderFilter.value);
+    }
 
     final cloudBalance = await AuthService.fetchCloudWalletBalance();
     if (cloudBalance != null) {
@@ -157,10 +175,46 @@ class DashboardController extends GetxController {
         'balance': walletBalance.value,
         'refs': creditedReferences.toList(),
         'transactions': transactions.take(40).map(_transactionToJson).toList(),
+        'orders': orders.take(40).map(_orderToJson).toList(),
       });
       PaystackService.setCachedJson(_cacheKey, payload);
     } catch (_) {}
   }
+
+  Map<String, dynamic> _orderToJson(Order o) => {
+        'id': o.id,
+        'productName': o.productName,
+        'category': o.category,
+        'date': o.date.toIso8601String(),
+        'amount': o.amount,
+        'paymentStatus': o.paymentStatus.name,
+        'fulfilmentStatus': o.fulfilmentStatus.name,
+        'details': o.details,
+        'quantity': o.quantity,
+        'recipientEmail': o.recipientEmail,
+        'targetUrl': o.targetUrl,
+        'pins': o.pins,
+      };
+
+  Order _orderFromJson(Map<String, dynamic> m) => Order(
+        id: (m['id'] ?? '').toString(),
+        productName: (m['productName'] ?? '').toString(),
+        category: (m['category'] ?? 'Social Media Boosting').toString(),
+        date: DateTime.tryParse('${m['date']}') ?? DateTime.now(),
+        amount: (m['amount'] as num?)?.toDouble() ?? 0.0,
+        paymentStatus: OrderPaymentStatus.paid,
+        fulfilmentStatus: switch (m['fulfilmentStatus']) {
+          'completed' => OrderFulfilmentStatus.completed,
+          'pending' => OrderFulfilmentStatus.pending,
+          'cancelled' => OrderFulfilmentStatus.cancelled,
+          _ => OrderFulfilmentStatus.processing,
+        },
+        details: m['details']?.toString(),
+        quantity: (m['quantity'] as num?)?.toInt() ?? 1,
+        recipientEmail: m['recipientEmail']?.toString(),
+        targetUrl: m['targetUrl']?.toString(),
+        pins: (m['pins'] as List?)?.map((e) => '$e').toList(),
+      );
 
   Map<String, dynamic> _transactionToJson(Transaction t) => {
         'reference': t.reference,
@@ -541,6 +595,20 @@ class DashboardController extends GetxController {
         recentTransactions: transactions.map(_transactionToJson).toList(),
       );
     }
+
+    AuthService.syncOrderToSupabase(
+      orderCode: orderId,
+      category: category,
+      productName: productName,
+      targetUrl: targetUrl,
+      quantity: quantity,
+      amount: amount,
+      paymentMethod: paymentMethod,
+      status: isInstantPin ? 'completed' : 'processing',
+      details: newOrder.details ?? '$productName (x$quantity)',
+      pins: generatedPins,
+      recentOrders: orders.map(_orderToJson).toList(),
+    );
 
     if (Get.isRegistered<AdminController>() && email.value.isNotEmpty) {
       Get.find<AdminController>().recordUserPurchase(

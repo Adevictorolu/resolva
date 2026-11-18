@@ -331,6 +331,52 @@ class AuthService {
     } catch (_) {}
   }
 
+  /// Records a Social Media Boosting or Other Services order in Supabase
+  /// (`create_service_order` RPC + `auth.users.user_metadata`).
+  static Future<void> syncOrderToSupabase({
+    required String orderCode,
+    required String category,
+    required String productName,
+    String? targetUrl,
+    required int quantity,
+    required double amount,
+    required String paymentMethod,
+    required String status,
+    required String details,
+    List<String>? pins,
+    required List<Map<String, dynamic>> recentOrders,
+  }) async {
+    if (!isEnabled || currentUser == null) return;
+
+    try {
+      await _client.rpc(
+        'create_service_order',
+        params: {
+          'p_order_code': orderCode,
+          'p_category': category,
+          'p_product_name': productName,
+          'p_target_url': targetUrl,
+          'p_quantity': quantity,
+          'p_amount': amount,
+          'p_payment_method': paymentMethod,
+          'p_status': status,
+          'p_details': details,
+          'p_pins': pins,
+        },
+      );
+    } catch (_) {}
+
+    try {
+      await _client.auth.updateUser(
+        UserAttributes(
+          data: {
+            'resolva_orders': recentOrders.take(40).toList(),
+          },
+        ),
+      );
+    } catch (_) {}
+  }
+
   /// Human-readable message for Supabase errors.
   static String describeError(Object e) {
     if (e is AuthException) return e.message;

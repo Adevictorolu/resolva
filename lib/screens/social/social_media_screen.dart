@@ -97,8 +97,8 @@ class _ServiceListView extends StatelessWidget {
                   child: Column(
                     children: [
                       const SectionHeading(
-                        title: 'Grow Your Social Presence',
-                        subtitle: 'High-retention followers, views, likes & engagement services across major platforms.',
+                        title: 'Social Media Boosting',
+                        subtitle: 'High-retention followers, views, likes & engagement across Instagram, TikTok, YouTube, X, Facebook, WhatsApp & Pinterest.',
                       ),
                       const SizedBox(height: 36),
                       // Platform cards
@@ -786,7 +786,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
 
     final order = dashCtrl.placeOrder(
       productName: service.name,
-      category: 'Social Media Services',
+      category: 'Social Media Boosting',
       amount: total,
       quantity: qty,
       paymentMethod: method,
