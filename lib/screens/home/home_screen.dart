@@ -161,7 +161,7 @@ class _HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Everything You Need.\nAll in One Place.',
+          'Boost Your Social Media.\nAll Digital Services in One Place.',
           style: GoogleFonts.montserrat(
             fontSize: isMobile ? 36 : 52,
             fontWeight: FontWeight.w800,
@@ -173,7 +173,7 @@ class _HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          'Get your examination e-pins, explore social media growth services, and discover convenient digital solutions with RESOLVA.',
+          'Accelerate your Instagram, TikTok, YouTube, X, Facebook & WhatsApp growth instantly — plus access other services like Examination E-Pins on RESOLVA.',
           style: GoogleFonts.montserrat(
             fontSize: isMobile ? 15 : 17,
             color: AppColors.white.withValues(alpha: 0.8),
@@ -188,7 +188,7 @@ class _HeroSection extends StatelessWidget {
           alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: () => onNavigate('/#services'),
+              onPressed: () => onNavigate('/social-media'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.white,
                 foregroundColor: AppColors.primaryNavy,
@@ -205,15 +205,15 @@ class _HeroSection extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Explore Services', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
+                    Text('Boost Social Media', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
                     const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded, size: 18),
+                    const Icon(Icons.trending_up_rounded, size: 18),
                   ],
                 ),
               ),
             ),
             OutlinedButton(
-              onPressed: () => onNavigate('/register'),
+              onPressed: () => onNavigate('/#services'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.white,
                 side: BorderSide(color: AppColors.white.withValues(alpha: 0.45), width: 1.5),
@@ -228,9 +228,9 @@ class _HeroSection extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Get Started', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
+                    Text('Other Services', style: GoogleFonts.montserrat(fontWeight: FontWeight.w700)),
                     const SizedBox(width: 6),
-                    const Icon(Icons.rocket_launch_rounded, size: 16),
+                    const Icon(Icons.arrow_forward_rounded, size: 16),
                   ],
                 ),
               ),
@@ -252,8 +252,21 @@ class _HeroSection extends StatelessWidget {
       child: Column(
         children: [
           _buildMiniServiceCard(
+            Icons.trending_up_rounded,
+            'Social Media Boosting',
+            'Instagram • TikTok • YouTube • X • Facebook',
+            AppColors.emeraldGreen,
+            const [
+              'assets/images/instagram_logo.png',
+              'assets/images/tiktok_logo.png',
+              'assets/images/youtube_logo.png',
+              'assets/images/x_logo.png',
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildMiniServiceCard(
             Icons.school_rounded,
-            'Examination E-Pins',
+            'Other Services · Exam E-Pins',
             'WAEC • NECO • NABTEB • JAMB',
             AppColors.royalBlue,
             const [
@@ -261,19 +274,6 @@ class _HeroSection extends StatelessWidget {
               'assets/images/neco_logo.png',
               'assets/images/nabteb_logo.png',
               'assets/images/jamb_logo.png',
-            ],
-          ),
-          const SizedBox(height: 12),
-          _buildMiniServiceCard(
-            Icons.trending_up_rounded,
-            'Social Media Services',
-            'Instagram • TikTok • YouTube • X',
-            AppColors.emeraldGreen,
-            const [
-              'assets/images/instagram_logo.png',
-              'assets/images/tiktok_logo.png',
-              'assets/images/youtube_logo.png',
-              'assets/images/x_logo.png',
             ],
           ),
           const SizedBox(height: 12),
@@ -390,7 +390,7 @@ class _ServicesSection extends StatelessWidget {
               children: [
                 const SectionHeading(
                   title: 'Our Services',
-                  subtitle: 'Explore the digital products and services available on RESOLVA.',
+                  subtitle: 'High-retention social media boosting and essential digital services on RESOLVA.',
                 ),
                 const SizedBox(height: 48),
                 LayoutBuilder(
@@ -421,10 +421,31 @@ class _ServicesSection extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.all(8),
         child: ServiceCard(
+          icon: Icons.trending_up_rounded,
+          iconColor: AppColors.emeraldGreen,
+          title: 'Social Media Boosting',
+          description: 'Boost followers, likes, views, and engagement across top social platforms for creators, brands, and businesses.',
+          tags: const ['Instagram', 'TikTok', 'YouTube', 'X', 'Facebook', 'WhatsApp', 'Pinterest'],
+          tagLogos: const {
+            'Instagram': 'assets/images/instagram_logo.png',
+            'TikTok': 'assets/images/tiktok_logo.png',
+            'YouTube': 'assets/images/youtube_logo.png',
+            'X': 'assets/images/x_logo.png',
+            'Facebook': 'assets/images/facebook_logo.png',
+            'WhatsApp': 'assets/images/whatsapp_logo.png',
+            'Pinterest': 'assets/images/pinterest_logo.png',
+          },
+          buttonText: 'Boost Social Media',
+          onTap: () => onNavigate('/social-media'),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8),
+        child: ServiceCard(
           icon: Icons.school_rounded,
           iconColor: AppColors.royalBlue,
-          title: 'Examination E-Pins',
-          description: 'Find examination pins and result-checking scratch cards for your academic needs.',
+          title: 'Other Services — Exam E-Pins',
+          description: 'Get instant examination result-checking pins and scratch cards for WAEC, NECO, NABTEB, and JAMB.',
           tags: const ['WAEC', 'NECO', 'NABTEB', 'JAMB'],
           tagLogos: const {
             'WAEC': 'assets/images/waec_logo.png',
@@ -432,27 +453,8 @@ class _ServicesSection extends StatelessWidget {
             'NABTEB': 'assets/images/nabteb_logo.png',
             'JAMB': 'assets/images/jamb_logo.png',
           },
-          buttonText: 'Explore E-Pins',
+          buttonText: 'Explore Exam E-Pins',
           onTap: () => onNavigate('/exam-pins'),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.all(8),
-        child: ServiceCard(
-          icon: Icons.trending_up_rounded,
-          iconColor: AppColors.emeraldGreen,
-          title: 'Social Media Services',
-          description: 'Explore high-retention engagement services for creators, brands, and businesses.',
-          tags: const ['Instagram', 'TikTok', 'Facebook', 'YouTube', 'X'],
-          tagLogos: const {
-            'Instagram': 'assets/images/instagram_logo.png',
-            'TikTok': 'assets/images/tiktok_logo.png',
-            'Facebook': 'assets/images/facebook_logo.png',
-            'YouTube': 'assets/images/youtube_logo.png',
-            'X': 'assets/images/x_logo.png',
-          },
-          buttonText: 'Explore Services',
-          onTap: () => onNavigate('/social-media'),
         ),
       ),
       Padding(
@@ -481,10 +483,10 @@ class _HowItWorksSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      _StepData(Icons.search_rounded, 'Browse Services', 'Explore our examination e-pins, social media services, and upcoming offerings.'),
-      _StepData(Icons.shopping_cart_rounded, 'Place Your Order', 'Select the product or service you need and complete the order form.'),
-      _StepData(Icons.payment_rounded, 'Make Payment', 'Pay securely using your preferred payment method.'),
-      _StepData(Icons.check_circle_rounded, 'Get Delivered', 'Receive your e-pin or service delivery directly to your dashboard.'),
+      _StepData(Icons.search_rounded, 'Choose a Service', 'Select a social media boosting package or browse other services like Examination E-Pins.'),
+      _StepData(Icons.shopping_cart_rounded, 'Enter Details', 'Provide your social profile/post link or select the quantity of e-pins you need.'),
+      _StepData(Icons.payment_rounded, 'Fund & Pay Securely', 'Pay instantly using your Paystack-funded wallet balance, card, transfer, or USSD.'),
+      _StepData(Icons.check_circle_rounded, 'Instant Fulfillment', 'Watch your social media engagement grow or copy your delivered e-pin from your dashboard.'),
     ];
 
     return Container(
@@ -599,12 +601,12 @@ class _WhyChooseSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reasons = [
-      _ReasonData(Icons.verified_rounded, 'Trusted Products', 'All examination e-pins are sourced from authorised channels.'),
-      _ReasonData(Icons.flash_on_rounded, 'Instant Delivery', 'Receive your products quickly after payment confirmation.'),
-      _ReasonData(Icons.support_agent_rounded, 'Customer Support', 'Get help whenever you need it from our support team.'),
-      _ReasonData(Icons.lock_rounded, 'Secure Platform', 'Your information and transactions are handled securely.'),
-      _ReasonData(Icons.devices_rounded, 'Access Anywhere', 'Use RESOLVA on your phone, tablet, or computer.'),
-      _ReasonData(Icons.price_check_rounded, 'Competitive Pricing', 'Get fair, transparent pricing across all services.'),
+      _ReasonData(Icons.trending_up_rounded, 'High-Retention Boosting', 'Real-time social media growth for Instagram, TikTok, YouTube, X, Facebook & WhatsApp.'),
+      _ReasonData(Icons.flash_on_rounded, 'Instant Automated Delivery', 'Campaigns and other digital services trigger immediately after payment confirmation.'),
+      _ReasonData(Icons.verified_rounded, 'Genuine Other Services', 'All WAEC, NECO, NABTEB & JAMB examination e-pins are sourced from authorised channels.'),
+      _ReasonData(Icons.lock_rounded, 'Paystack Secured Wallet', 'Fund your wallet seamlessly via Paystack using Card, Bank Transfer, or USSD.'),
+      _ReasonData(Icons.devices_rounded, 'Access Anywhere', 'Manage your social media orders and e-pins on phone, tablet, or computer.'),
+      _ReasonData(Icons.support_agent_rounded, '24/7 Customer Support', 'Get dedicated assistance whenever you need help from our team.'),
     ];
 
     return Container(
@@ -714,14 +716,14 @@ class _FaqPreviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final faqs = [
-      ('How do I purchase an examination e-pin?',
-       'Browse our Examination E-Pins section, select the product you need, choose the quantity, and proceed to checkout.'),
-      ('How long does delivery take for social media services?',
-       'Delivery times vary by service. Most services begin within a few hours, with full delivery ranging from hours to several days.'),
-      ('What payment methods are accepted?',
-       'RESOLVA will support bank transfers and card payments. Payment options will be available at checkout once payment integration is complete.'),
-      ('Is it safe to use social media engagement services?',
-       'We use methods designed to appear natural. However, please review the terms of service for each social media platform.'),
+      ('How fast does Social Media Boosting start?',
+       'Most social media boosting orders (followers, likes, views, and engagement) begin processing within minutes of payment confirmation.'),
+      ('Is it safe to boost my social media account on RESOLVA?',
+       'Yes. We never ask for your social media password—only your public profile or post link is required to deliver your order safely.'),
+      ('How do I fund my wallet?',
+       'Click "Fund Wallet" on your dashboard to top up instantly via Paystack using Bank Transfer, Debit Card, or USSD. Your balance updates automatically once payment is confirmed.'),
+      ('What other services are available on RESOLVA?',
+       'Under Other Services, you can purchase instant WAEC, NECO, NABTEB, and JAMB examination scratch cards and e-pins.'),
     ];
 
     return Container(

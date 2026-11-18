@@ -130,8 +130,8 @@ class AdminController extends GetxController {
       }
     }
     return {
-      'Examination E-Pins': examRevenue,
-      'Social Media Services': socialRevenue,
+      'Social Media Boosting': socialRevenue,
+      'Other Services (Exam E-Pins)': examRevenue,
     };
   }
 

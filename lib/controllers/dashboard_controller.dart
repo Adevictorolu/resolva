@@ -192,7 +192,7 @@ class DashboardController extends GetxController {
         id: 'NOTIF-WELCOME',
         title: 'Welcome to RESOLVA, $displayName!',
         message:
-            'Your account is active. Fund your wallet via Paystack or place your first order for Examination E-Pins and Social Media services.',
+            'Your account is active. Fund your wallet via Paystack to boost your social media accounts or access other services like Examination E-Pins.',
         date: DateTime.now(),
         type: NotificationType.support,
         isRead: false,

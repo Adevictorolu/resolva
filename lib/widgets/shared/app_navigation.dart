@@ -226,16 +226,16 @@ class ResolvaAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: Icons.grid_view_rounded,
       ),
       _NavItem(
-        label: 'Examination E-Pins',
-        isActive: currentIndex == 1,
-        onTap: () => onNavigate('/exam-pins'),
-        icon: Icons.school_rounded,
-      ),
-      _NavItem(
-        label: 'Social Media',
+        label: 'Social Media Boosting',
         isActive: currentIndex == 2,
         onTap: () => onNavigate('/social-media'),
         icon: Icons.trending_up_rounded,
+      ),
+      _NavItem(
+        label: 'Other Services (Exam E-Pins)',
+        isActive: currentIndex == 1,
+        onTap: () => onNavigate('/exam-pins'),
+        icon: Icons.school_rounded,
       ),
       _NavItem(
         label: 'CAC Registration',
@@ -610,19 +610,19 @@ class ResolvaDrawer extends StatelessWidget {
                     },
                   ),
                   _DrawerItem(
-                    icon: Icons.school_rounded,
-                    label: 'Examination E-Pins',
-                    onTap: () {
-                      Navigator.pop(context);
-                      onNavigate('/exam-pins');
-                    },
-                  ),
-                  _DrawerItem(
                     icon: Icons.trending_up_rounded,
-                    label: 'Social Media Services',
+                    label: 'Social Media Boosting',
                     onTap: () {
                       Navigator.pop(context);
                       onNavigate('/social-media');
+                    },
+                  ),
+                  _DrawerItem(
+                    icon: Icons.school_rounded,
+                    label: 'Other Services (Exam E-Pins)',
+                    onTap: () {
+                      Navigator.pop(context);
+                      onNavigate('/exam-pins');
                     },
                   ),
                   _DrawerItem(

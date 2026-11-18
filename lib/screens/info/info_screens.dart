@@ -137,7 +137,7 @@ class AboutScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'From students needing instant WAEC and JAMB examination pins at midnight, to content creators and entrepreneurs scaling social reach, and founders seeking friction-free corporate registration, RESOLVA serves as your dependable technological backbone.',
+                          'From content creators, influencers, and businesses scaling their social media reach across Instagram, TikTok, YouTube, X, Facebook & WhatsApp, to students accessing other services such as instant WAEC, NECO, NABTEB, and JAMB examination e-pins, RESOLVA serves as your dependable digital growth platform.',
                           style: GoogleFonts.montserrat(
                             fontSize: 15,
                             color: AppColors.textSecondary,

@@ -734,19 +734,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           builder: (context, constraints) {
             final actions = [
               _buildQuickActionCard(
-                'Buy Exam E-PIN',
-                'WAEC • NECO • NABTEB • JAMB',
-                Icons.school_rounded,
-                AppColors.royalBlue,
-                () => widget.onNavigate('/exam-pins'),
-                logos: const [
-                  'assets/images/waec_logo.png',
-                  'assets/images/neco_logo.png',
-                  'assets/images/nabteb_logo.png',
-                ],
-              ),
-              _buildQuickActionCard(
-                'Boost Social Media',
+                'Social Media Boosting',
                 'Instagram • TikTok • YouTube • X',
                 Icons.trending_up_rounded,
                 AppColors.emeraldGreen,
@@ -755,6 +743,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   'assets/images/instagram_logo.png',
                   'assets/images/tiktok_logo.png',
                   'assets/images/youtube_logo.png',
+                ],
+              ),
+              _buildQuickActionCard(
+                'Other Services · Exam E-Pins',
+                'WAEC • NECO • NABTEB • JAMB',
+                Icons.school_rounded,
+                AppColors.royalBlue,
+                () => widget.onNavigate('/exam-pins'),
+                logos: const [
+                  'assets/images/waec_logo.png',
+                  'assets/images/neco_logo.png',
+                  'assets/images/nabteb_logo.png',
                 ],
               ),
               _buildQuickActionCard(
@@ -852,7 +852,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Purchase an Examination E-Pin or Social Media service to see your order activity here.',
+                  'Start a Social Media Boosting order or purchase from Other Services (Examination E-Pins) to see your activity here.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.montserrat(
                     fontSize: 13,
@@ -2454,7 +2454,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 20),
                 _buildQuickActionCard(
-                  'Examination E-Pins',
+                  'Social Media Boosting',
+                  'Instagram, TikTok, YouTube, X, Facebook & WhatsApp',
+                  Icons.trending_up_rounded,
+                  AppColors.emeraldGreen,
+                  () {
+                    Navigator.pop(ctx);
+                    widget.onNavigate('/social-media');
+                  },
+                  logos: const [
+                    'assets/images/instagram_logo.png',
+                    'assets/images/tiktok_logo.png',
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildQuickActionCard(
+                  'Other Services — Examination E-Pins',
                   'WAEC, NECO, NABTEB & JAMB Scratch Cards',
                   Icons.school_rounded,
                   AppColors.royalBlue,
@@ -2465,21 +2480,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   logos: const [
                     'assets/images/waec_logo.png',
                     'assets/images/neco_logo.png',
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildQuickActionCard(
-                  'Social Media Services',
-                  'Instagram, TikTok, YouTube, X & Facebook',
-                  Icons.trending_up_rounded,
-                  AppColors.emeraldGreen,
-                  () {
-                    Navigator.pop(ctx);
-                    widget.onNavigate('/social-media');
-                  },
-                  logos: const [
-                    'assets/images/instagram_logo.png',
-                    'assets/images/tiktok_logo.png',
                   ],
                 ),
               ],

@@ -58,8 +58,8 @@ class ResolvaFooter extends StatelessWidget {
         Expanded(
           flex: 2,
           child: _buildLinksSection('Services', [
-            _FooterLink('Examination E-Pins', '/exam-pins'),
-            _FooterLink('Social Media Services', '/social-media'),
+            _FooterLink('Social Media Boosting', '/social-media'),
+            _FooterLink('Other Services: Exam E-Pins', '/exam-pins'),
             _FooterLink('CAC Registration', '/cac'),
           ]),
         ),
@@ -86,8 +86,8 @@ class ResolvaFooter extends StatelessWidget {
         _buildBrandSection(),
         const SizedBox(height: 32),
         _buildLinksSection('Services', [
-          _FooterLink('Examination E-Pins', '/exam-pins'),
-          _FooterLink('Social Media Services', '/social-media'),
+          _FooterLink('Social Media Boosting', '/social-media'),
+          _FooterLink('Other Services: Exam E-Pins', '/exam-pins'),
           _FooterLink('CAC Registration', '/cac'),
         ]),
         const SizedBox(height: 24),
