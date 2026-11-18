@@ -1,24 +1,22 @@
 -- ============================================================================
--- RESOLVA — Paystack Payment Gateway & Live Wallet Balance Migration
+-- RESOLVA — Paystack Wallet, Bigisub Server Proxy & Admin Platform Pricing
 -- ----------------------------------------------------------------------------
 -- Run this in: Supabase Dashboard → SQL Editor → New query → Run
 --
--- What this creates:
---   1. Adds `wallet_balance` column to `public.profiles`
---   2. Creates `public.payment_gateway_configs` for Paystack keys (RLS-protected)
---   3. Creates `public.wallet_transactions` with unique `reference` (idempotent)
---   4. Creates RPCs:
---      * `public.get_my_wallet_balance()`
---      * `public.credit_wallet_paystack(p_reference, p_amount, p_payment_method, p_channel, p_metadata)`
---      * `public.debit_wallet_for_order(p_reference, p_amount, p_description)`
+-- Security Architecture:
+--   * Secret API keys (`PAYSTACK_SECRET_KEY` and `BIGISUB_API_TOKEN`) are stored
+--     exclusively in Supabase Vault (`vault.secrets` / `vault.decrypted_secrets`)
+--     or `public.payment_gateway_configs` via the Admin RPC
+--     `public.admin_save_gateway_secret(...)` — never in GitHub source code.
+--   * `public.platform_settings` stores global & per-service pricing rules set
+--     by Administrators and is readable by all users so pricing updates propagate
+--     across all accounts immediately.
 -- ============================================================================
 
 -- 1. Add wallet_balance to public.profiles
 alter table public.profiles
   add column if not exists wallet_balance numeric(14, 2) not null default 0.00;
 
--- Guard wallet_balance in protect_profile_columns so clients can only modify it
--- via the verified SECURITY DEFINER wallet RPCs below (or as an admin).
 create or replace function public.protect_profile_columns()
 returns trigger
 language plpgsql
@@ -46,8 +44,8 @@ $$;
 -- 2. Payment Gateway Configuration table (RLS enabled, no direct client access)
 create table if not exists public.payment_gateway_configs (
   provider    text primary key,
-  public_key  text not null,
-  secret_key  text not null,
+  public_key  text not null default '',
+  secret_key  text not null default '',
   is_live     boolean not null default true,
   updated_at  timestamptz not null default now()
 );
@@ -55,29 +53,138 @@ create table if not exists public.payment_gateway_configs (
 alter table public.payment_gateway_configs enable row level security;
 revoke all on public.payment_gateway_configs from anon, authenticated;
 
-insert into public.payment_gateway_configs (provider, public_key, secret_key, is_live, updated_at)
-values
-  (
-    'paystack',
-    'pk_live_58d1473922bf544d0a24c1ffed660b6cb9a0c0e4',
-    encode(convert_to('sk_live_' || '117f91c44a40c630802bdb284111fa89897ac863', 'UTF8'), 'base64'),
-    true,
-    now()
-  ),
-  (
-    'bigisub',
-    'https://api.bigisub.ng',
-    'NTJmMDcwZWNkZDcyNmIxZmUwNmRlZDI5NTU4NjgzNjZmZDAwZWU3Ng==',
+-- Admin-only RPC to store/rotate gateway secrets in Supabase Vault & payment_gateway_configs
+create or replace function public.admin_save_gateway_secret(
+  p_provider   text,
+  p_public_key text,
+  p_secret_key text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_secret_name text;
+begin
+  if not public.is_admin() then
+    raise exception 'Administrators only';
+  end if;
+
+  insert into public.payment_gateway_configs (provider, public_key, secret_key, is_live, updated_at)
+  values (
+    lower(trim(p_provider)),
+    coalesce(trim(p_public_key), ''),
+    coalesce(trim(p_secret_key), ''),
     true,
     now()
   )
-on conflict (provider) do update
-  set public_key = excluded.public_key,
-      secret_key = excluded.secret_key,
-      is_live    = excluded.is_live,
-      updated_at = now();
+  on conflict (provider) do update
+    set public_key = case when trim(excluded.public_key) <> '' then excluded.public_key else public.payment_gateway_configs.public_key end,
+        secret_key = case when trim(excluded.secret_key) <> '' then excluded.secret_key else public.payment_gateway_configs.secret_key end,
+        updated_at = now();
 
--- 3. Wallet Transactions Ledger
+  -- Also sync into Supabase Vault (`vault.secrets`) if Vault extension is active
+  v_secret_name := case lower(trim(p_provider))
+    when 'bigisub' then 'BIGISUB_API_TOKEN'
+    when 'paystack' then 'PAYSTACK_SECRET_KEY'
+    else upper(trim(p_provider)) || '_SECRET_KEY'
+  end;
+
+  begin
+    if trim(coalesce(p_secret_key, '')) <> '' then
+      execute 'insert into vault.secrets (name, secret) values ($1, $2) on conflict (name) do update set secret = excluded.secret, updated_at = now()'
+        using v_secret_name, trim(p_secret_key);
+    end if;
+  exception when others then
+    -- Vault schema optional; `payment_gateway_configs` is always updated above.
+    null;
+  end;
+end;
+$$;
+
+revoke execute on function public.admin_save_gateway_secret(text, text, text) from public, anon;
+grant execute on function public.admin_save_gateway_secret(text, text, text)  to authenticated;
+
+-- Internal helper (SECURITY DEFINER, never callable by clients) to resolve a secret
+-- from Supabase Vault (`vault.decrypted_secrets`) or `public.payment_gateway_configs`.
+create or replace function public.resolve_gateway_secret(
+  p_provider    text,
+  p_vault_name  text
+)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_secret text;
+begin
+  begin
+    execute 'select decrypted_secret from vault.decrypted_secrets where name = $1 limit 1'
+      into v_secret
+      using p_vault_name;
+  exception when others then
+    v_secret := null;
+  end;
+
+  if v_secret is null or trim(v_secret) = '' then
+    select secret_key into v_secret
+    from public.payment_gateway_configs
+    where provider = lower(trim(p_provider));
+  end if;
+
+  return coalesce(trim(v_secret), '');
+end;
+$$;
+
+revoke all on function public.resolve_gateway_secret(text, text) from public, anon, authenticated;
+
+-- 3. Platform Settings (Service Pricing Rules & Admin Directory)
+create table if not exists public.platform_settings (
+  key        text primary key,
+  value      jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.platform_settings enable row level security;
+
+drop policy if exists "platform_settings: read all"    on public.platform_settings;
+drop policy if exists "platform_settings: admin write" on public.platform_settings;
+
+create policy "platform_settings: read all"
+  on public.platform_settings for select
+  to anon, authenticated
+  using (true);
+
+grant select on public.platform_settings to anon, authenticated;
+
+create or replace function public.admin_save_platform_setting(
+  p_key   text,
+  p_value jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Administrators only';
+  end if;
+
+  insert into public.platform_settings (key, value, updated_at)
+  values (trim(p_key), coalesce(p_value, '{}'::jsonb), now())
+  on conflict (key) do update
+    set value      = excluded.value,
+        updated_at = now();
+end;
+$$;
+
+revoke execute on function public.admin_save_platform_setting(text, jsonb) from public, anon;
+grant execute on function public.admin_save_platform_setting(text, jsonb)  to authenticated;
+
+-- 4. Wallet Transactions Ledger
 create table if not exists public.wallet_transactions (
   id              uuid primary key default gen_random_uuid(),
   user_id         uuid not null references auth.users (id) on delete cascade,
@@ -113,7 +220,7 @@ create policy "wallet_transactions: admins read all"
 
 grant select on public.wallet_transactions to authenticated;
 
--- 4. Wallet RPCs
+-- 5. Wallet RPCs
 create or replace function public.get_my_wallet_balance()
 returns numeric
 language sql
@@ -152,7 +259,6 @@ begin
     raise exception 'Amount must be greater than zero';
   end if;
 
-  -- Idempotency check: if reference already credited, return current balance
   if exists (
     select 1 from public.wallet_transactions
     where reference = trim(p_reference) and status = 'successful'
@@ -269,7 +375,7 @@ grant execute on function public.get_my_wallet_balance()                        
 grant execute on function public.credit_wallet_paystack(text, numeric, text, text, jsonb)      to authenticated;
 grant execute on function public.debit_wallet_for_order(text, numeric, text)                   to authenticated;
 
--- 5. Priority Service Orders: Social Media Boosting & Other Services (Exam E-Pins)
+-- 6. Priority Service Orders: Social Media Boosting & Other Services (Exam E-Pins)
 create table if not exists public.social_boosting_orders (
   id              uuid primary key default gen_random_uuid(),
   order_code      text not null unique,
@@ -361,7 +467,7 @@ $$;
 revoke execute on function public.create_service_order(text, text, text, text, int, numeric, text, text, text, text[]) from public, anon;
 grant execute on function public.create_service_order(text, text, text, text, int, numeric, text, text, text, text[])  to authenticated;
 
--- 6. Server-to-Server Bigisub API Proxy RPC (keeps BIGISUB_API_TOKEN secret inside Postgres)
+-- 7. Server-to-Server Bigisub API Proxy RPC (reads BIGISUB_API_TOKEN from Supabase Vault)
 create extension if not exists http with schema extensions;
 
 create or replace function public.bigisub_api_proxy(
@@ -375,28 +481,26 @@ security definer
 set search_path = public, extensions
 as $$
 declare
-  v_encoded_token text;
-  v_token         text;
-  v_url           text;
-  v_response      extensions.http_response;
+  v_token    text;
+  v_url      text;
+  v_response extensions.http_response;
 begin
   if auth.uid() is null then
     raise exception 'Not authenticated';
   end if;
 
-  -- Restrict proxy to Marketing Hub and Education endpoints only
   if p_path not like '/api/v2/marketinghub/%'
      and p_path not like '/api/v2/bills/result-checker/%'
      and p_path not like '/api/v2/bills/education/%' then
     raise exception 'Endpoint not permitted';
   end if;
 
-  select secret_key into v_encoded_token
-  from public.payment_gateway_configs
-  where provider = 'bigisub';
+  v_token := public.resolve_gateway_secret('bigisub', 'BIGISUB_API_TOKEN');
+  if v_token = '' then
+    raise exception 'BIGISUB_API_TOKEN not configured in Supabase Vault';
+  end if;
 
-  v_token := convert_from(decode(v_encoded_token, 'base64'), 'UTF8');
-  v_url   := 'https://api.bigisub.ng' || p_path;
+  v_url := 'https://api.bigisub.ng' || p_path;
 
   if upper(p_method) = 'POST' then
     select * into v_response
@@ -430,4 +534,3 @@ $$;
 
 revoke execute on function public.bigisub_api_proxy(text, text, jsonb) from public, anon;
 grant execute on function public.bigisub_api_proxy(text, text, jsonb)  to authenticated;
-

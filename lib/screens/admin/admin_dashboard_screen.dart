@@ -5,9 +5,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/config/supabase_config.dart';
 import '../../controllers/admin_controller.dart';
 import '../../controllers/auth_controller.dart';
+import '../../controllers/social_controller.dart';
+import '../../controllers/exam_controller.dart';
 import '../../data/models/admin_models.dart';
+import '../../data/models/social_service.dart';
+import '../../data/models/exam_product.dart';
+import '../../data/mock/mock_data.dart';
+import '../../services/pricing_service.dart';
 import '../../widgets/shared/app_navigation.dart';
 
 /// RESOLVA Admin Dashboard Screen.
@@ -15,9 +22,12 @@ import '../../widgets/shared/app_navigation.dart';
 /// Features:
 /// - Platform Analytics & Revenue Breakdown
 /// - User Management (Add User, Remove User, Suspend/Activate, View User Info)
+/// - Admin Team Management (Invite other admins to oversee system with total control)
+/// - Service Pricing Management (Adjust prices based on percentage % or fixed/per-unit ₦ across all users)
 /// - User Session Tracking (When users log in & log out, online status)
 /// - Last Purchase Inspector for each user
 /// - Live User Activities & Audit Feed
+/// - Supabase Secrets Vault Manager (Zero GitHub key exposure)
 class AdminDashboardScreen extends StatefulWidget {
   final Function(String) onNavigate;
   final int initialTab;
@@ -232,25 +242,76 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showAddUserDialog(context),
-                        icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                        label: const Text('Add New User'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.white,
-                          foregroundColor: AppColors.brandBlue,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 13,
-                          ),
-                          textStyle: GoogleFonts.montserrat(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _showInviteAdminDialog(context),
+                            icon: const Icon(Icons.security_rounded, size: 18),
+                            label: const Text('Add Administrator'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.accentGold,
+                              foregroundColor: AppColors.primaryNavy,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              textStyle: GoogleFonts.montserrat(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () => _showAddUserDialog(context),
+                                icon: const Icon(Icons.person_add_alt_1_rounded, size: 17),
+                                label: const Text('Add User'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.white,
+                                  foregroundColor: AppColors.brandBlue,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 11,
+                                  ),
+                                  textStyle: GoogleFonts.montserrat(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => _showGatewaySecretsDialog(context),
+                                icon: const Icon(Icons.vpn_key_rounded, size: 17),
+                                label: const Text('API Secrets'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.white,
+                                  side: BorderSide(
+                                    color: AppColors.white.withValues(alpha: 0.5),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 11,
+                                  ),
+                                  textStyle: GoogleFonts.montserrat(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 )
@@ -341,7 +402,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Manage users, monitor login/logout sessions, inspect last purchases & platform analytics.',
+                                  'Manage users, invite admins, set service pricing rules & inspect sessions in real time.',
                                   style: GoogleFonts.montserrat(
                                     fontSize: 13,
                                     color: AppColors.textSecondaryDark,
@@ -354,22 +415,63 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                     ),
                     const SizedBox(width: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => _showAddUserDialog(context),
-                      icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                      label: const Text('Add New User'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.white,
-                        foregroundColor: AppColors.brandBlue,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 14,
+                    Wrap(
+                      spacing: 10,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => _showGatewaySecretsDialog(context),
+                          icon: const Icon(Icons.vpn_key_rounded, size: 17),
+                          label: const Text('API Secrets Vault'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.white,
+                            side: BorderSide(
+                              color: AppColors.white.withValues(alpha: 0.5),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            textStyle: GoogleFonts.montserrat(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
-                        textStyle: GoogleFonts.montserrat(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                        ElevatedButton.icon(
+                          onPressed: () => _showInviteAdminDialog(context),
+                          icon: const Icon(Icons.security_rounded, size: 17),
+                          label: const Text('Add Administrator'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accentGold,
+                            foregroundColor: AppColors.primaryNavy,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 14,
+                            ),
+                            textStyle: GoogleFonts.montserrat(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ),
-                      ),
+                        ElevatedButton.icon(
+                          onPressed: () => _showAddUserDialog(context),
+                          icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                          label: const Text('Add New User'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.white,
+                            foregroundColor: AppColors.brandBlue,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 14,
+                            ),
+                            textStyle: GoogleFonts.montserrat(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -383,7 +485,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildMobileNavTabs() {
     final tabs = [
       {'icon': Icons.analytics_rounded, 'label': 'Analytics'},
-      {'icon': Icons.people_alt_rounded, 'label': 'Users Management'},
+      {'icon': Icons.people_alt_rounded, 'label': 'Users Directory'},
+      {'icon': Icons.tune_rounded, 'label': 'Pricing & Margins'},
+      {'icon': Icons.shield_rounded, 'label': 'Admin Team'},
       {'icon': Icons.history_rounded, 'label': 'Sessions & Activities'},
       {'icon': Icons.shopping_bag_rounded, 'label': 'Last Purchases'},
     ];
@@ -435,14 +539,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         'idx': 1,
       },
       {
+        'icon': Icons.tune_rounded,
+        'label': 'Service Pricing & Margins',
+        'idx': 2,
+      },
+      {
+        'icon': Icons.shield_rounded,
+        'label': 'Administrator Team',
+        'idx': 3,
+      },
+      {
         'icon': Icons.history_edu_rounded,
         'label': 'Login/Logout & Activity',
-        'idx': 2,
+        'idx': 4,
       },
       {
         'icon': Icons.shopping_bag_rounded,
         'label': 'Last Purchases Report',
-        'idx': 3,
+        'idx': 5,
       },
     ];
 
@@ -543,8 +657,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       case 1:
         return _buildUsersTab(isMobile);
       case 2:
-        return _buildActivitiesTab(isMobile);
+        return _buildPricingTab(isMobile);
       case 3:
+        return _buildAdminTeamTab(isMobile);
+      case 4:
+        return _buildActivitiesTab(isMobile);
+      case 5:
         return _buildLastPurchasesTab(isMobile);
       default:
         return _buildAnalyticsTab(isMobile);
@@ -2586,6 +2704,1539 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TAB 2: SERVICE PRICING & MARGINS (Percentage % or Per-unit ₦)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  Widget _buildPricingTab(bool isMobile) {
+    return Obx(() {
+      final pricing = PricingService.config.value;
+      final socialCtrl = Get.isRegistered<SocialController>()
+          ? Get.find<SocialController>()
+          : null;
+      final examCtrl = Get.isRegistered<ExamController>()
+          ? Get.find<ExamController>()
+          : null;
+
+      final allSocial = socialCtrl?.baseServices ?? mockSocialServices;
+      final allExams = examCtrl?.baseProducts ?? mockExamProducts;
+
+      // Filter social services for the overrides list
+      var displayedSocial = allSocial.toList();
+      final q = controller.pricingSearchQuery.value.trim().toLowerCase();
+      final plat = controller.pricingPlatformFilter.value.toLowerCase();
+      final reg = controller.pricingRegionFilter.value.toLowerCase();
+      final overridesOnly = controller.showCustomOverridesOnly.value;
+
+      if (plat != 'all') {
+        displayedSocial = displayedSocial
+            .where((s) => s.platformId.toLowerCase() == plat)
+            .toList();
+      }
+      if (reg != 'all') {
+        displayedSocial = displayedSocial
+            .where((s) => s.country.toLowerCase() == reg)
+            .toList();
+      }
+      if (overridesOnly) {
+        displayedSocial = displayedSocial.where((s) {
+          return pricing.overrides.containsKey(s.id) ||
+              pricing.overrides.containsKey('bgs-${s.bigisubServiceId}');
+        }).toList();
+      }
+      if (q.isNotEmpty) {
+        displayedSocial = displayedSocial.where((s) {
+          return s.name.toLowerCase().contains(q) ||
+              s.category.toLowerCase().contains(q) ||
+              s.platformId.toLowerCase().contains(q) ||
+              '${s.bigisubServiceId}'.contains(q);
+        }).toList();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header info banner
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.royalBlue.withValues(alpha: 0.08),
+                  AppColors.electricBlue.withValues(alpha: 0.04),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.royalBlue.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.royalBlue.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.price_change_rounded,
+                    color: AppColors.royalBlue,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Live Service Pricing & Margins Engine',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryNavy,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Adjust prices globally by percentage (%) or fixed Naira (+₦), apply regional rates, or set custom overrides for individual services. Every change broadcasts live to all customer accounts immediately.',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 12.5,
+                          color: AppColors.textSecondary,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Global Pricing Card
+          _buildGlobalPricingControls(pricing, isMobile),
+          const SizedBox(height: 24),
+
+          // Examination E-Pins Fast Price Controls
+          _buildExamPricingCard(pricing, allExams, isMobile),
+          const SizedBox(height: 24),
+
+          // Individual Service Overrides Table / Cards
+          _buildServiceOverridesSection(
+            pricing: pricing,
+            services: displayedSocial,
+            isMobile: isMobile,
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildGlobalPricingControls(
+    PlatformPricingConfig pricing,
+    bool isMobile,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Social Media Boosting Global Markup',
+                style: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryNavy,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.emeraldGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  pricing.socialGlobalMode == PriceRuleMode.percentage
+                      ? '+${pricing.socialGlobalValue.toStringAsFixed(1)}% Active'
+                      : '+₦${pricing.socialGlobalValue.toStringAsFixed(0)} Active',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.emeraldGreen,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Select whether Social Media Boosting services are marked up by a percentage (%) or fixed amount (₦).',
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Mode Toggle Chips
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('Percentage Markup (%)'),
+                selected: pricing.socialGlobalMode == PriceRuleMode.percentage,
+                onSelected: (val) {
+                  if (val) {
+                    controller.updateGlobalPricing(
+                      socialMode: PriceRuleMode.percentage,
+                    );
+                  }
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Fixed Amount (+₦)'),
+                selected: pricing.socialGlobalMode == PriceRuleMode.fixedMarkup,
+                onSelected: (val) {
+                  if (val) {
+                    controller.updateGlobalPricing(
+                      socialMode: PriceRuleMode.fixedMarkup,
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Preset Buttons
+          Text(
+            'Quick Markup Presets',
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildPresetButton(
+                label: 'Base Rate (0%)',
+                isSelected: pricing.socialGlobalValue == 0,
+                onTap: () => controller.updateGlobalPricing(socialValue: 0),
+              ),
+              _buildPresetButton(
+                label: '+5%',
+                isSelected: pricing.socialGlobalValue == 5,
+                onTap: () => controller.updateGlobalPricing(
+                  socialMode: PriceRuleMode.percentage,
+                  socialValue: 5,
+                ),
+              ),
+              _buildPresetButton(
+                label: '+10%',
+                isSelected: pricing.socialGlobalValue == 10,
+                onTap: () => controller.updateGlobalPricing(
+                  socialMode: PriceRuleMode.percentage,
+                  socialValue: 10,
+                ),
+              ),
+              _buildPresetButton(
+                label: '+15%',
+                isSelected: pricing.socialGlobalValue == 15,
+                onTap: () => controller.updateGlobalPricing(
+                  socialMode: PriceRuleMode.percentage,
+                  socialValue: 15,
+                ),
+              ),
+              _buildPresetButton(
+                label: '+20%',
+                isSelected: pricing.socialGlobalValue == 20,
+                onTap: () => controller.updateGlobalPricing(
+                  socialMode: PriceRuleMode.percentage,
+                  socialValue: 20,
+                ),
+              ),
+              _buildPresetButton(
+                label: '+25%',
+                isSelected: pricing.socialGlobalValue == 25,
+                onTap: () => controller.updateGlobalPricing(
+                  socialMode: PriceRuleMode.percentage,
+                  socialValue: 25,
+                ),
+              ),
+              _buildPresetButton(
+                label: '+₦200 Fixed',
+                isSelected: pricing.socialGlobalMode == PriceRuleMode.fixedMarkup &&
+                    pricing.socialGlobalValue == 200,
+                onTap: () => controller.updateGlobalPricing(
+                  socialMode: PriceRuleMode.fixedMarkup,
+                  socialValue: 200,
+                ),
+              ),
+              _buildPresetButton(
+                label: '+₦500 Fixed',
+                isSelected: pricing.socialGlobalMode == PriceRuleMode.fixedMarkup &&
+                    pricing.socialGlobalValue == 500,
+                onTap: () => controller.updateGlobalPricing(
+                  socialMode: PriceRuleMode.fixedMarkup,
+                  socialValue: 500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Regional Adjustments
+          Text(
+            'Regional Markup Adjustments',
+            style: GoogleFonts.montserrat(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryNavy,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Optionally add specific margin percentages to Nigeria, Ghana, or Global services.',
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 10,
+            children: [
+              _buildRegionalAdjustmentChip(
+                flag: '🇳🇬',
+                region: 'Nigeria',
+                percent: pricing.nigeriaRegionPercent,
+                onChanged: (val) =>
+                    controller.updateGlobalPricing(nigeriaRegionPct: val),
+              ),
+              _buildRegionalAdjustmentChip(
+                flag: '🇬🇭',
+                region: 'Ghana',
+                percent: pricing.ghanaRegionPercent,
+                onChanged: (val) =>
+                    controller.updateGlobalPricing(ghanaRegionPct: val),
+              ),
+              _buildRegionalAdjustmentChip(
+                flag: '🌍',
+                region: 'Global',
+                percent: pricing.globalRegionPercent,
+                onChanged: (val) =>
+                    controller.updateGlobalPricing(globalRegionPct: val),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPresetButton({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.royalBlue : AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? AppColors.royalBlue : AppColors.cardBorder,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.montserrat(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            color: isSelected ? AppColors.white : AppColors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegionalAdjustmentChip({
+    required String flag,
+    required String region,
+    required double percent,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(flag, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Text(
+            '$region: ',
+            style: GoogleFonts.montserrat(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryNavy,
+            ),
+          ),
+          Text(
+            percent >= 0 ? '+${percent.toStringAsFixed(0)}%' : '${percent.toStringAsFixed(0)}%',
+            style: GoogleFonts.montserrat(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              color: percent != 0 ? AppColors.royalBlue : AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(width: 8),
+          InkWell(
+            onTap: () => onChanged((percent + 5).clamp(-20.0, 100.0)),
+            child: const Icon(Icons.add_circle_outline, size: 18),
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: () => onChanged((percent - 5).clamp(-20.0, 100.0)),
+            child: const Icon(Icons.remove_circle_outline, size: 18),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExamPricingCard(
+    PlatformPricingConfig pricing,
+    List<ExamProduct> exams,
+    bool isMobile,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Examination E-Pins Pricing (WAEC, NECO, NABTEB)',
+                style: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryNavy,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.royalBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  pricing.examGlobalMode == PriceRuleMode.percentage
+                      ? '+${pricing.examGlobalValue.toStringAsFixed(1)}% Markup'
+                      : '+₦${pricing.examGlobalValue.toStringAsFixed(0)} Markup',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.royalBlue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Live customer prices for examination result checker PINs. Set global margin or individual price overrides per board.',
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Exam Products Cards
+          ...exams.map((product) {
+            final override = pricing.overrides[product.id] ??
+                pricing.overrides[product.examCode.toUpperCase()];
+            final basePrice = switch (product.examCode.toUpperCase()) {
+              'WAEC' => 5250.0,
+              'NECO' => 2500.0,
+              'NABTEB' => 1000.0,
+              _ => product.price,
+            };
+            final effectivePrice = pricing.effectiveExamPrice(product, basePrice);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceLight,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: override != null
+                      ? AppColors.royalBlue
+                      : AppColors.cardBorder,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.royalBlue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.school_rounded,
+                      color: AppColors.royalBlue,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              product.name,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryNavy,
+                              ),
+                            ),
+                            if (override != null) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accentGold,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'CUSTOM OVERRIDE',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 8.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primaryNavy,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Provider Base: ₦${_currencyFormat.format(basePrice)} • Customer Sees: ₦${_currencyFormat.format(effectivePrice)}',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 11.5,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _showEditExamPriceDialog(
+                      context,
+                      product,
+                      basePrice,
+                      effectivePrice,
+                    ),
+                    icon: const Icon(Icons.edit_rounded, size: 15),
+                    label: const Text('Edit Price'),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceOverridesSection({
+    required PlatformPricingConfig pricing,
+    required List<SocialService> services,
+    required bool isMobile,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  'Individual Service Price Overrides (759 Services)',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryNavy,
+                  ),
+                ),
+              ),
+              if (pricing.overrides.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () => controller.resetAllOverrides(),
+                  icon: const Icon(Icons.refresh_rounded, size: 15),
+                  label: const Text('Reset All Overrides'),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Override the price of any individual service. Set an exact price (=₦), percentage (+%), or fixed markup (+₦).',
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Search and Filters
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  onChanged: (val) => controller.pricingSearchQuery.value = val,
+                  decoration: InputDecoration(
+                    hintText: 'Search service name, ID, or category...',
+                    prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 11,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              FilterChip(
+                label: const Text('Overrides Only'),
+                selected: controller.showCustomOverridesOnly.value,
+                onSelected: (val) =>
+                    controller.showCustomOverridesOnly.value = val,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Services List
+          Text(
+            'Showing ${services.length} services',
+            style: GoogleFonts.montserrat(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          ...services.take(25).map((service) {
+            final override = pricing.overrides[service.id] ??
+                pricing.overrides['bgs-${service.bigisubServiceId}'];
+            final baseAmount = service.displayAmount;
+            final effectiveRate =
+                pricing.effectiveSocialRate(service, baseAmount);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceLight,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: override != null
+                      ? AppColors.royalBlue
+                      : AppColors.cardBorder,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                service.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primaryNavy,
+                                ),
+                              ),
+                            ),
+                            if (override != null) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accentGold,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'OVERRIDE (${override.mode.name})',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 8.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primaryNavy,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'ID: ${service.id} • ${service.platformId.toUpperCase()} • ${service.countryLabel} • Base: ₦${baseAmount.toStringAsFixed(2)} ${service.displayUnit} • User Sees: ₦${effectiveRate.toStringAsFixed(2)} ${service.displayUnit}',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => _showEditSocialPriceDialog(
+                      context,
+                      service,
+                      baseAmount,
+                      effectiveRate,
+                      override,
+                    ),
+                    child: const Text('Adjust'),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TAB 3: ADMINISTRATOR TEAM & ACCESS CONTROL
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  Widget _buildAdminTeamTab(bool isMobile) {
+    return Obx(() {
+      final admins = controller.adminUsers;
+      final invitedEmails = PricingService.config.value.adminEmails;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Banner
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryNavy.withValues(alpha: 0.08),
+                  AppColors.royalBlue.withValues(alpha: 0.04),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.primaryNavy.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryNavy.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.shield_rounded,
+                    color: AppColors.primaryNavy,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Administrative Access & Governance',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryNavy,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Administrators have full administrative authority over the RESOLVA system: viewing registered users, inspecting session activity, managing platform pricing, and overseeing order fulfillment.',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 12.5,
+                          color: AppColors.textSecondary,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Administrators Card
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.cardBorder),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Platform Administrators (${admins.length})',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryNavy,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${invitedEmails.length} authorized administrator email${invitedEmails.length == 1 ? '' : 's'}',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showInviteAdminDialog(context),
+                      icon: const Icon(Icons.person_add_rounded, size: 16),
+                      label: const Text('Add Administrator'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryNavy,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                ...admins.map((admin) {
+                  final isPrimary = admin.email.toLowerCase() ==
+                      SupabaseConfig.primaryAdminEmail.toLowerCase();
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isPrimary
+                          ? AppColors.royalBlue.withValues(alpha: 0.05)
+                          : AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isPrimary
+                            ? AppColors.royalBlue.withValues(alpha: 0.3)
+                            : AppColors.cardBorder,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: isPrimary
+                              ? AppColors.royalBlue
+                              : AppColors.primaryNavy,
+                          child: Text(
+                            admin.fullName.isNotEmpty
+                                ? admin.fullName[0].toUpperCase()
+                                : 'A',
+                            style: GoogleFonts.montserrat(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Text(
+                                    admin.fullName,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.primaryNavy,
+                                    ),
+                                  ),
+                                  if (isPrimary)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.accentGold,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'PRIMARY ADMIN',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.primaryNavy,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.emeraldGreen
+                                            .withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'ADMINISTRATOR',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.emeraldGreen,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${admin.email} • ${admin.phone}',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                admin.isCurrentlyOnline
+                                    ? '🟢 Currently Online'
+                                    : (admin.lastLoginAt != null
+                                        ? 'Last active: ${_dateTimeFormat.format(admin.lastLoginAt!)}'
+                                        : 'Account created'),
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 11,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!isPrimary)
+                          IconButton(
+                            icon: const Icon(
+                              Icons.remove_circle_outline,
+                              color: AppColors.error,
+                            ),
+                            tooltip: 'Revoke Administrator Access',
+                            onPressed: () => _confirmRevokeAdmin(context, admin.email),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  // ──────────────────── DIALOGS & MODALS ────────────────────
+
+  void _showInviteAdminDialog(BuildContext context) {
+    final emailCtrl = TextEditingController();
+    final nameCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(26),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Add Administrator',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryNavy,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Grant administrator privileges to an email. They will oversee the system, manage pricing, view registered users, and inspect session logs.',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  TextFormField(
+                    controller: emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Admin Email Address',
+                      hintText: 'admin@resolva.ng',
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                    validator: (v) =>
+                        v == null || !v.contains('@') ? 'Enter a valid email' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: nameCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Full Name (Optional)',
+                      hintText: 'e.g. Victor Ademola',
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (formKey.currentState!.validate()) {
+                          await controller.inviteAdmin(
+                            email: emailCtrl.text,
+                            fullName: nameCtrl.text.isNotEmpty
+                                ? nameCtrl.text
+                                : null,
+                          );
+                          if (!ctx.mounted) return;
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Added ${emailCtrl.text} as Administrator. They now have full system control.',
+                              ),
+                              backgroundColor: AppColors.emeraldGreen,
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryNavy,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text('Add Administrator'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmRevokeAdmin(BuildContext context, String email) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Revoke Administrator?'),
+        content: Text(
+          'Are you sure you want to remove administrator privileges from $email? They will be changed to a regular customer account.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await controller.revokeAdmin(email);
+              if (!ctx.mounted) return;
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Revoked admin privileges from $email.')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Revoke'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGatewaySecretsDialog(BuildContext context) {
+    final bigisubCtrl = TextEditingController();
+    final paystackSecretCtrl = TextEditingController();
+    final paystackPublicCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Supabase Secrets Vault',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primaryNavy,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'All sensitive API keys are securely placed inside Supabase Vault & backend server storage. No secrets exist in GitHub commits or client-side bundles.',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 12.5,
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                TextFormField(
+                  controller: bigisubCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Bigisub API Token (Marketing Hub & Education)',
+                    hintText: 'Paste token to rotate in Supabase Vault',
+                    prefixIcon: Icon(Icons.token_rounded),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: paystackSecretCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Paystack Live Secret Key',
+                    hintText: 'sk_live_...',
+                    prefixIcon: Icon(Icons.lock_outline),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: paystackPublicCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Paystack Live Public Key',
+                    hintText: 'pk_live_...',
+                    prefixIcon: Icon(Icons.vpn_key_outlined),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (bigisubCtrl.text.trim().isNotEmpty) {
+                        await controller.saveGatewaySecretToSupabase(
+                          provider: 'bigisub',
+                          secretKey: bigisubCtrl.text.trim(),
+                        );
+                      }
+                      if (paystackSecretCtrl.text.trim().isNotEmpty) {
+                        await controller.saveGatewaySecretToSupabase(
+                          provider: 'paystack',
+                          publicKey: paystackPublicCtrl.text.trim(),
+                          secretKey: paystackSecretCtrl.text.trim(),
+                        );
+                      }
+                      if (!ctx.mounted) return;
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Secrets successfully updated in Supabase Vault with zero GitHub exposure.',
+                          ),
+                          backgroundColor: AppColors.emeraldGreen,
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryNavy,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text('Save to Supabase Vault'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditSocialPriceDialog(
+    BuildContext context,
+    SocialService service,
+    double baseAmount,
+    double effectiveRate,
+    ServicePriceOverride? existingOverride,
+  ) {
+    PriceRuleMode selectedMode =
+        existingOverride?.mode ?? PriceRuleMode.percentage;
+    final valueCtrl = TextEditingController(
+      text: existingOverride != null
+          ? existingOverride.value.toString()
+          : '15.0',
+    );
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final enteredVal = double.tryParse(valueCtrl.text) ?? 0.0;
+          final previewRate = switch (selectedMode) {
+            PriceRuleMode.percentage =>
+              baseAmount * (1.0 + (enteredVal / 100.0)),
+            PriceRuleMode.fixedMarkup => baseAmount + enteredVal,
+            PriceRuleMode.exactPrice => enteredVal > 0 ? enteredVal : baseAmount,
+          };
+
+          return AlertDialog(
+            title: Text(
+              'Set Service Price: ${service.name}',
+              style: GoogleFonts.montserrat(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Provider Base Rate: ₦${baseAmount.toStringAsFixed(2)} ${service.displayUnit}',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<PriceRuleMode>(
+                  initialValue: selectedMode,
+                  decoration: const InputDecoration(labelText: 'Pricing Mode'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: PriceRuleMode.percentage,
+                      child: Text('Percentage Markup (+%)'),
+                    ),
+                    DropdownMenuItem(
+                      value: PriceRuleMode.fixedMarkup,
+                      child: Text('Fixed Markup (+₦)'),
+                    ),
+                    DropdownMenuItem(
+                      value: PriceRuleMode.exactPrice,
+                      child: Text('Exact Custom Price (=₦)'),
+                    ),
+                  ],
+                  onChanged: (mode) {
+                    if (mode != null) {
+                      setDialogState(() => selectedMode = mode);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: valueCtrl,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: selectedMode == PriceRuleMode.percentage
+                        ? 'Percentage Value (%)'
+                        : 'Naira Amount (₦)',
+                  ),
+                  onChanged: (_) => setDialogState(() {}),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.royalBlue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Preview Customer Price: ₦${previewRate.toStringAsFixed(2)} ${service.displayUnit}',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.royalBlue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              if (existingOverride != null)
+                TextButton(
+                  onPressed: () async {
+                    await controller.removeServicePriceOverride(service.id);
+                    if (!ctx.mounted) return;
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text('Clear Override'),
+                ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final val = double.tryParse(valueCtrl.text) ?? 0.0;
+                  await controller.setServicePriceOverride(
+                    serviceId: service.id,
+                    mode: selectedMode,
+                    value: val,
+                  );
+                  if (!ctx.mounted) return;
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Apply Price'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showEditExamPriceDialog(
+    BuildContext context,
+    ExamProduct product,
+    double basePrice,
+    double effectivePrice,
+  ) {
+    final valueCtrl = TextEditingController(text: effectivePrice.toStringAsFixed(0));
+    PriceRuleMode selectedMode = PriceRuleMode.exactPrice;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final enteredVal = double.tryParse(valueCtrl.text) ?? 0.0;
+          final previewPrice = switch (selectedMode) {
+            PriceRuleMode.percentage =>
+              basePrice * (1.0 + (enteredVal / 100.0)),
+            PriceRuleMode.fixedMarkup => basePrice + enteredVal,
+            PriceRuleMode.exactPrice => enteredVal > 0 ? enteredVal : basePrice,
+          };
+
+          return AlertDialog(
+            title: Text(
+              'Set ${product.name} Price',
+              style: GoogleFonts.montserrat(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Provider Base Price: ₦${_currencyFormat.format(basePrice)}',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<PriceRuleMode>(
+                  initialValue: selectedMode,
+                  decoration: const InputDecoration(labelText: 'Pricing Mode'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: PriceRuleMode.exactPrice,
+                      child: Text('Exact Price (=₦)'),
+                    ),
+                    DropdownMenuItem(
+                      value: PriceRuleMode.fixedMarkup,
+                      child: Text('Fixed Markup (+₦)'),
+                    ),
+                    DropdownMenuItem(
+                      value: PriceRuleMode.percentage,
+                      child: Text('Percentage Markup (+%)'),
+                    ),
+                  ],
+                  onChanged: (mode) {
+                    if (mode != null) {
+                      setDialogState(() => selectedMode = mode);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: valueCtrl,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: selectedMode == PriceRuleMode.percentage
+                        ? 'Percentage Value (%)'
+                        : 'Naira Amount (₦)',
+                  ),
+                  onChanged: (_) => setDialogState(() {}),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.royalBlue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Customer Price per PIN: ₦${_currencyFormat.format(previewPrice)}',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.royalBlue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final val = double.tryParse(valueCtrl.text) ?? 0.0;
+                  await controller.setServicePriceOverride(
+                    serviceId: product.examCode.toUpperCase(),
+                    mode: selectedMode,
+                    value: val,
+                  );
+                  if (!ctx.mounted) return;
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Apply Price'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

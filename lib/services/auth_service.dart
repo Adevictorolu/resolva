@@ -206,7 +206,27 @@ class AuthService {
   static Future<void> adminDeleteUser(String userId) =>
       _client.rpc('admin_delete_user', params: {'target': userId});
 
+  /// Stores or updates a gateway secret (`bigisub` or `paystack`) inside
+  /// Supabase Vault (`vault.secrets`) and `public.payment_gateway_configs`.
+  static Future<void> adminSaveGatewaySecret({
+    required String provider,
+    String publicKey = '',
+    required String secretKey,
+  }) async {
+    if (!isEnabled) return;
+    await _client.rpc(
+      'admin_save_gateway_secret',
+      params: {
+        'p_provider': provider.trim().toLowerCase(),
+        'p_public_key': publicKey.trim(),
+        'p_secret_key': secretKey.trim(),
+      },
+    );
+  }
+
   // ──────────────── Wallet & Paystack Cloud Sync ────────────────
+
+  static bool _walletRpcsAvailable = true;
 
   /// Fetches the user's wallet balance from `public.profiles` (via RPC) and/or
   /// `auth.users.user_metadata` so the balance persists across devices and refreshes.
@@ -216,15 +236,21 @@ class AuthService {
     if (user == null) return null;
 
     double? rpcBalance;
-    try {
-      final res = await _client.rpc('get_my_wallet_balance');
-      if (res is num) {
-        rpcBalance = res.toDouble();
-      } else if (res != null) {
-        rpcBalance = double.tryParse(res.toString());
-      }
-    } catch (_) {
-      // RPC may not be installed yet if migration 20261110000000 hasn't been run.
+    if (_walletRpcsAvailable) {
+      try {
+        final res = await _client
+            .rpc('get_my_wallet_balance')
+            .timeout(const Duration(seconds: 4));
+        if (res is num) {
+          rpcBalance = res.toDouble();
+        } else if (res != null) {
+          rpcBalance = double.tryParse(res.toString());
+        }
+      } on PostgrestException catch (e) {
+        if (e.code == 'PGRST202' || e.code == '42883') {
+          _walletRpcsAvailable = false;
+        }
+      } catch (_) {}
     }
 
     final meta = user.userMetadata ?? const <String, dynamic>{};
@@ -263,22 +289,30 @@ class AuthService {
 
     double effectiveBalance = newBalance;
 
-    // 1. Try SQL RPC on public.profiles + public.wallet_transactions
-    try {
-      final rpcRes = await _client.rpc(
-        'credit_wallet_paystack',
-        params: {
-          'p_reference': reference,
-          'p_amount': amount,
-          'p_payment_method': paymentMethod,
-          'p_channel': channel,
-          'p_metadata': metadata,
-        },
-      );
-      if (rpcRes is num) {
-        effectiveBalance = rpcRes.toDouble();
-      }
-    } catch (_) {}
+    // 1. Try SQL RPC on public.profiles + public.wallet_transactions if available
+    if (_walletRpcsAvailable) {
+      try {
+        final rpcRes = await _client
+            .rpc(
+              'credit_wallet_paystack',
+              params: {
+                'p_reference': reference,
+                'p_amount': amount,
+                'p_payment_method': paymentMethod,
+                'p_channel': channel,
+                'p_metadata': metadata,
+              },
+            )
+            .timeout(const Duration(seconds: 4));
+        if (rpcRes is num) {
+          effectiveBalance = rpcRes.toDouble();
+        }
+      } on PostgrestException catch (e) {
+        if (e.code == 'PGRST202' || e.code == '42883') {
+          _walletRpcsAvailable = false;
+        }
+      } catch (_) {}
+    }
 
     // 2. Always persist to Supabase Auth user_metadata so balance is saved in cloud immediately
     try {
@@ -307,16 +341,24 @@ class AuthService {
   }) async {
     if (!isEnabled || currentUser == null) return;
 
-    try {
-      await _client.rpc(
-        'debit_wallet_for_order',
-        params: {
-          'p_reference': reference,
-          'p_amount': amount,
-          'p_description': description,
-        },
-      );
-    } catch (_) {}
+    if (_walletRpcsAvailable) {
+      try {
+        await _client
+            .rpc(
+              'debit_wallet_for_order',
+              params: {
+                'p_reference': reference,
+                'p_amount': amount,
+                'p_description': description,
+              },
+            )
+            .timeout(const Duration(seconds: 4));
+      } on PostgrestException catch (e) {
+        if (e.code == 'PGRST202' || e.code == '42883') {
+          _walletRpcsAvailable = false;
+        }
+      } catch (_) {}
+    }
 
     try {
       await _client.auth.updateUser(
@@ -348,23 +390,31 @@ class AuthService {
   }) async {
     if (!isEnabled || currentUser == null) return;
 
-    try {
-      await _client.rpc(
-        'create_service_order',
-        params: {
-          'p_order_code': orderCode,
-          'p_category': category,
-          'p_product_name': productName,
-          'p_target_url': targetUrl,
-          'p_quantity': quantity,
-          'p_amount': amount,
-          'p_payment_method': paymentMethod,
-          'p_status': status,
-          'p_details': details,
-          'p_pins': pins,
-        },
-      );
-    } catch (_) {}
+    if (_walletRpcsAvailable) {
+      try {
+        await _client
+            .rpc(
+              'create_service_order',
+              params: {
+                'p_order_code': orderCode,
+                'p_category': category,
+                'p_product_name': productName,
+                'p_target_url': targetUrl,
+                'p_quantity': quantity,
+                'p_amount': amount,
+                'p_payment_method': paymentMethod,
+                'p_status': status,
+                'p_details': details,
+                'p_pins': pins,
+              },
+            )
+            .timeout(const Duration(seconds: 4));
+      } on PostgrestException catch (e) {
+        if (e.code == 'PGRST202' || e.code == '42883') {
+          _walletRpcsAvailable = false;
+        }
+      } catch (_) {}
+    }
 
     try {
       await _client.auth.updateUser(

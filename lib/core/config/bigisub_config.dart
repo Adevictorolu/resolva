@@ -1,18 +1,13 @@
-import 'dart:convert';
-
 /// Bigisub API configuration for RESOLVA (Social Media Boosting / Marketing Hub
 /// & Other Services — Examination E-Pins / Education).
 ///
 /// Documentation: https://rif.africa/technotronics/api/bigisub
 /// Base URL: https://api.bigisub.ng
-/// Auth Header: `Authorization: Token <token>`
 ///
-/// Token can be injected at build time via:
-/// ```bash
-/// flutter build web --release \
-///   --dart-define=BIGISUB_API_TOKEN=... \
-///   --dart-define=BIGISUB_PIN=...
-/// ```
+/// Security Note:
+/// - `BIGISUB_API_TOKEN` is stored exclusively in Supabase Secrets / Vault
+///   (`vault.decrypted_secrets` / `bigisub-proxy` Edge Function / `bigisub_api_proxy` RPC)
+///   and is never committed to GitHub.
 class BigisubConfig {
   BigisubConfig._();
 
@@ -24,25 +19,26 @@ class BigisubConfig {
   static const String _envPin =
       String.fromEnvironment('BIGISUB_PIN', defaultValue: '1234');
 
-  // Encoded runtime fallback so raw secret tokens are never exposed in source commits.
-  static const String _encodedTokenFallback =
-      'NTJmMDcwZWNkZDcyNmIxZmUwNmRlZDI5NTU4NjgzNjZmZDAwZWU3Ng==';
+  static String _runtimeToken = '';
 
-  /// Permanent Bigisub API Token used in `Authorization: Token <apiToken>`.
-  static String get apiToken {
-    if (_envApiToken.isNotEmpty) return _envApiToken;
-    return utf8.decode(base64Decode(_encodedTokenFallback));
+  /// Allows an authenticated session to hydrate the token from Supabase Vault/Admin settings if needed.
+  static void setRuntimeToken(String token) {
+    _runtimeToken = token.trim();
   }
+
+  /// Optional local token if provided at runtime; production calls route through Supabase Proxy.
+  static String get apiToken =>
+      _runtimeToken.isNotEmpty ? _runtimeToken : _envApiToken;
 
   /// Default 4-digit PIN for Bigisub Education Result Checker purchases if user PIN is 6 digits.
   static String get defaultPin => _envPin;
 
-  /// Authorization header map required on every Bigisub API request.
+  /// Authorization header map when calling Bigisub directly.
   static Map<String, String> get headers => {
-        'Authorization': 'Token $apiToken',
+        if (apiToken.isNotEmpty) 'Authorization': 'Token $apiToken',
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       };
 
-  static bool get isConfigured => apiToken.isNotEmpty;
+  static bool get hasDirectToken => apiToken.isNotEmpty;
 }

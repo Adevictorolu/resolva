@@ -2,10 +2,12 @@ import 'package:get/get.dart';
 import '../data/models/social_service.dart';
 import '../data/mock/mock_data.dart';
 import '../services/bigisub_service.dart';
+import '../services/pricing_service.dart';
 
 /// Controller for the Social Media Boosting (Bigisub Marketing Hub) marketplace.
 class SocialController extends GetxController {
   final platforms = mockPlatforms;
+  final List<SocialService> _baseServices = <SocialService>[];
   final services = <SocialService>[].obs;
   final filteredServices = <SocialService>[].obs;
 
@@ -43,12 +45,33 @@ class SocialController extends GetxController {
     ('ghana', 'Ghana 🇬🇭'),
   ];
 
+  List<SocialService> get baseServices => List.unmodifiable(_baseServices);
+
   @override
   void onInit() {
     super.onInit();
-    services.assignAll(mockSocialServices);
-    filteredServices.assignAll(mockSocialServices);
+    _baseServices.assignAll(mockSocialServices);
+    PricingService.addListener((_) => applyPricingRules());
+    PricingService.initialize();
+    applyPricingRules();
     _hydrateBigisubCatalog();
+  }
+
+  /// Applies the latest admin pricing rules to all Social Media Boosting services.
+  void applyPricingRules() {
+    final priced = _baseServices
+        .map((s) => PricingService.applyToSocialService(s, s.displayAmount))
+        .toList();
+    services.assignAll(priced);
+    if (selectedService.value != null) {
+      final currentId = selectedService.value!.id;
+      final updatedSelected =
+          priced.firstWhereOrNull((s) => s.id == currentId);
+      if (updatedSelected != null) {
+        selectedService.value = updatedSelected;
+      }
+    }
+    _applyFilters();
   }
 
   Future<void> _hydrateBigisubCatalog() async {
@@ -56,16 +79,17 @@ class SocialController extends GetxController {
     try {
       final catalog = await BigisubService.loadCatalog();
       if (catalog.marketingServices.isNotEmpty) {
-        // Place Nigeria services first so local earners appear prominently, followed by Global & Ghana
         final sorted = catalog.marketingServices.toList()
           ..sort((a, b) {
-            final ca = a.country == 'nigeria' ? 0 : (a.country == 'global' ? 1 : 2);
-            final cb = b.country == 'nigeria' ? 0 : (b.country == 'global' ? 1 : 2);
+            final ca =
+                a.country == 'nigeria' ? 0 : (a.country == 'global' ? 1 : 2);
+            final cb =
+                b.country == 'nigeria' ? 0 : (b.country == 'global' ? 1 : 2);
             if (ca != cb) return ca.compareTo(cb);
             return a.startingPrice.compareTo(b.startingPrice);
           });
-        services.assignAll(sorted);
-        _applyFilters();
+        _baseServices.assignAll(sorted);
+        applyPricingRules();
       }
     } finally {
       isLoadingCatalog.value = false;

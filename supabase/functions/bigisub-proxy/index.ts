@@ -1,6 +1,9 @@
 // Supabase Edge Function: bigisub-proxy
 // Secure server-side proxy for Bigisub Marketing Hub (Social Media Boosting)
 // & Education (Examination E-Pins) APIs (`https://api.bigisub.ng`).
+//
+// Configure secret in Supabase Dashboard -> Edge Functions -> Secrets (or CLI):
+//   supabase secrets set BIGISUB_API_TOKEN=<your-bigisub-token>
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
@@ -10,15 +13,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const FALLBACK_ENCODED_TOKEN =
-  "NTJmMDcwZWNkZDcyNmIxZmUwNmRlZDI5NTU4NjgzNjZmZDAwZWU3Ng==";
-
 function resolveBigisubToken(): string {
-  const envToken = Deno.env.get("BIGISUB_API_TOKEN");
-  if (envToken && envToken.trim().length > 0) {
-    return envToken.trim();
-  }
-  return atob(FALLBACK_ENCODED_TOKEN);
+  return (Deno.env.get("BIGISUB_API_TOKEN") ?? "").trim();
 }
 
 serve(async (req: Request) => {
@@ -52,6 +48,20 @@ serve(async (req: Request) => {
     }
 
     const token = resolveBigisubToken();
+    if (!token) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message:
+            "BIGISUB_API_TOKEN is not configured in Supabase Secrets.",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const targetUrl = `https://api.bigisub.ng${path}`;
 
     const upstreamRes = await fetch(targetUrl, {

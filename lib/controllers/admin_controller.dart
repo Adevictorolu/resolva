@@ -1,10 +1,17 @@
 import 'package:get/get.dart';
+import '../core/config/bigisub_config.dart';
+import '../core/config/supabase_config.dart';
 import '../data/models/admin_models.dart';
 import '../data/mock/mock_data.dart';
 import '../services/auth_service.dart';
+import '../services/bigisub_service.dart';
+import '../services/pricing_service.dart';
+import 'exam_controller.dart';
+import 'social_controller.dart';
 
 /// Controller managing the RESOLVA Admin Dashboard:
-/// - Adding & removing users
+/// - Adding & removing users and administrators
+/// - Setting global & per-service pricing (percentage `%` or fixed/per-unit `₦`)
 /// - Toggling user status (Active / Suspended)
 /// - Viewing user information & last purchase details
 /// - Tracking user login/logout sessions & live activities
@@ -21,6 +28,12 @@ class AdminController extends GetxController {
   final activityFilter = 'All'.obs; // All, Logins, Logouts, Purchases, Account Changes
   final activitySearchQuery = ''.obs;
 
+  // Service Pricing Management filters
+  final pricingSearchQuery = ''.obs;
+  final pricingPlatformFilter = 'all'.obs;
+  final pricingRegionFilter = 'all'.obs;
+  final showCustomOverridesOnly = false.obs;
+
   // Selected user for detailed profile modal/drawer
   final selectedUser = Rxn<AdminUserRecord>();
 
@@ -30,6 +43,7 @@ class AdminController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    PricingService.initialize();
     if (AuthService.isEnabled) {
       loadFromBackend();
     } else {
@@ -45,7 +59,8 @@ class AdminController extends GetxController {
   final isLoadingUsers = false.obs;
   final backendError = ''.obs;
 
-  /// Loads every profile from Supabase (admins only; enforced by RLS).
+  /// Loads every profile from Supabase (admins only; enforced by RLS) and merges
+  /// any invited administrator emails from `PricingService.config.value.adminEmails`.
   Future<void> loadFromBackend() async {
     if (!AuthService.isEnabled) return;
     isLoadingUsers.value = true;
@@ -53,6 +68,30 @@ class AdminController extends GetxController {
     try {
       final profiles = await AuthService.adminListProfiles();
       final backendRecords = profiles.map(_recordFromProfile).toList();
+
+      // Ensure any invited admin emails that haven't signed up yet are also visible
+      for (final adminEmail in PricingService.config.value.adminEmails) {
+        final exists = backendRecords.any(
+          (u) => u.email.toLowerCase() == adminEmail.toLowerCase(),
+        );
+        if (!exists) {
+          backendRecords.insert(
+            0,
+            AdminUserRecord(
+              id: 'ADM-${adminEmail.hashCode.abs().toString().substring(0, 4)}',
+              fullName: '${adminEmail.split('@').first} (Admin)',
+              email: adminEmail,
+              phone: 'Invited Admin',
+              role: UserRole.admin,
+              status: UserStatus.active,
+              joinedAt: DateTime.now(),
+              hasPinConfigured: true,
+              hasAcceptedPolicies: true,
+            ),
+          );
+        }
+      }
+
       users.assignAll(backendRecords);
       _applyUserFilters();
     } catch (e) {
@@ -63,12 +102,16 @@ class AdminController extends GetxController {
   }
 
   AdminUserRecord _recordFromProfile(UserProfile p) {
+    final normalizedEmail = p.email.trim().toLowerCase();
+    final isListedAdmin =
+        PricingService.config.value.adminEmails.contains(normalizedEmail) ||
+        normalizedEmail == SupabaseConfig.primaryAdminEmail.toLowerCase();
     return AdminUserRecord(
       id: p.id,
       fullName: p.fullName.isNotEmpty ? p.fullName : p.email.split('@').first,
       email: p.email,
       phone: p.phone.isNotEmpty ? p.phone : 'Not provided',
-      role: p.isAdmin ? UserRole.admin : UserRole.customer,
+      role: (p.isAdmin || isListedAdmin) ? UserRole.admin : UserRole.customer,
       status: switch (p.status) {
         'active' => UserStatus.active,
         'suspended' => UserStatus.suspended,
@@ -80,6 +123,9 @@ class AdminController extends GetxController {
       hasAcceptedPolicies: p.acceptedTermsVersion.isNotEmpty,
     );
   }
+
+  List<AdminUserRecord> get adminUsers =>
+      users.where((u) => u.role == UserRole.admin).toList();
 
   // ──────────────────── ANALYTICS GETTERS ────────────────────
 
@@ -560,6 +606,206 @@ class AdminController extends GetxController {
     );
     activityLogs.insert(0, log);
     _applyActivityFilters();
+  }
+
+  // ──────────────────── ADMIN INVITATION & TEAM MANAGEMENT ────────────────────
+
+  /// Adds a new administrator by email. This updates `PricingService.config`
+  /// and `public.admin_emails` so the new admin can log in and oversee the dashboard.
+  Future<void> inviteAdmin({
+    required String email,
+    String? fullName,
+    String? phone,
+  }) async {
+    final cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail.isEmpty || !cleanEmail.contains('@')) return;
+
+    final currentAdmins =
+        List<String>.from(PricingService.config.value.adminEmails);
+    if (!currentAdmins.contains(cleanEmail)) {
+      currentAdmins.add(cleanEmail);
+      await PricingService.saveConfig(
+        PricingService.config.value.copyWith(adminEmails: currentAdmins),
+      );
+    }
+
+    addUser(
+      fullName: (fullName != null && fullName.trim().isNotEmpty)
+          ? fullName.trim()
+          : cleanEmail.split('@').first,
+      email: cleanEmail,
+      phone: (phone != null && phone.trim().isNotEmpty) ? phone.trim() : 'Admin Team',
+      role: UserRole.admin,
+      status: UserStatus.active,
+    );
+
+    recordActivity(
+      userId: 'ADM-${cleanEmail.hashCode.abs().toString().substring(0, 4)}',
+      userName: fullName ?? cleanEmail.split('@').first,
+      userEmail: cleanEmail,
+      type: ActivityType.statusChanged,
+      description: 'Added as Administrator by Primary Admin',
+    );
+  }
+
+  /// Revokes administrator privileges from an email address (primary admin cannot be removed).
+  Future<void> revokeAdmin(String email) async {
+    final cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail == SupabaseConfig.primaryAdminEmail.toLowerCase()) return;
+
+    final currentAdmins =
+        List<String>.from(PricingService.config.value.adminEmails);
+    currentAdmins.remove(cleanEmail);
+    await PricingService.saveConfig(
+      PricingService.config.value.copyWith(adminEmails: currentAdmins),
+    );
+
+    final idx = users.indexWhere((u) => u.email.toLowerCase() == cleanEmail);
+    if (idx != -1) {
+      users[idx] = users[idx].copyWith(role: UserRole.customer);
+      _applyUserFilters();
+    }
+
+    if (AuthService.isEnabled) {
+      try {
+        final profile = users.firstWhereOrNull((u) => u.email.toLowerCase() == cleanEmail);
+        if (profile != null) {
+          await AuthService.adminSetUserRole(profile.id, 'customer');
+        }
+      } catch (_) {}
+    }
+
+    recordActivity(
+      userId: 'REV-${cleanEmail.hashCode.abs().toString().substring(0, 4)}',
+      userName: cleanEmail,
+      userEmail: cleanEmail,
+      type: ActivityType.statusChanged,
+      description: 'Administrator privileges revoked',
+    );
+  }
+
+  // ──────────────────── PRICING & MARGINS MANAGEMENT ────────────────────
+
+  PlatformPricingConfig get currentPricing => PricingService.config.value;
+
+  /// Updates global pricing markup rules (percentage `%` or fixed `₦`) and
+  /// broadcasts the changes immediately to all users' views.
+  Future<void> updateGlobalPricing({
+    PriceRuleMode? socialMode,
+    double? socialValue,
+    double? globalRegionPct,
+    double? nigeriaRegionPct,
+    double? ghanaRegionPct,
+    PriceRuleMode? examMode,
+    double? examValue,
+  }) async {
+    final updated = currentPricing.copyWith(
+      socialGlobalMode: socialMode,
+      socialGlobalValue: socialValue,
+      globalRegionPercent: globalRegionPct,
+      nigeriaRegionPercent: nigeriaRegionPct,
+      ghanaRegionPercent: ghanaRegionPct,
+      examGlobalMode: examMode,
+      examGlobalValue: examValue,
+    );
+
+    await PricingService.saveConfig(updated);
+    _refreshControllers();
+
+    recordActivity(
+      userId: 'PRICING-GLOBAL',
+      userName: 'Administrator',
+      userEmail: 'admin@resolva.ng',
+      type: ActivityType.statusChanged,
+      description: 'Updated global service pricing rules',
+    );
+  }
+
+  /// Sets an exact price or markup for a specific service (by service id).
+  Future<void> setServicePriceOverride({
+    required String serviceId,
+    required PriceRuleMode mode,
+    required double value,
+  }) async {
+    final currentOverrides =
+        Map<String, ServicePriceOverride>.from(currentPricing.overrides);
+    currentOverrides[serviceId] = ServicePriceOverride(
+      serviceId: serviceId,
+      mode: mode,
+      value: value,
+      updatedAt: DateTime.now(),
+    );
+
+    final updated = currentPricing.copyWith(overrides: currentOverrides);
+    await PricingService.saveConfig(updated);
+    _refreshControllers();
+
+    recordActivity(
+      userId: 'PRICING-OVERRIDE',
+      userName: 'Administrator',
+      userEmail: 'admin@resolva.ng',
+      type: ActivityType.statusChanged,
+      description: 'Updated price override for service $serviceId',
+    );
+  }
+
+  /// Removes a custom price override from a specific service.
+  Future<void> removeServicePriceOverride(String serviceId) async {
+    final currentOverrides =
+        Map<String, ServicePriceOverride>.from(currentPricing.overrides);
+    currentOverrides.remove(serviceId);
+
+    final updated = currentPricing.copyWith(overrides: currentOverrides);
+    await PricingService.saveConfig(updated);
+    _refreshControllers();
+  }
+
+  /// Resets all per-service custom overrides back to global rules.
+  Future<void> resetAllOverrides() async {
+    final updated = currentPricing.copyWith(overrides: const {});
+    await PricingService.saveConfig(updated);
+    _refreshControllers();
+  }
+
+  void _refreshControllers() {
+    if (Get.isRegistered<SocialController>()) {
+      Get.find<SocialController>().applyPricingRules();
+    }
+    if (Get.isRegistered<ExamController>()) {
+      Get.find<ExamController>().applyPricingRules();
+    }
+  }
+
+  /// Safely saves or rotates sensitive API keys (`paystack` or `bigisub`) inside
+  /// Supabase Vault (`vault.secrets`) & `public.payment_gateway_configs`.
+  Future<void> saveGatewaySecretToSupabase({
+    required String provider,
+    String publicKey = '',
+    required String secretKey,
+  }) async {
+    if (secretKey.trim().isEmpty) return;
+
+    if (provider.toLowerCase() == 'bigisub') {
+      BigisubConfig.setRuntimeToken(secretKey.trim());
+      BigisubService.resetProxyFlags();
+    }
+
+    if (AuthService.isEnabled) {
+      await AuthService.adminSaveGatewaySecret(
+        provider: provider,
+        publicKey: publicKey,
+        secretKey: secretKey,
+      );
+    }
+
+    recordActivity(
+      userId: 'VAULT-${provider.toUpperCase()}',
+      userName: 'Administrator',
+      userEmail: 'admin@resolva.ng',
+      type: ActivityType.statusChanged,
+      description:
+          'Updated $provider secret in Supabase Vault (Zero GitHub Exposure)',
+    );
   }
 }
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:get/get.dart';
@@ -463,22 +464,24 @@ class DashboardController extends GetxController {
 
     _saveLocalCache();
 
-    // Sync to Supabase (both public.profiles RPC + auth.users user_metadata)
-    final syncedBalance = await AuthService.creditWalletOnSupabase(
-      reference: ref,
-      amount: creditedAmount,
-      paymentMethod: methodLabel,
-      channel: result.channel,
-      newBalance: walletBalance.value,
-      creditedRefs: creditedReferences.toList(),
-      recentTransactions: transactions.map(_transactionToJson).toList(),
-      metadata: result.rawData,
-    );
+    // Sync to Supabase in background so UI responds in 0ms
+    unawaited(() async {
+      final syncedBalance = await AuthService.creditWalletOnSupabase(
+        reference: ref,
+        amount: creditedAmount,
+        paymentMethod: methodLabel,
+        channel: result.channel,
+        newBalance: walletBalance.value,
+        creditedRefs: creditedReferences.toList(),
+        recentTransactions: transactions.map(_transactionToJson).toList(),
+        metadata: result.rawData,
+      );
 
-    if (syncedBalance != null && syncedBalance >= walletBalance.value) {
-      walletBalance.value = syncedBalance;
-      _saveLocalCache();
-    }
+      if (syncedBalance != null && syncedBalance >= walletBalance.value) {
+        walletBalance.value = syncedBalance;
+        _saveLocalCache();
+      }
+    }());
   }
 
   /// Direct wallet credit helper.

@@ -112,11 +112,29 @@ class BigisubService {
     return 'Edu$suffix';
   }
 
+  static bool _proxyRpcAvailable = true;
+  static bool _edgeFnAvailable = true;
+  static ({
+    List<SocialService> marketingServices,
+    List<ExamProduct> educationProducts,
+  })? _cachedCatalog;
+  static Future<
+      ({
+        List<SocialService> marketingServices,
+        List<ExamProduct> educationProducts,
+      })>? _catalogLoadingFuture;
+
+  /// Resets proxy availability flags (e.g. after Admin updates Supabase Vault secrets).
+  static void resetProxyFlags() {
+    _proxyRpcAvailable = true;
+    _edgeFnAvailable = true;
+  }
+
   /// Executes an authenticated request against Bigisub (`https://api.bigisub.ng`)
-  /// using a 3-tier strategy so it works on both native apps and browser (CORS-safe):
-  /// 1. Supabase Postgres RPC `bigisub_api_proxy` (if SQL migration applied)
-  /// 2. Supabase Edge Function `bigisub-proxy` (if Edge Function deployed)
-  /// 3. Direct HTTP request to `https://api.bigisub.ng` with `Authorization: Token <token>`
+  /// using a fast 3-tier strategy:
+  /// 1. Supabase Postgres RPC `bigisub_api_proxy` (reads `BIGISUB_API_TOKEN` from Supabase Vault)
+  /// 2. Supabase Edge Function `bigisub-proxy` (reads `BIGISUB_API_TOKEN` from Supabase Secrets)
+  /// 3. Direct HTTP request if a runtime/dev token is configured
   static Future<Map<String, dynamic>?> _request({
     required String method,
     required String path,
@@ -124,17 +142,19 @@ class BigisubService {
   }) async {
     final client = _supabase;
 
-    // 1. Try Supabase Postgres RPC proxy (server-to-server, keeps token in DB)
-    if (client != null) {
+    // 1. Try Supabase Postgres RPC proxy (server-to-server, keeps token in Supabase Vault)
+    if (client != null && _proxyRpcAvailable) {
       try {
-        final rpcRes = await client.rpc(
-          'bigisub_api_proxy',
-          params: {
-            'p_method': method.toUpperCase(),
-            'p_path': path,
-            'p_body': body ?? <String, dynamic>{},
-          },
-        );
+        final rpcRes = await client
+            .rpc(
+              'bigisub_api_proxy',
+              params: {
+                'p_method': method.toUpperCase(),
+                'p_path': path,
+                'p_body': body ?? <String, dynamic>{},
+              },
+            )
+            .timeout(const Duration(seconds: 6));
         if (rpcRes is Map) {
           return Map<String, dynamic>.from(rpcRes);
         }
@@ -142,19 +162,31 @@ class BigisubService {
           final decoded = jsonDecode(rpcRes);
           if (decoded is Map) return Map<String, dynamic>.from(decoded);
         }
+      } on PostgrestException catch (e) {
+        if (e.code == 'PGRST202' || e.code == '42883') {
+          _proxyRpcAvailable = false;
+        }
       } catch (_) {}
+    }
 
-      // 2. Try Supabase Edge Function proxy (`supabase/functions/bigisub-proxy`)
+    // 2. Try Supabase Edge Function proxy (`supabase/functions/bigisub-proxy`)
+    if (client != null && _edgeFnAvailable) {
       try {
-        final fnRes = await client.functions.invoke(
-          'bigisub-proxy',
-          body: {
-            'method': method.toUpperCase(),
-            'path': path,
-            'body': ?body,
-          },
-        );
-        if (fnRes.status >= 200 && fnRes.status < 300 && fnRes.data != null) {
+        final fnRes = await client.functions
+            .invoke(
+              'bigisub-proxy',
+              body: {
+                'method': method.toUpperCase(),
+                'path': path,
+                'body': ?body,
+              },
+            )
+            .timeout(const Duration(seconds: 6));
+        if (fnRes.status == 404) {
+          _edgeFnAvailable = false;
+        } else if (fnRes.status >= 200 &&
+            fnRes.status < 300 &&
+            fnRes.data != null) {
           if (fnRes.data is Map) {
             return Map<String, dynamic>.from(fnRes.data as Map);
           }
@@ -163,48 +195,74 @@ class BigisubService {
             if (decoded is Map) return Map<String, dynamic>.from(decoded);
           }
         }
+      } on FunctionException catch (e) {
+        if (e.status == 404) {
+          _edgeFnAvailable = false;
+        }
       } catch (_) {}
     }
 
-    // 3. Direct call to https://api.bigisub.ng
-    try {
-      final uri = Uri.parse('${BigisubConfig.baseUrl}$path');
-      late http.Response response;
-      if (method.toUpperCase() == 'POST') {
-        response = await http
-            .post(
-              uri,
-              headers: BigisubConfig.headers,
-              body: jsonEncode(body ?? const <String, dynamic>{}),
-            )
-            .timeout(const Duration(seconds: 15));
-      } else {
-        response = await http
-            .get(uri, headers: BigisubConfig.headers)
-            .timeout(const Duration(seconds: 15));
-      }
-      if (response.body.isNotEmpty) {
-        final decoded = jsonDecode(response.body);
-        if (decoded is Map) {
-          final map = Map<String, dynamic>.from(decoded);
-          map['_http_status'] = response.statusCode;
-          return map;
+    // 3. Direct call to https://api.bigisub.ng if runtime/local token is available
+    if (BigisubConfig.hasDirectToken) {
+      try {
+        final uri = Uri.parse('${BigisubConfig.baseUrl}$path');
+        late http.Response response;
+        if (method.toUpperCase() == 'POST') {
+          response = await http
+              .post(
+                uri,
+                headers: BigisubConfig.headers,
+                body: jsonEncode(body ?? const <String, dynamic>{}),
+              )
+              .timeout(const Duration(seconds: 6));
+        } else {
+          response = await http
+              .get(uri, headers: BigisubConfig.headers)
+              .timeout(const Duration(seconds: 5));
         }
-      }
-    } catch (_) {}
+        if (response.body.isNotEmpty) {
+          final decoded = jsonDecode(response.body);
+          if (decoded is Map) {
+            final map = Map<String, dynamic>.from(decoded);
+            map['_http_status'] = response.statusCode;
+            return map;
+          }
+        }
+      } catch (_) {}
+    }
 
     return null;
   }
 
   /// Loads the complete Bigisub Marketing Hub & Education catalog from the
-  /// bundled live snapshot (`assets/data/bigisub_catalog.json`) and optionally
-  /// refreshes live from `https://api.bigisub.ng`.
-  static Future<({List<SocialService> marketingServices, List<ExamProduct> educationProducts})>
-      loadCatalog() async {
+  /// bundled live snapshot (`assets/data/bigisub_catalog.json`) with in-memory
+  /// caching so subsequent reads take 0ms.
+  static Future<
+      ({
+        List<SocialService> marketingServices,
+        List<ExamProduct> educationProducts,
+      })> loadCatalog() async {
+    if (_cachedCatalog != null) return _cachedCatalog!;
+    if (_catalogLoadingFuture != null) return _catalogLoadingFuture!;
+
+    _catalogLoadingFuture = _loadCatalogInternal();
+    try {
+      _cachedCatalog = await _catalogLoadingFuture!;
+      return _cachedCatalog!;
+    } finally {
+      _catalogLoadingFuture = null;
+    }
+  }
+
+  static Future<
+      ({
+        List<SocialService> marketingServices,
+        List<ExamProduct> educationProducts,
+      })> _loadCatalogInternal() async {
     final marketingList = <SocialService>[];
     final educationList = <ExamProduct>[];
 
-    // 1. Load bundled live Bigisub catalog (759 Marketing Hub services + 3 Education services)
+    // Load bundled live Bigisub catalog (759 Marketing Hub services + 3 Education services)
     try {
       final rawJson =
           await rootBundle.loadString('assets/data/bigisub_catalog.json');

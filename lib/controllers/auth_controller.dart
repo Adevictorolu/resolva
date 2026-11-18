@@ -6,6 +6,7 @@ import '../core/config/supabase_config.dart';
 import '../core/constants/app_constants.dart';
 import '../data/models/admin_models.dart';
 import '../services/auth_service.dart';
+import '../services/pricing_service.dart';
 import 'admin_controller.dart';
 
 /// Central authentication and session authorization controller.
@@ -143,23 +144,34 @@ class AuthController extends GetxController {
   /// Returns false (and signs out) if the account is suspended.
   Future<bool> _loadSessionFromBackend({required bool recordLogin}) async {
     UserProfile? profile;
-    try {
-      profile = await AuthService.fetchMyProfile();
-    } catch (_) {
-      profile = null;
-    }
+    bool hasPin = false;
 
-    if (profile != null && profile.isSuspended) {
+    await Future.wait([
+      () async {
+        try {
+          profile = await AuthService.fetchMyProfile();
+        } catch (_) {
+          profile = null;
+        }
+      }(),
+      () async {
+        try {
+          hasPin = await AuthService.hasSecurityPin();
+        } catch (_) {
+          hasPin = false;
+        }
+      }(),
+      () async {
+        try {
+          await PricingService.fetchFromCloud();
+        } catch (_) {}
+      }(),
+    ]);
+
+    if (profile != null && profile!.isSuspended) {
       authError.value = 'This account has been suspended. Please contact support.';
       await AuthService.signOut();
       return false;
-    }
-
-    bool hasPin = false;
-    try {
-      hasPin = await AuthService.hasSecurityPin();
-    } catch (_) {
-      hasPin = false;
     }
 
     final supaUser = AuthService.currentUser;
@@ -180,15 +192,18 @@ class AuthController extends GetxController {
         (meta['avatar_url'] as String?) ??
         (meta['picture'] as String?) ??
         '';
+    final normalizedEmail = email.toLowerCase();
     final isPrimaryAdmin =
-        email.toLowerCase() == SupabaseConfig.primaryAdminEmail.toLowerCase();
+        normalizedEmail == SupabaseConfig.primaryAdminEmail.toLowerCase();
+    final isListedAdmin =
+        PricingService.config.value.adminEmails.contains(normalizedEmail);
 
     userId.value = profile?.id ?? supaUser?.id ?? '';
     userEmail.value = email;
     userFullName.value = fullName;
     userPhone.value = phone;
     userAvatarUrl.value = avatar;
-    isAdmin.value = (profile?.isAdmin ?? false) || isPrimaryAdmin;
+    isAdmin.value = (profile?.isAdmin ?? false) || isPrimaryAdmin || isListedAdmin;
     acceptedTermsVersion.value = profile?.acceptedTermsVersion ?? '';
     acceptedPrivacyVersion.value = profile?.acceptedPrivacyVersion ?? '';
     pinConfigured.value = hasPin;

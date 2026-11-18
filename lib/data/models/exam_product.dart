@@ -29,6 +29,23 @@ class ExamProduct {
     this.allowedQuantities = const [1, 2, 5],
   }) : examCode = examCode ?? provider;
 
+  ExamProduct copyWithPrice(double newPrice) {
+    return ExamProduct(
+      id: id,
+      examCode: examCode,
+      provider: provider,
+      name: name,
+      description: description,
+      validity: validity,
+      price: newPrice,
+      corporatePrice: corporatePrice,
+      category: category,
+      isAvailable: isAvailable,
+      maxQuantity: maxQuantity,
+      allowedQuantities: allowedQuantities,
+    );
+  }
+
   factory ExamProduct.fromBigisubJson(Map<String, dynamic> json) {
     final examType =
         (json['exam_type'] ?? json['type'] ?? json['id'] ?? 'WAEC')

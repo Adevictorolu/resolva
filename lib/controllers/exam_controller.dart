@@ -2,9 +2,11 @@ import 'package:get/get.dart';
 import '../data/models/exam_product.dart';
 import '../data/mock/mock_data.dart';
 import '../services/bigisub_service.dart';
+import '../services/pricing_service.dart';
 
 /// Controller for Other Services — Examination E-Pins (Bigisub Education API).
 class ExamController extends GetxController {
+  final List<ExamProduct> _baseProducts = <ExamProduct>[];
   final products = <ExamProduct>[].obs;
   final filteredProducts = <ExamProduct>[].obs;
   final selectedCategory = 'All Products'.obs;
@@ -15,24 +17,44 @@ class ExamController extends GetxController {
 
   final categories = const ['All Products', 'WAEC', 'NECO', 'NABTEB'];
 
+  List<ExamProduct> get baseProducts => List.unmodifiable(_baseProducts);
+
   @override
   void onInit() {
     super.onInit();
-    products.assignAll(mockExamProducts);
-    filteredProducts.assignAll(mockExamProducts);
+    _baseProducts.assignAll(mockExamProducts);
+    PricingService.addListener((_) => applyPricingRules());
+    applyPricingRules();
     _hydrateEducationCatalog();
+  }
+
+  /// Applies the latest admin pricing rules to all Examination E-Pin products.
+  void applyPricingRules() {
+    final priced = _baseProducts
+        .map((p) => PricingService.applyToExamProduct(p, p.price))
+        .toList();
+    products.assignAll(priced);
+    if (selectedProduct.value != null) {
+      final currentId = selectedProduct.value!.id;
+      final updatedSelected =
+          priced.firstWhereOrNull((p) => p.id == currentId);
+      if (updatedSelected != null) {
+        selectedProduct.value = updatedSelected;
+      }
+    }
+    _applyFilters();
   }
 
   Future<void> _hydrateEducationCatalog() async {
     final catalog = await BigisubService.loadCatalog();
     if (catalog.educationProducts.isNotEmpty) {
-      products.assignAll(catalog.educationProducts);
-      _applyFilters();
+      _baseProducts.assignAll(catalog.educationProducts);
+      applyPricingRules();
     }
     final live = await BigisubService.fetchLiveEducationPrices();
     if (live != null && live.isNotEmpty) {
-      products.assignAll(live);
-      _applyFilters();
+      _baseProducts.assignAll(live);
+      applyPricingRules();
     }
   }
 

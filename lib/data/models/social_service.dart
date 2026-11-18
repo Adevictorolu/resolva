@@ -85,6 +85,37 @@ class SocialService {
   /// Starting price for the minimum allowed quantity.
   double get startingPrice => calculatePrice(minQuantity);
 
+  /// Creates a copy of this service with an updated admin-configured display rate.
+  SocialService copyWithPricing({
+    required double displayAmount,
+    required double pricePerUnit,
+  }) {
+    return SocialService(
+      id: id,
+      bigisubServiceId: bigisubServiceId,
+      platformId: platformId,
+      country: country,
+      name: name,
+      description: description,
+      category: category,
+      pricePerUnit: pricePerUnit,
+      displayAmount: displayAmount,
+      displayUnit: displayUnit,
+      pricingModel: pricingModel,
+      minQuantity: minQuantity,
+      maxQuantity: maxQuantity,
+      estimatedDelivery: estimatedDelivery,
+      requiresCustomText: requiresCustomText,
+      serviceType: serviceType,
+      hasDripfeed: hasDripfeed,
+      hasRefill: hasRefill,
+      hasCancel: hasCancel,
+      deliverySpeed: deliverySpeed,
+      avgDeliveryHours: avgDeliveryHours,
+      successRate: successRate,
+    );
+  }
+
   /// Human-readable country label.
   String get countryLabel {
     return switch (country.toLowerCase()) {
