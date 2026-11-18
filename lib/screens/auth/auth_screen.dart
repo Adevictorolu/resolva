@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/config/app_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/shared/app_navigation.dart';
@@ -106,14 +107,107 @@ class _AuthScreenState extends State<AuthScreen> {
         widget.onNavigate(nextRoute);
       } else {
         if (controller.authInfo.value.isNotEmpty && mounted) {
+          final registeredEmail = controller.regEmail.value;
           setState(() {
             _isRegister = false;
-            _loginEmailController.text = controller.regEmail.value;
+            _loginEmailController.text = registeredEmail;
           });
+          _showActivationSentDialog(context, registeredEmail);
+        } else {
+          _showAuthFeedback();
         }
-        _showAuthFeedback();
       }
     }
+  }
+
+  void _showActivationSentDialog(BuildContext context, String email) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Padding(
+            padding: const EdgeInsets.all(26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: AppColors.royalBlue.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.mark_email_read_rounded,
+                    color: AppColors.royalBlue,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Verify Your Email Address',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryNavy,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'We sent an account activation link to $email. Please check your inbox (or spam folder) and click the link to activate your account.',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.support_agent_rounded, size: 18, color: AppColors.royalBlue),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Need help? ${AppConfig.supportEmail}',
+                          style: GoogleFonts.montserrat(fontSize: 11.5, color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.royalBlue,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                    ),
+                    child: Text(
+                      'Understood, Proceed to Sign In',
+                      style: GoogleFonts.montserrat(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _handleGoogle() async {

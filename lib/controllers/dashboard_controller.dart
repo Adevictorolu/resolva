@@ -5,8 +5,10 @@ import 'package:get/get.dart';
 import '../data/models/exam_product.dart';
 import '../data/models/order.dart';
 import '../data/models/social_service.dart';
+import '../core/config/app_config.dart';
 import '../services/auth_service.dart';
 import '../services/bigisub_service.dart';
+import '../services/email_notification_service.dart';
 import '../services/paystack_service.dart';
 import 'admin_controller.dart';
 import 'auth_controller.dart';
@@ -482,6 +484,25 @@ class DashboardController extends GetxController {
         _saveLocalCache();
       }
     }());
+
+    // Dispatch branded Montserrat funding receipt email to the customer
+    final custEmail = email.value.isNotEmpty ? email.value : AppConfig.supportEmail;
+    final custName = fullName.value.isNotEmpty ? fullName.value : 'Valued Customer';
+    unawaited(
+      EmailNotificationService.sendEmail(
+        recipientEmail: custEmail,
+        recipientName: custName,
+        subject: 'Paystack Wallet Top-Up Receipt (₦${creditedAmount.toStringAsFixed(2)})',
+        templateType: 'wallet_funding',
+        htmlContent: EmailNotificationService.buildWalletFundingReceiptEmail(
+          fullName: custName,
+          amount: creditedAmount,
+          reference: ref,
+          newBalance: walletBalance.value,
+          channel: result.channel,
+        ),
+      ),
+    );
   }
 
   /// Direct wallet credit helper.
@@ -599,7 +620,7 @@ class DashboardController extends GetxController {
           '$platformName (${service.countryLabel}) — ${service.name} • Qty: $quantity • Target: $targetLinkOrUsername',
       quantity: quantity,
       recipientEmail:
-          email.value.isNotEmpty ? email.value : 'customer@resolva.ng',
+          email.value.isNotEmpty ? email.value : AppConfig.supportEmail,
       targetUrl: targetLinkOrUsername,
       bigisubTranId: apiRes.tranId,
       platform: service.platformId,
@@ -676,6 +697,24 @@ class DashboardController extends GetxController {
       );
     }
 
+    // Dispatch branded Montserrat order receipt email to customer
+    final custEmail = email.value.isNotEmpty ? email.value : AppConfig.supportEmail;
+    final custName = fullName.value.isNotEmpty ? fullName.value : 'Valued Customer';
+    unawaited(
+      EmailNotificationService.sendEmail(
+        recipientEmail: custEmail,
+        recipientName: custName,
+        subject: 'Social Media Boosting Order Confirmed ($orderId)',
+        templateType: 'social_boosting',
+        htmlContent: EmailNotificationService.buildSocialBoostingReceiptEmail(
+          fullName: custName,
+          order: newOrder,
+          service: service,
+          platformName: platformName,
+        ),
+      ),
+    );
+
     return (order: newOrder, error: null);
   }
 
@@ -732,7 +771,7 @@ class DashboardController extends GetxController {
           '${product.provider} — ${product.name} (x$normalizedQty) • Ref: $txnRef',
       quantity: normalizedQty,
       recipientEmail:
-          email.value.isNotEmpty ? email.value : 'customer@resolva.ng',
+          email.value.isNotEmpty ? email.value : AppConfig.supportEmail,
       pins: apiRes.pins,
       bigisubTranId: apiRes.transactionId,
       bigisubReference: apiRes.reference,
@@ -807,6 +846,24 @@ class DashboardController extends GetxController {
         amount: total,
       );
     }
+
+    // Dispatch branded Montserrat E-PIN delivery email with actual PINs and serials to customer
+    final custEmail = email.value.isNotEmpty ? email.value : AppConfig.supportEmail;
+    final custName = fullName.value.isNotEmpty ? fullName.value : 'Valued Customer';
+    unawaited(
+      EmailNotificationService.sendEmail(
+        recipientEmail: custEmail,
+        recipientName: custName,
+        subject: 'Official ${product.provider} Result Checker E-PIN Delivered ($orderId)',
+        templateType: 'exam_pins',
+        htmlContent: EmailNotificationService.buildExamPinDeliveryEmail(
+          fullName: custName,
+          order: newOrder,
+          product: product,
+          pins: apiRes.pins,
+        ),
+      ),
+    );
 
     return (order: newOrder, error: null);
   }
@@ -930,7 +987,7 @@ class DashboardController extends GetxController {
       details: details ?? '$productName (x$quantity)',
       quantity: quantity,
       recipientEmail:
-          email.value.isNotEmpty ? email.value : 'customer@resolva.ng',
+          email.value.isNotEmpty ? email.value : AppConfig.supportEmail,
       targetUrl: targetUrl,
       pins: generatedPins,
     );

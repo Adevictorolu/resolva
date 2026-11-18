@@ -220,7 +220,7 @@ class PaystackService {
     final amountKobo = (amountNaira * 100).round();
     final channels = mapChannels(selectedMethod);
     final customerEmail =
-        email.trim().isNotEmpty ? email.trim() : 'customer@resolva.ng';
+        email.trim().isNotEmpty ? email.trim() : 'customer@resolver.com.ng';
 
     String? completedRef;
     try {

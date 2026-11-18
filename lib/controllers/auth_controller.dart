@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent, AuthState;
+import '../core/config/app_config.dart';
 import '../core/config/supabase_config.dart';
 import '../core/constants/app_constants.dart';
 import '../data/models/admin_models.dart';
 import '../services/auth_service.dart';
+import '../services/email_notification_service.dart';
 import '../services/pricing_service.dart';
 import 'admin_controller.dart';
 
@@ -404,8 +406,25 @@ class AuthController extends GetxController {
           phone: regPhone.value.trim(),
         );
         if (res.session == null) {
+          final targetEmail = regEmail.value.trim();
+          final targetName = regFullName.value.trim();
           authInfo.value =
-              'Account created! Check ${regEmail.value.trim()} for a confirmation link, then sign in.';
+              'Account created! Check $targetEmail for your activation link, then sign in.';
+
+          // Dispatch customized Montserrat activation email
+          unawaited(
+            EmailNotificationService.sendEmail(
+              recipientEmail: targetEmail,
+              recipientName: targetName,
+              subject: 'Activate Your RESOLVA Account',
+              templateType: 'activation',
+              htmlContent: EmailNotificationService.buildActivationEmail(
+                fullName: targetName,
+                email: targetEmail,
+                confirmationUrl: '${AppConfig.siteUrl}/#/login',
+              ),
+            ),
+          );
           return false;
         }
         return await _loadSessionFromBackend(recordLogin: true);

@@ -427,6 +427,30 @@ class AuthService {
     } catch (_) {}
   }
 
+  /// Logs an outbound email notification to Supabase `public.email_notifications` table.
+  static Future<void> logEmailNotification({
+    required String recipientEmail,
+    required String recipientName,
+    required String subject,
+    required String htmlContent,
+    required String templateType,
+  }) async {
+    if (!isEnabled) return;
+    try {
+      await _client.from('email_notifications').insert({
+        'user_id': currentUser?.id,
+        'recipient_email': recipientEmail.trim().toLowerCase(),
+        'recipient_name': recipientName.trim(),
+        'subject': subject,
+        'template_type': templateType,
+        'html_content': htmlContent,
+        'status': 'sent',
+      }).timeout(const Duration(seconds: 4));
+    } catch (_) {
+      // Non-blocking table insert
+    }
+  }
+
   /// Human-readable message for Supabase errors.
   static String describeError(Object e) {
     if (e is AuthException) return e.message;
