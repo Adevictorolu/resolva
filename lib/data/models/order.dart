@@ -1,4 +1,4 @@
-/// Model representing a customer order.
+/// Model representing a customer order (Social Media Boosting or Examination E-Pins).
 class Order {
   final String id;
   final String productName;
@@ -13,6 +13,20 @@ class Order {
   final String? targetUrl;
   final List<String>? pins;
 
+  // Bigisub provider tracking & live receipt fields
+  final String? bigisubTranId;
+  final String? bigisubReference;
+  final String? platform;
+  final double? unitPrice;
+  final int? startCount;
+  final int? remains;
+  final int? deliveredCount;
+  final int? deliveryPercentage;
+  final String? statusNote;
+  final bool canCancel;
+  final bool canRefill;
+  final bool canRefresh;
+
   const Order({
     required this.id,
     required this.productName,
@@ -23,12 +37,78 @@ class Order {
     required this.fulfilmentStatus,
     this.details,
     this.quantity = 1,
-    this.recipientEmail = 'customer@example.com',
+    this.recipientEmail = 'customer@resolva.ng',
     this.targetUrl,
     this.pins,
+    this.bigisubTranId,
+    this.bigisubReference,
+    this.platform,
+    this.unitPrice,
+    this.startCount,
+    this.remains,
+    this.deliveredCount,
+    this.deliveryPercentage,
+    this.statusNote,
+    this.canCancel = false,
+    this.canRefill = false,
+    this.canRefresh = true,
   });
 
   DateTime get createdAt => date;
+
+  Order copyWith({
+    String? id,
+    String? productName,
+    String? category,
+    DateTime? date,
+    double? amount,
+    OrderPaymentStatus? paymentStatus,
+    OrderFulfilmentStatus? fulfilmentStatus,
+    String? details,
+    int? quantity,
+    String? recipientEmail,
+    String? targetUrl,
+    List<String>? pins,
+    String? bigisubTranId,
+    String? bigisubReference,
+    String? platform,
+    double? unitPrice,
+    int? startCount,
+    int? remains,
+    int? deliveredCount,
+    int? deliveryPercentage,
+    String? statusNote,
+    bool? canCancel,
+    bool? canRefill,
+    bool? canRefresh,
+  }) {
+    return Order(
+      id: id ?? this.id,
+      productName: productName ?? this.productName,
+      category: category ?? this.category,
+      date: date ?? this.date,
+      amount: amount ?? this.amount,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      fulfilmentStatus: fulfilmentStatus ?? this.fulfilmentStatus,
+      details: details ?? this.details,
+      quantity: quantity ?? this.quantity,
+      recipientEmail: recipientEmail ?? this.recipientEmail,
+      targetUrl: targetUrl ?? this.targetUrl,
+      pins: pins ?? this.pins,
+      bigisubTranId: bigisubTranId ?? this.bigisubTranId,
+      bigisubReference: bigisubReference ?? this.bigisubReference,
+      platform: platform ?? this.platform,
+      unitPrice: unitPrice ?? this.unitPrice,
+      startCount: startCount ?? this.startCount,
+      remains: remains ?? this.remains,
+      deliveredCount: deliveredCount ?? this.deliveredCount,
+      deliveryPercentage: deliveryPercentage ?? this.deliveryPercentage,
+      statusNote: statusNote ?? this.statusNote,
+      canCancel: canCancel ?? this.canCancel,
+      canRefill: canRefill ?? this.canRefill,
+      canRefresh: canRefresh ?? this.canRefresh,
+    );
+  }
 }
 
 enum OrderPaymentStatus { paid, pending, failed }
@@ -75,7 +155,13 @@ class AppNotification {
   });
 }
 
-enum NotificationType { orderConfirmed, orderProcessing, orderCompleted, payment, support }
+enum NotificationType {
+  orderConfirmed,
+  orderProcessing,
+  orderCompleted,
+  payment,
+  support,
+}
 
 /// Model for FAQ items.
 class FaqItem {

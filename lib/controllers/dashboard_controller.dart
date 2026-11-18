@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:get/get.dart';
+import '../data/models/exam_product.dart';
 import '../data/models/order.dart';
+import '../data/models/social_service.dart';
 import '../services/auth_service.dart';
+import '../services/bigisub_service.dart';
 import '../services/paystack_service.dart';
 import 'admin_controller.dart';
 import 'auth_controller.dart';
 
-/// Controller for the live Customer Dashboard, Paystack Wallet Funding, Orders, Notifications & Settings.
+/// Controller for the live Customer Dashboard, Paystack Wallet Funding,
+/// Bigisub Social Media Boosting & Examination E-Pin Orders, Notifications & Settings.
 class DashboardController extends GetxController {
   final orders = <Order>[].obs;
   final filteredOrders = <Order>[].obs;
@@ -194,6 +198,18 @@ class DashboardController extends GetxController {
         'recipientEmail': o.recipientEmail,
         'targetUrl': o.targetUrl,
         'pins': o.pins,
+        'bigisubTranId': o.bigisubTranId,
+        'bigisubReference': o.bigisubReference,
+        'platform': o.platform,
+        'unitPrice': o.unitPrice,
+        'startCount': o.startCount,
+        'remains': o.remains,
+        'deliveredCount': o.deliveredCount,
+        'deliveryPercentage': o.deliveryPercentage,
+        'statusNote': o.statusNote,
+        'canCancel': o.canCancel,
+        'canRefill': o.canRefill,
+        'canRefresh': o.canRefresh,
       };
 
   Order _orderFromJson(Map<String, dynamic> m) => Order(
@@ -214,6 +230,18 @@ class DashboardController extends GetxController {
         recipientEmail: (m['recipientEmail'] ?? '').toString(),
         targetUrl: m['targetUrl']?.toString(),
         pins: (m['pins'] as List?)?.map((e) => '$e').toList(),
+        bigisubTranId: m['bigisubTranId']?.toString(),
+        bigisubReference: m['bigisubReference']?.toString(),
+        platform: m['platform']?.toString(),
+        unitPrice: (m['unitPrice'] as num?)?.toDouble(),
+        startCount: (m['startCount'] as num?)?.toInt(),
+        remains: (m['remains'] as num?)?.toInt(),
+        deliveredCount: (m['deliveredCount'] as num?)?.toInt(),
+        deliveryPercentage: (m['deliveryPercentage'] as num?)?.toInt(),
+        statusNote: m['statusNote']?.toString(),
+        canCancel: m['canCancel'] == true,
+        canRefill: m['canRefill'] == true,
+        canRefresh: m['canRefresh'] != false,
       );
 
   Map<String, dynamic> _transactionToJson(Transaction t) => {
@@ -258,7 +286,8 @@ class DashboardController extends GetxController {
   String get userInitials {
     final name = fullName.value.trim();
     if (name.isEmpty) return 'U';
-    final parts = name.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    final parts =
+        name.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
@@ -452,7 +481,7 @@ class DashboardController extends GetxController {
     }
   }
 
-  /// Direct wallet credit helper (used by tests or internal adjustments).
+  /// Direct wallet credit helper.
   void fundWallet({
     required double amount,
     required String paymentMethod,
@@ -460,7 +489,8 @@ class DashboardController extends GetxController {
   }) {
     if (amount <= 0) return;
     final now = DateTime.now();
-    final ref = reference ?? 'RSV-${now.millisecondsSinceEpoch.toString().substring(6)}';
+    final ref =
+        reference ?? 'RSV-${now.millisecondsSinceEpoch.toString().substring(6)}';
     if (creditedReferences.contains(ref)) return;
     creditedReferences.insert(0, ref);
 
@@ -503,7 +533,357 @@ class DashboardController extends GetxController {
     );
   }
 
-  /// Places a live customer order for Examination E-Pins or Social Media Services.
+  /// Places a live **Social Media Boosting** order via Bigisub Marketing Hub
+  /// (`POST https://api.bigisub.ng/api/v2/marketinghub/order/create/`) and deducts
+  /// the cost from the user's RESOLVA Wallet Balance.
+  Future<({Order? order, String? error})> placeSocialBoostingOrder({
+    required SocialService service,
+    required String platformName,
+    required String targetLinkOrUsername,
+    required int quantity,
+    String? customText,
+    int? pollAnswerNumber,
+    String? hashtag,
+    int? oldPosts,
+    int? futurePosts,
+    int? delayMinutes,
+  }) async {
+    final total = service.calculatePrice(quantity);
+    if (walletBalance.value < total) {
+      final shortfall = (total - walletBalance.value).ceil();
+      return (
+        order: null,
+        error:
+            'Insufficient wallet balance. You need ₦$shortfall more in your wallet to place this order.',
+      );
+    }
+
+    final apiRes = await BigisubService.createMarketingOrder(
+      service: service,
+      targetLinkOrUsername: targetLinkOrUsername,
+      quantity: quantity,
+      customText: customText,
+      pollAnswerNumber: pollAnswerNumber,
+      hashtag: hashtag,
+      oldPosts: oldPosts,
+      futurePosts: futurePosts,
+      delayMinutes: delayMinutes,
+    );
+
+    if (!apiRes.isSuccess) {
+      return (order: null, error: apiRes.message);
+    }
+
+    final now = DateTime.now();
+    final orderId = apiRes.tranId.isNotEmpty
+        ? apiRes.tranId
+        : 'SOCL_${now.millisecondsSinceEpoch.toString().substring(5)}';
+    final txnRef = 'TXN-$orderId';
+
+    walletBalance.value = (walletBalance.value - total).clamp(0.0, double.infinity);
+
+    final newOrder = Order(
+      id: orderId,
+      productName: service.name,
+      category: 'Social Media Boosting',
+      date: now,
+      amount: total,
+      paymentStatus: OrderPaymentStatus.paid,
+      fulfilmentStatus: apiRes.status == 'completed'
+          ? OrderFulfilmentStatus.completed
+          : OrderFulfilmentStatus.processing,
+      details:
+          '$platformName (${service.countryLabel}) — ${service.name} • Qty: $quantity • Target: $targetLinkOrUsername',
+      quantity: quantity,
+      recipientEmail:
+          email.value.isNotEmpty ? email.value : 'customer@resolva.ng',
+      targetUrl: targetLinkOrUsername,
+      bigisubTranId: apiRes.tranId,
+      platform: service.platformId,
+      unitPrice: apiRes.unitPrice,
+      startCount: apiRes.startCount,
+      remains: apiRes.remains,
+      deliveredCount: apiRes.deliveredCount,
+      deliveryPercentage: apiRes.deliveryPercentage,
+      statusNote: apiRes.statusNote,
+      canCancel: apiRes.canCancel,
+      canRefill: apiRes.canRefill,
+      canRefresh: apiRes.canRefresh,
+    );
+
+    orders.insert(0, newOrder);
+    filterOrders(selectedOrderFilter.value);
+
+    transactions.insert(
+      0,
+      Transaction(
+        reference: txnRef,
+        description: '${service.name} (x$quantity)',
+        date: now,
+        amount: total,
+        paymentMethod: 'Wallet Balance',
+        status: TransactionStatus.successful,
+      ),
+    );
+
+    notifications.insert(
+      0,
+      AppNotification(
+        id: 'NOTIF-${now.millisecondsSinceEpoch}',
+        title: 'Social Boosting Order Placed ($orderId)',
+        message:
+            'Your order for ${service.name} (Qty: $quantity) has been sent to Bigisub Marketing Hub.',
+        date: now,
+        type: NotificationType.orderConfirmed,
+        isRead: false,
+      ),
+    );
+
+    _saveLocalCache();
+
+    AuthService.debitWalletOnSupabase(
+      reference: txnRef,
+      amount: total,
+      description: '${service.name} (x$quantity)',
+      newBalance: walletBalance.value,
+      creditedRefs: creditedReferences.toList(),
+      recentTransactions: transactions.map(_transactionToJson).toList(),
+    );
+
+    AuthService.syncOrderToSupabase(
+      orderCode: orderId,
+      category: 'Social Media Boosting',
+      productName: service.name,
+      targetUrl: targetLinkOrUsername,
+      quantity: quantity,
+      amount: total,
+      paymentMethod: 'Wallet Balance',
+      status: 'processing',
+      details: newOrder.details ?? service.name,
+      recentOrders: orders.map(_orderToJson).toList(),
+    );
+
+    if (Get.isRegistered<AdminController>() && email.value.isNotEmpty) {
+      Get.find<AdminController>().recordUserPurchase(
+        email: email.value,
+        orderId: orderId,
+        productName: service.name,
+        category: 'Social Media Boosting',
+        amount: total,
+      );
+    }
+
+    return (order: newOrder, error: null);
+  }
+
+  /// Places a live **Examination E-Pin** purchase via Bigisub Education API
+  /// (`POST https://api.bigisub.ng/api/v2/bills/result-checker/purchase/`) and deducts
+  /// the cost from the user's RESOLVA Wallet Balance.
+  Future<({Order? order, String? error})> placeExamPinOrder({
+    required ExamProduct product,
+    required int quantity,
+    String? pinCode,
+  }) async {
+    final normalizedQty =
+        product.allowedQuantities.contains(quantity) ? quantity : 1;
+    final total = product.price * normalizedQty;
+
+    if (walletBalance.value < total) {
+      final shortfall = (total - walletBalance.value).ceil();
+      return (
+        order: null,
+        error:
+            'Insufficient wallet balance. You need ₦$shortfall more in your wallet to purchase ${product.name} (x$normalizedQty).',
+      );
+    }
+
+    final apiRes = await BigisubService.purchaseExamResultPins(
+      product: product,
+      quantity: normalizedQty,
+      pinCode: pinCode,
+    );
+
+    if (!apiRes.isSuccess) {
+      return (order: null, error: apiRes.message);
+    }
+
+    final now = DateTime.now();
+    final orderId = apiRes.transactionId.isNotEmpty
+        ? apiRes.transactionId
+        : 'Edu-${now.millisecondsSinceEpoch.toString().substring(6)}';
+    final txnRef = apiRes.reference.isNotEmpty
+        ? apiRes.reference
+        : 'TXN-${now.millisecondsSinceEpoch.toString().substring(6)}';
+
+    walletBalance.value = (walletBalance.value - total).clamp(0.0, double.infinity);
+
+    final newOrder = Order(
+      id: orderId,
+      productName: product.name,
+      category: 'Examination E-Pins',
+      date: now,
+      amount: total,
+      paymentStatus: OrderPaymentStatus.paid,
+      fulfilmentStatus: OrderFulfilmentStatus.completed,
+      details:
+          '${product.provider} — ${product.name} (x$normalizedQty) • Ref: $txnRef',
+      quantity: normalizedQty,
+      recipientEmail:
+          email.value.isNotEmpty ? email.value : 'customer@resolva.ng',
+      pins: apiRes.pins,
+      bigisubTranId: apiRes.transactionId,
+      bigisubReference: apiRes.reference,
+      unitPrice: product.price,
+      deliveredCount: normalizedQty,
+      deliveryPercentage: 100,
+      statusNote: 'Result Checker PIN(s) delivered',
+      canCancel: false,
+      canRefill: false,
+      canRefresh: false,
+    );
+
+    orders.insert(0, newOrder);
+    filterOrders(selectedOrderFilter.value);
+
+    transactions.insert(
+      0,
+      Transaction(
+        reference: txnRef,
+        description: '${product.name} (x$normalizedQty)',
+        date: now,
+        amount: total,
+        paymentMethod: 'Wallet Balance',
+        status: TransactionStatus.successful,
+      ),
+    );
+
+    notifications.insert(
+      0,
+      AppNotification(
+        id: 'NOTIF-${now.millisecondsSinceEpoch}',
+        title: '${product.provider} E-PIN Delivered ($orderId)',
+        message:
+            'Your ${product.name} PIN(s) under reference $txnRef have been delivered to your Order & E-PIN Vault.',
+        date: now,
+        type: NotificationType.orderCompleted,
+        isRead: false,
+      ),
+    );
+
+    _saveLocalCache();
+
+    AuthService.debitWalletOnSupabase(
+      reference: txnRef,
+      amount: total,
+      description: '${product.name} (x$normalizedQty)',
+      newBalance: walletBalance.value,
+      creditedRefs: creditedReferences.toList(),
+      recentTransactions: transactions.map(_transactionToJson).toList(),
+    );
+
+    AuthService.syncOrderToSupabase(
+      orderCode: orderId,
+      category: 'Examination E-Pins',
+      productName: product.name,
+      targetUrl: null,
+      quantity: normalizedQty,
+      amount: total,
+      paymentMethod: 'Wallet Balance',
+      status: 'completed',
+      details: newOrder.details ?? product.name,
+      pins: apiRes.pins,
+      recentOrders: orders.map(_orderToJson).toList(),
+    );
+
+    if (Get.isRegistered<AdminController>() && email.value.isNotEmpty) {
+      Get.find<AdminController>().recordUserPurchase(
+        email: email.value,
+        orderId: orderId,
+        productName: product.name,
+        category: 'Examination E-Pins',
+        amount: total,
+      );
+    }
+
+    return (order: newOrder, error: null);
+  }
+
+  /// Refreshes a Social Media Boosting order's delivery progress from Bigisub
+  /// (`POST /api/v2/marketinghub/order/refresh/` + `GET /api/v2/marketinghub/order/receipt/`).
+  Future<Order> refreshSocialOrderReceipt(Order order) async {
+    final tranId = order.bigisubTranId ?? order.id;
+    await BigisubService.refreshMarketingOrder(tranId);
+    final receipt = await BigisubService.getMarketingOrderReceipt(tranId);
+
+    Order updated = order;
+    if (receipt != null) {
+      final newFulfilment = switch (receipt.status.toLowerCase()) {
+        'completed' => OrderFulfilmentStatus.completed,
+        'cancelled' || 'failed' || 'refunded' => OrderFulfilmentStatus.cancelled,
+        'pending' => OrderFulfilmentStatus.pending,
+        _ => OrderFulfilmentStatus.processing,
+      };
+      updated = order.copyWith(
+        fulfilmentStatus: newFulfilment,
+        startCount: receipt.startCount,
+        remains: receipt.remains,
+        deliveredCount: receipt.deliveredCount,
+        deliveryPercentage: receipt.deliveryPercentage,
+        statusNote: receipt.statusNote,
+        canCancel: receipt.canCancel,
+        canRefill: receipt.canRefill,
+        canRefresh: receipt.canRefresh,
+      );
+    } else {
+      updated = order.copyWith(
+        statusNote: 'Synced with Bigisub Marketing Hub',
+      );
+    }
+
+    final idx = orders.indexWhere((o) => o.id == order.id);
+    if (idx != -1) {
+      orders[idx] = updated;
+      filterOrders(selectedOrderFilter.value);
+      _saveLocalCache();
+    }
+    return updated;
+  }
+
+  /// Requests a free refill for a Social Media Boosting order on Bigisub.
+  Future<String> requestSocialOrderRefill(Order order) async {
+    final tranId = order.bigisubTranId ?? order.id;
+    final res = await BigisubService.requestMarketingOrderRefill(tranId);
+    return res.message;
+  }
+
+  /// Cancels an active Social Media Boosting order on Bigisub and refunds any undelivered balance.
+  Future<({bool ok, String message})> cancelSocialOrder(Order order) async {
+    final tranId = order.bigisubTranId ?? order.id;
+    final res = await BigisubService.cancelMarketingOrder(tranId);
+    if (res.ok) {
+      final refund = res.refundAmount ?? order.amount;
+      if (refund > 0) {
+        fundWallet(
+          amount: refund,
+          paymentMethod: 'Order Refund ($tranId)',
+          reference: 'REFUND-$tranId-${DateTime.now().millisecondsSinceEpoch}',
+        );
+      }
+      final idx = orders.indexWhere((o) => o.id == order.id);
+      if (idx != -1) {
+        orders[idx] = order.copyWith(
+          fulfilmentStatus: OrderFulfilmentStatus.cancelled,
+          statusNote: 'Cancelled & refunded',
+          canCancel: false,
+        );
+        filterOrders(selectedOrderFilter.value);
+        _saveLocalCache();
+      }
+    }
+    return (ok: res.ok, message: res.message);
+  }
+
+  /// Legacy synchronous order placement helper.
   Order placeOrder({
     required String productName,
     required String category,
@@ -567,59 +947,7 @@ class DashboardController extends GetxController {
       ),
     );
 
-    notifications.insert(
-      0,
-      AppNotification(
-        id: 'NOTIF-${now.millisecondsSinceEpoch}',
-        title: isInstantPin ? 'E-Pin Order Delivered' : 'Order Confirmed',
-        message: isInstantPin
-            ? 'Your $productName e-pin(s) under order $orderId are ready in your dashboard.'
-            : 'Your order $orderId for $productName has been confirmed and is processing.',
-        date: now,
-        type: isInstantPin
-            ? NotificationType.orderCompleted
-            : NotificationType.orderConfirmed,
-        isRead: false,
-      ),
-    );
-
     _saveLocalCache();
-
-    if (usedWallet) {
-      AuthService.debitWalletOnSupabase(
-        reference: txnRef,
-        amount: amount,
-        description: '$productName (x$quantity)',
-        newBalance: walletBalance.value,
-        creditedRefs: creditedReferences.toList(),
-        recentTransactions: transactions.map(_transactionToJson).toList(),
-      );
-    }
-
-    AuthService.syncOrderToSupabase(
-      orderCode: orderId,
-      category: category,
-      productName: productName,
-      targetUrl: targetUrl,
-      quantity: quantity,
-      amount: amount,
-      paymentMethod: paymentMethod,
-      status: isInstantPin ? 'completed' : 'processing',
-      details: newOrder.details ?? '$productName (x$quantity)',
-      pins: generatedPins,
-      recentOrders: orders.map(_orderToJson).toList(),
-    );
-
-    if (Get.isRegistered<AdminController>() && email.value.isNotEmpty) {
-      Get.find<AdminController>().recordUserPurchase(
-        email: email.value,
-        orderId: orderId,
-        productName: productName,
-        category: category,
-        amount: amount,
-      );
-    }
-
     return newOrder;
   }
 

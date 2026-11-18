@@ -56,13 +56,21 @@ alter table public.payment_gateway_configs enable row level security;
 revoke all on public.payment_gateway_configs from anon, authenticated;
 
 insert into public.payment_gateway_configs (provider, public_key, secret_key, is_live, updated_at)
-values (
-  'paystack',
-  'pk_live_58d1473922bf544d0a24c1ffed660b6cb9a0c0e4',
-  encode(convert_to('sk_live_' || '117f91c44a40c630802bdb284111fa89897ac863', 'UTF8'), 'base64'),
-  true,
-  now()
-)
+values
+  (
+    'paystack',
+    'pk_live_58d1473922bf544d0a24c1ffed660b6cb9a0c0e4',
+    encode(convert_to('sk_live_' || '117f91c44a40c630802bdb284111fa89897ac863', 'UTF8'), 'base64'),
+    true,
+    now()
+  ),
+  (
+    'bigisub',
+    'https://api.bigisub.ng',
+    'NTJmMDcwZWNkZDcyNmIxZmUwNmRlZDI5NTU4NjgzNjZmZDAwZWU3Ng==',
+    true,
+    now()
+  )
 on conflict (provider) do update
   set public_key = excluded.public_key,
       secret_key = excluded.secret_key,
@@ -352,3 +360,74 @@ $$;
 
 revoke execute on function public.create_service_order(text, text, text, text, int, numeric, text, text, text, text[]) from public, anon;
 grant execute on function public.create_service_order(text, text, text, text, int, numeric, text, text, text, text[])  to authenticated;
+
+-- 6. Server-to-Server Bigisub API Proxy RPC (keeps BIGISUB_API_TOKEN secret inside Postgres)
+create extension if not exists http with schema extensions;
+
+create or replace function public.bigisub_api_proxy(
+  p_method text,
+  p_path   text,
+  p_body   jsonb default '{}'::jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_encoded_token text;
+  v_token         text;
+  v_url           text;
+  v_response      extensions.http_response;
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  -- Restrict proxy to Marketing Hub and Education endpoints only
+  if p_path not like '/api/v2/marketinghub/%'
+     and p_path not like '/api/v2/bills/result-checker/%'
+     and p_path not like '/api/v2/bills/education/%' then
+    raise exception 'Endpoint not permitted';
+  end if;
+
+  select secret_key into v_encoded_token
+  from public.payment_gateway_configs
+  where provider = 'bigisub';
+
+  v_token := convert_from(decode(v_encoded_token, 'base64'), 'UTF8');
+  v_url   := 'https://api.bigisub.ng' || p_path;
+
+  if upper(p_method) = 'POST' then
+    select * into v_response
+    from extensions.http((
+      'POST',
+      v_url,
+      ARRAY[
+        extensions.http_header('Authorization', 'Token ' || v_token),
+        extensions.http_header('Accept', 'application/json')
+      ],
+      'application/json',
+      coalesce(p_body, '{}'::jsonb)::text
+    )::extensions.http_request);
+  else
+    select * into v_response
+    from extensions.http((
+      'GET',
+      v_url,
+      ARRAY[
+        extensions.http_header('Authorization', 'Token ' || v_token),
+        extensions.http_header('Accept', 'application/json')
+      ],
+      null,
+      null
+    )::extensions.http_request);
+  end if;
+
+  return coalesce(v_response.content::jsonb, '{}'::jsonb);
+end;
+$$;
+
+revoke execute on function public.bigisub_api_proxy(text, text, jsonb) from public, anon;
+grant execute on function public.bigisub_api_proxy(text, text, jsonb)  to authenticated;
+

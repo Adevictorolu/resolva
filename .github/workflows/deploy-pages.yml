@@ -35,6 +35,8 @@ jobs:
           --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY || 'sb_publishable_qwWqoND6dPiWH9cQC_S9Gg_AW8XVCkG' }}
           --dart-define=PAYSTACK_PUBLIC_KEY=${{ vars.PAYSTACK_PUBLIC_KEY || 'pk_live_58d1473922bf544d0a24c1ffed660b6cb9a0c0e4' }}
           --dart-define=PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
+          --dart-define=BIGISUB_API_TOKEN=${{ secrets.BIGISUB_API_TOKEN }}
+
 
       - name: SPA fallback (404.html)
         run: cp build/web/index.html build/web/404.html

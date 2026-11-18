@@ -1288,6 +1288,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: AppColors.textSecondary,
                       ),
                     ),
+                    if (!isExam &&
+                        (order.deliveredCount != null ||
+                            order.startCount != null)) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 4,
+                        children: [
+                          if (order.startCount != null)
+                            Text(
+                              'Start: ${order.startCount}',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          if (order.deliveredCount != null)
+                            Text(
+                              'Delivered: ${order.deliveredCount}/${order.quantity}',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.emeraldGreen,
+                              ),
+                            ),
+                          if (order.remains != null)
+                            Text(
+                              'Remains: ${order.remains}',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.royalBlue,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1308,7 +1346,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
           ),
-          if (showDetails && order.details != null) ...[
+          if (showDetails &&
+              (order.details != null ||
+                  (order.pins != null && order.pins!.isNotEmpty) ||
+                  !isExam)) ...[
             const SizedBox(height: 14),
             const Divider(),
             const SizedBox(height: 10),
@@ -1322,34 +1363,363 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    order.details!,
+                    order.details ?? order.targetUrl ?? 'Order confirmed',
                     style: GoogleFonts.montserrat(
                       fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
                   ),
                 ),
-                if (order.fulfilmentStatus == OrderFulfilmentStatus.completed &&
-                    isExam)
-                  TextButton.icon(
-                    onPressed: () {
-                      final pinText = (order.pins != null && order.pins!.isNotEmpty)
-                          ? order.pins!.first
-                          : order.details!;
-                      Clipboard.setData(ClipboardData(text: pinText));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('E-PIN copied to clipboard!'),
-                          duration: Duration(seconds: 2),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (isExam &&
+                        order.fulfilmentStatus ==
+                            OrderFulfilmentStatus.completed)
+                      TextButton.icon(
+                        onPressed: () {
+                          final pinText =
+                              (order.pins != null && order.pins!.isNotEmpty)
+                                  ? order.pins!.join('\n')
+                                  : (order.details ?? '');
+                          Clipboard.setData(ClipboardData(text: pinText));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                (order.pins != null && order.pins!.length > 1)
+                                    ? 'All ${order.pins!.length} E-PINs copied to clipboard!'
+                                    : 'E-PIN copied to clipboard!',
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.copy_rounded, size: 15),
+                        label: Text(
+                          (order.pins != null && order.pins!.length > 1)
+                              ? 'Copy All PINs'
+                              : 'Copy PIN',
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.copy_rounded, size: 15),
-                    label: const Text('Copy PIN'),
-                  ),
+                      ),
+                    if (!isExam)
+                      TextButton.icon(
+                        onPressed: () async {
+                          final refreshed = await controller
+                              .refreshSocialOrderReceipt(order);
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Order status refreshed (${refreshed.statusNote ?? refreshed.fulfilmentStatus.name}).',
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.refresh_rounded, size: 15),
+                        label: const Text('Refresh'),
+                      ),
+                    TextButton.icon(
+                      onPressed: () => _showOrderReceiptDialog(order),
+                      icon: const Icon(Icons.receipt_long_rounded, size: 15),
+                      label: const Text('Receipt'),
+                    ),
+                  ],
+                ),
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  void _showOrderReceiptDialog(Order order) {
+    final isExam = order.category.contains('Exam');
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: (isExam
+                                ? AppColors.royalBlue
+                                : AppColors.emeraldGreen)
+                            .withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isExam
+                            ? Icons.verified_rounded
+                            : Icons.trending_up_rounded,
+                        color: isExam
+                            ? AppColors.royalBlue
+                            : AppColors.emeraldGreen,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isExam
+                                ? 'Exam Result Checker Receipt'
+                                : 'Social Media Boosting Receipt',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryNavy,
+                            ),
+                          ),
+                          Text(
+                            order.id,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildReceiptDetailRow('Service', order.productName),
+                      if (order.platform != null && order.platform!.isNotEmpty)
+                        _buildReceiptDetailRow('Platform', order.platform!),
+                      _buildReceiptDetailRow(
+                        'Quantity',
+                        '${order.quantity}',
+                      ),
+                      if (order.unitPrice != null && order.unitPrice! > 0)
+                        _buildReceiptDetailRow(
+                          'Unit Price',
+                          '₦${order.unitPrice!.toStringAsFixed(2)}',
+                        ),
+                      _buildReceiptDetailRow(
+                        'Total Paid',
+                        '₦${_currencyFormat.format(order.amount)}',
+                      ),
+                      _buildReceiptDetailRow(
+                        'Date',
+                        _dateFormat.format(order.date),
+                      ),
+                      if (order.bigisubReference != null &&
+                          order.bigisubReference!.isNotEmpty)
+                        _buildReceiptDetailRow(
+                          'Provider Reference',
+                          order.bigisubReference!,
+                        ),
+                      if (order.targetUrl != null &&
+                          order.targetUrl!.isNotEmpty)
+                        _buildReceiptDetailRow(
+                          'Target Link / Handle',
+                          order.targetUrl!,
+                        ),
+                      if (!isExam) ...[
+                        if (order.startCount != null)
+                          _buildReceiptDetailRow(
+                            'Start Count',
+                            '${order.startCount}',
+                          ),
+                        if (order.deliveredCount != null)
+                          _buildReceiptDetailRow(
+                            'Delivered Count',
+                            '${order.deliveredCount}',
+                          ),
+                        if (order.remains != null)
+                          _buildReceiptDetailRow(
+                            'Remaining',
+                            '${order.remains}',
+                          ),
+                        if (order.deliveryPercentage != null)
+                          _buildReceiptDetailRow(
+                            'Completion',
+                            '${order.deliveryPercentage}%',
+                          ),
+                        if (order.statusNote != null &&
+                            order.statusNote!.isNotEmpty)
+                          _buildReceiptDetailRow('Status Note', order.statusNote!),
+                      ],
+                    ],
+                  ),
+                ),
+                if (isExam &&
+                    order.pins != null &&
+                    order.pins!.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Generated Result Checker PIN(s)',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryNavy,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...order.pins!.map(
+                    (pin) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.royalBlue.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.royalBlue.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: SelectableText(
+                              pin,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryNavy,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: pin));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('PIN copied to clipboard!'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.copy_rounded,
+                              size: 16,
+                              color: AppColors.royalBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                if (!isExam) ...[
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final updated = await controller
+                              .refreshSocialOrderReceipt(order);
+                          if (!ctx.mounted) return;
+                          Navigator.of(ctx).pop();
+                          if (mounted) {
+                            _showOrderReceiptDialog(updated);
+                          }
+                        },
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Refresh Status'),
+                      ),
+                      if (order.canRefill)
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final msg = await controller
+                                .requestSocialOrderRefill(order);
+                            if (!ctx.mounted) return;
+                            ScaffoldMessenger.of(ctx).showSnackBar(
+                              SnackBar(content: Text(msg)),
+                            );
+                          },
+                          icon: const Icon(Icons.autorenew_rounded, size: 16),
+                          label: const Text('Request Refill'),
+                        ),
+                      if (order.canCancel)
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final res = await controller
+                                .cancelSocialOrder(order);
+                            if (!ctx.mounted) return;
+                            Navigator.of(ctx).pop();
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(res.message)),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.error,
+                          ),
+                          icon: const Icon(Icons.cancel_outlined, size: 16),
+                          label: const Text('Cancel Order'),
+                        ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReceiptDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 135,
+            child: Text(
+              label,
+              style: GoogleFonts.montserrat(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SelectableText(
+              value,
+              style: GoogleFonts.montserrat(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryNavy,
+              ),
+            ),
+          ),
         ],
       ),
     );
