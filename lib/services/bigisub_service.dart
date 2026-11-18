@@ -178,7 +178,7 @@ class BigisubService {
               body: {
                 'method': method.toUpperCase(),
                 'path': path,
-                'body': ?body,
+                if (body != null) 'body': body,
               },
             )
             .timeout(const Duration(seconds: 6));
