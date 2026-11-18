@@ -272,7 +272,7 @@ $_baseFooter
       'WAEC' => 'https://www.waecdirect.org',
       'NECO' => 'https://result.neco.gov.ng',
       'NABTEB' => 'https://eworld.nabteb.gov.ng',
-      _ => 'https://resolver.com.ng/dashboard',
+      _ => '${AppConfig.siteUrl}/#/dashboard',
     };
 
     return '''

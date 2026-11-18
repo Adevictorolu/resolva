@@ -511,7 +511,7 @@ class _ContactScreenState extends State<ContactScreen> {
         'icon': Icons.email_rounded,
         'title': 'Email Desk',
         'desc': 'For official & enterprise inquiries',
-        'val': 'support@resolver.com.ng',
+        'val': 'support@resolva.com.ng',
         'color': AppColors.royalBlue,
       },
       {

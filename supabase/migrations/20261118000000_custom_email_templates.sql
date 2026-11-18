@@ -1,6 +1,6 @@
 -- =============================================================================
 -- RESOLVA: Custom Montserrat Email Notifications & Audit Log Schema
--- Domain: resolver.com.ng | Support: support@resolver.com.ng
+-- Domain: resolva.com.ng | Support: support@resolva.com.ng
 -- =============================================================================
 
 -- Table storing every transactional email dispatched to users

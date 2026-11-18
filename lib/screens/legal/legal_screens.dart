@@ -261,7 +261,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                               ),
                               _buildLegalSection(
                                 '6. Contact the Data Protection Officer',
-                                'If you have inquiries regarding how your data is handled or wish to exercise your data rights, contact privacy@resolver.com.ng or support@resolver.com.ng.',
+                                'If you have inquiries regarding how your data is handled or wish to exercise your data rights, contact privacy@resolva.com.ng or support@resolva.com.ng.',
                               ),
                             ],
                           ),

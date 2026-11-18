@@ -3,22 +3,22 @@ class AppConfig {
   AppConfig._();
 
   /// Primary production domain.
-  static const String domain = 'resolver.com.ng';
+  static const String domain = 'resolva.com.ng';
 
   /// Primary website URL.
-  static const String siteUrl = 'https://resolver.com.ng';
+  static const String siteUrl = 'https://resolva.com.ng';
 
   /// Official support email address.
-  static const String supportEmail = 'support@resolver.com.ng';
+  static const String supportEmail = 'support@resolva.com.ng';
 
   /// Official contact email.
-  static const String contactEmail = 'contact@resolver.com.ng';
+  static const String contactEmail = 'contact@resolva.com.ng';
 
   /// Official privacy & data compliance email.
-  static const String privacyEmail = 'privacy@resolver.com.ng';
+  static const String privacyEmail = 'privacy@resolva.com.ng';
 
   /// Official billing email.
-  static const String billingEmail = 'billing@resolver.com.ng';
+  static const String billingEmail = 'billing@resolva.com.ng';
 
   /// Support phone line (WhatsApp & Call).
   static const String supportPhone = '+234 810 000 0000';
