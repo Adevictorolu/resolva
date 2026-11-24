@@ -184,15 +184,19 @@ class BigisubService {
             .timeout(const Duration(seconds: 6));
         if (fnRes.status == 404) {
           _edgeFnAvailable = false;
-        } else if (fnRes.status >= 200 &&
-            fnRes.status < 300 &&
-            fnRes.data != null) {
+        } else if (fnRes.data != null) {
           if (fnRes.data is Map) {
-            return Map<String, dynamic>.from(fnRes.data as Map);
+            final map = Map<String, dynamic>.from(fnRes.data as Map);
+            map['_http_status'] = fnRes.status;
+            return map;
           }
           if (fnRes.data is String) {
             final decoded = jsonDecode(fnRes.data as String);
-            if (decoded is Map) return Map<String, dynamic>.from(decoded);
+            if (decoded is Map) {
+              final map = Map<String, dynamic>.from(decoded);
+              map['_http_status'] = fnRes.status;
+              return map;
+            }
           }
         }
       } on FunctionException catch (e) {
@@ -423,12 +427,30 @@ class BigisubService {
       );
     }
 
-    // If Bigisub returned an explicit 400 validation error (e.g. invalid link format), surface it
+    // Surface any upstream error (any non-success response) to the caller so the wallet is NOT debited
     final httpStatus = response?['_http_status'] as int?;
-    if (httpStatus == 400 && response != null) {
-      final errMsg =
-          (response['message'] ?? response['detail'] ?? 'Invalid order parameters.')
-              .toString();
+    if (response != null && response['success'] != true) {
+      // Extract the most specific error message available
+      String errMsg = 'Service temporarily unavailable. Please try again or contact support.';
+      final respMsg = response['message']?.toString() ?? '';
+      final respDetail = response['detail']?.toString() ?? '';
+      final errors = response['errors'];
+      if (errors is Map) {
+        // Flatten validation errors from Bigisub format {"balance": ["msg..."]}
+        final msgs = <String>[];
+        errors.forEach((k, v) {
+          if (v is List) {
+            for (final m in v) msgs.add(m.toString());
+          } else {
+            msgs.add(v.toString());
+          }
+        });
+        if (msgs.isNotEmpty) errMsg = msgs.join(' ');
+      } else if (respMsg.isNotEmpty) {
+        errMsg = respMsg;
+      } else if (respDetail.isNotEmpty) {
+        errMsg = respDetail;
+      }
       return BigisubMarketingOrderResult(
         isSuccess: false,
         tranId: '',
@@ -443,27 +465,34 @@ class BigisubService {
       );
     }
 
-    // Fulfill and queue with generated Bigisub SOCL_ transaction ID when running in browser-only mode
-    final fallbackTranId = _generateSocialTranId();
+    // response is null — all 3 proxy tiers failed (no network / edge fn not deployed)
+    if (response == null) {
+      return BigisubMarketingOrderResult(
+        isSuccess: false,
+        tranId: '',
+        serviceName: service.name,
+        platform: service.platformId,
+        link: cleanTarget,
+        quantity: quantity,
+        unitPrice: unitPrice,
+        totalAmount: expectedTotal,
+        status: 'failed',
+        message: 'Could not reach the service gateway. Please check your internet connection and try again.',
+      );
+    }
+
+    // Should never reach here, but guard anyway
     return BigisubMarketingOrderResult(
-      isSuccess: true,
-      tranId: fallbackTranId,
+      isSuccess: false,
+      tranId: '',
       serviceName: service.name,
       platform: service.platformId,
       link: cleanTarget,
       quantity: quantity,
       unitPrice: unitPrice,
       totalAmount: expectedTotal,
-      status: 'processing',
-      startCount: 0,
-      remains: quantity,
-      deliveredCount: 0,
-      deliveryPercentage: 0,
-      statusNote: 'Delivery in progress (${service.estimatedDelivery})',
-      canCancel: service.hasCancel,
-      canRefill: service.hasRefill,
-      canRefresh: true,
-      message: 'Order placed and queued for delivery.',
+      status: 'failed',
+      message: 'Unexpected gateway response. Please try again.',
     );
   }
 
@@ -658,24 +687,19 @@ class BigisubService {
       );
     }
 
-    // Fallback instant E-PIN issuance when running in browser mode without Edge Function deployed
-    final txId = _generateEduTranId();
-    final ref =
-        '${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, "0")}ED${1000 + _rng.nextInt(9000)}';
-    final pins = _generateFallbackPins(examCode, normalizedQty);
-
+    // Fallback: edge fn not deployed / no connectivity — do NOT fake success
     return BigisubExamPurchaseResult(
-      isSuccess: true,
-      transactionId: txId,
-      reference: ref,
-      status: 'successful',
+      isSuccess: false,
+      transactionId: '',
+      reference: '',
+      status: 'failed',
       examType: examCode,
       examName: product.name,
       quantity: normalizedQty,
       unitPrice: product.price,
       totalAmount: total,
-      pins: pins,
-      message: 'Exam pin purchase successful',
+      pins: const [],
+      message: 'Could not reach the service gateway. Please check your internet connection and try again.',
     );
   }
 

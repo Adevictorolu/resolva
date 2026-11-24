@@ -986,7 +986,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
-                                      'Service #${service.bigisubServiceId}',
+                                      'Service #${service.bigisubServiceId.toString().replaceAll(RegExp(r'^(BGS|MH|BIG)-?', caseSensitive: false), '')}',
                                       style: GoogleFonts.montserrat(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -1490,7 +1490,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                         ),
                                   label: Text(
                                     ctrl.isSubmittingOrder.value
-                                        ? 'Submitting Order to Bigisub...'
+                                        ? 'Processing Order...'
                                         : (hasEnoughBalance
                                             ? 'Pay from Wallet & Place Order (₦${_fmt.format(total)})'
                                             : 'Fund Wallet via Paystack to Order'),

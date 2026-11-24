@@ -102,6 +102,27 @@ serve(async (req: Request) => {
 
     const rawData = await upstreamRes.json();
     const sanitizedData = sanitizeDeep(rawData);
+
+    // Always forward the upstream HTTP status so the Dart client can detect 4xx errors.
+    // Sanitize merchant-balance error messages into generic ones.
+    if (!upstreamRes.ok) {
+      const sanitized = sanitizedData as Record<string, unknown>;
+      const rawMsg = (sanitized["message"] as string) ?? "";
+      if (
+        /merchant balance/i.test(rawMsg) ||
+        /top up/i.test(rawMsg) ||
+        /funding your main wallet/i.test(rawMsg)
+      ) {
+        sanitized["message"] =
+          "Service temporarily unavailable. Please try again later or contact support.";
+        if (sanitized["errors"]) sanitized["errors"] = null;
+      }
+      return new Response(JSON.stringify(sanitizedData), {
+        status: upstreamRes.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify(sanitizedData), {
       status: upstreamRes.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

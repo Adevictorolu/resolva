@@ -331,7 +331,7 @@ $_baseHeader
           </tr>
           <tr>
             <td class="label">Reference</td>
-            <td class="val">${order.bigisubReference ?? order.id}</td>
+            <td class="val">${order.id}</td>
           </tr>
           <tr>
             <td class="label">Examination</td>
