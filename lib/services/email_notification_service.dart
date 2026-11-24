@@ -377,11 +377,11 @@ $_baseFooter
     return '''
 $_baseHeader
         <div style="display: inline-block; background-color: #DBEAFE; color: #1E40AF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; margin-bottom: 12px;">
-          ✓ DISPATCHED TO MARKETING HUB
+          ✓ ORDER CONFIRMED & DISPATCHED
         </div>
         <h2 class="h1">Social Media Boosting Order Confirmed</h2>
         <p class="p">Hello <strong>$fullName</strong>,</p>
-        <p class="p">Your order for <strong>${service.name}</strong> has been received and queued with the upstream Marketing Hub network.</p>
+        <p class="p">Your order for <strong>${service.name}</strong> has been received and queued with the Resolva Gateway network.</p>
 
         <table class="detail-table">
           <tr>

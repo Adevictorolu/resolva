@@ -151,6 +151,58 @@ final List<SocialPlatform> mockPlatforms = [
 
 /// Initial fallback Bigisub Marketing Hub services (immediately hydrated with all 759 services from assets/data/bigisub_catalog.json & live API).
 final List<SocialService> mockSocialServices = [
+  // WhatsApp
+  const SocialService(
+    id: 'bgs-wa-101',
+    bigisubServiceId: 101,
+    platformId: 'whatsapp',
+    country: 'nigeria',
+    name: 'WHATSAPP - Community / Group Members',
+    description:
+      'Real-looking members for your WhatsApp group or community. Submit group invite link.',
+    category: 'Followers & Subscribers',
+    pricePerUnit: 8.5,
+    displayAmount: 8.5,
+    displayUnit: 'per member',
+    pricingModel: 'per_unit',
+    minQuantity: 50,
+    maxQuantity: 5000,
+    estimatedDelivery: '~1-3 hrs',
+  ),
+  const SocialService(
+    id: 'bgs-wa-102',
+    bigisubServiceId: 102,
+    platformId: 'whatsapp',
+    country: 'nigeria',
+    name: 'WHATSAPP - Channel Followers / Subscribers',
+    description:
+      'High-quality subscribers for your official WhatsApp Channel. Submit channel link.',
+    category: 'Followers & Subscribers',
+    pricePerUnit: 6.0,
+    displayAmount: 6.0,
+    displayUnit: 'per subscriber',
+    pricingModel: 'per_unit',
+    minQuantity: 100,
+    maxQuantity: 10000,
+    estimatedDelivery: '~2-6 hrs',
+  ),
+  const SocialService(
+    id: 'bgs-wa-103',
+    bigisubServiceId: 103,
+    platformId: 'whatsapp',
+    country: 'global',
+    name: 'WHATSAPP - Channel Post Reactions',
+    description:
+      'Boost reactions on your WhatsApp channel updates. Submit post link.',
+    category: 'Likes & Reactions',
+    pricePerUnit: 3.5,
+    displayAmount: 3.5,
+    displayUnit: 'per reaction',
+    pricingModel: 'per_unit',
+    minQuantity: 50,
+    maxQuantity: 10000,
+    estimatedDelivery: '~0-2 hrs',
+  ),
   const SocialService(
     id: 'bgs-39',
     bigisubServiceId: 39,

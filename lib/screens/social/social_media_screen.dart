@@ -131,7 +131,7 @@ class _ServiceListViewState extends State<_ServiceListView> {
                       const SectionHeading(
                         title: 'Social Media Boosting',
                         subtitle:
-                            'Official Marketing Hub — High-retention followers, views, likes, comments & engagement across Instagram, TikTok, YouTube, X, Facebook, Telegram, WhatsApp, Audiomack & Spotify.',
+                            'Official Growth Network — High-retention followers, views, likes, comments & engagement across Instagram, TikTok, YouTube, X, Facebook, Telegram, WhatsApp, Audiomack & Spotify.',
                       ),
                       const SizedBox(height: 20),
 
@@ -1092,7 +1092,9 @@ class _OrderFormViewState extends State<_OrderFormView> {
                               _fieldLabel(
                                 isSubscription
                                     ? 'Target Username (No @, No URL)'
-                                    : 'Target Profile / Post / Video Link',
+                                    : (service.platformId == 'whatsapp'
+                                        ? 'WhatsApp Group / Channel / Post Link'
+                                        : 'Target Profile / Post / Video Link'),
                               ),
                               const SizedBox(height: 6),
                               TextFormField(
@@ -1101,7 +1103,9 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                 decoration: InputDecoration(
                                   hintText: isSubscription
                                       ? 'e.g. ade_victor'
-                                      : 'https://...',
+                                      : (service.platformId == 'whatsapp'
+                                          ? 'https://chat.whatsapp.com/... or channel link'
+                                          : 'https://...'),
                                   prefixIcon: Icon(
                                     isSubscription
                                         ? Icons.alternate_email_rounded
@@ -1111,9 +1115,13 @@ class _OrderFormViewState extends State<_OrderFormView> {
                                 ),
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
-                                    return isSubscription
-                                        ? 'Please enter the target username'
-                                        : 'Please enter the target post or profile link';
+                                    if (isSubscription) {
+                                      return 'Please enter the target username';
+                                    }
+                                    if (service.platformId == 'whatsapp') {
+                                      return 'Please enter the WhatsApp group, channel, or post link';
+                                    }
+                                    return 'Please enter the target post or profile link';
                                   }
                                   return null;
                                 },
@@ -1649,7 +1657,7 @@ class _OrderFormViewState extends State<_OrderFormView> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Your order has been dispatched to the Marketing Hub and is now being processed.',
+                  'Your order has been dispatched to the Resolva Gateway and is now being processed.',
                   style: GoogleFonts.montserrat(
                     fontSize: 12.5,
                     color: AppColors.textSecondary,

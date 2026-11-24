@@ -656,7 +656,7 @@ class DashboardController extends GetxController {
         id: 'NOTIF-${now.millisecondsSinceEpoch}',
         title: 'Social Boosting Order Placed ($orderId)',
         message:
-            'Your order for ${service.name} (Qty: $quantity) has been sent to Bigisub Marketing Hub.',
+            'Your order for ${service.name} (Qty: $quantity) has been confirmed and placed with Resolva Gateway.',
         date: now,
         type: NotificationType.orderConfirmed,
         isRead: false,
@@ -896,7 +896,7 @@ class DashboardController extends GetxController {
       );
     } else {
       updated = order.copyWith(
-        statusNote: 'Synced with Bigisub Marketing Hub',
+        statusNote: 'Synced with Resolva Gateway',
       );
     }
 

@@ -17,6 +17,32 @@ function resolveBigisubToken(): string {
   return (Deno.env.get("BIGISUB_API_TOKEN") ?? "").trim();
 }
 
+function sanitizeText(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/bigi\s*sub/gi, "Resolva Gateway")
+    .replace(/bigisub/gi, "Resolva Gateway")
+    .replace(/bilalsada\s*sub/gi, "Resolva Gateway")
+    .replace(/bilalsadasub/gi, "Resolva Gateway")
+    .replace(/marketing\s*hub/gi, "Resolva")
+    .replace(/\bmarketing\b/gi, "Resolva")
+    .replace(/api\.bigisub\.ng/gi, "gateway.resolva.ng")
+    .replace(/api\.bilalsadasub\.com/gi, "gateway.resolva.ng");
+}
+
+function sanitizeDeep(obj: unknown): unknown {
+  if (typeof obj === "string") return sanitizeText(obj);
+  if (Array.isArray(obj)) return obj.map(sanitizeDeep);
+  if (obj && typeof obj === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+      out[k] = sanitizeDeep(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -38,7 +64,7 @@ serve(async (req: Request) => {
         JSON.stringify({
           success: false,
           message:
-            "Only Marketing Hub (Social Media Boosting) and Education (Examination E-Pins) endpoints are permitted.",
+            "Only approved services (Social Media Boosting & Examination E-Pins) are permitted.",
         }),
         {
           status: 403,
@@ -53,7 +79,7 @@ serve(async (req: Request) => {
         JSON.stringify({
           success: false,
           message:
-            "BIGISUB_API_TOKEN is not configured in Supabase Secrets.",
+            "Gateway configuration token is not set in Supabase Secrets.",
         }),
         {
           status: 500,
@@ -74,8 +100,9 @@ serve(async (req: Request) => {
       body: method === "POST" && body ? JSON.stringify(body) : undefined,
     });
 
-    const data = await upstreamRes.json();
-    return new Response(JSON.stringify(data), {
+    const rawData = await upstreamRes.json();
+    const sanitizedData = sanitizeDeep(rawData);
+    return new Response(JSON.stringify(sanitizedData), {
       status: upstreamRes.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -83,7 +110,7 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: false,
-        message: err instanceof Error ? err.message : "Proxy error",
+        message: "Gateway service temporarily unavailable. Please try again.",
       }),
       {
         status: 500,

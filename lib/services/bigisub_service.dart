@@ -414,7 +414,7 @@ class BigisubService {
         remains: remains,
         deliveredCount: delivered,
         deliveryPercentage: pct,
-        statusNote: 'Order queued with Bigisub Marketing Hub',
+        statusNote: 'Order queued with Resolva Gateway',
         canCancel: service.hasCancel,
         canRefill: service.hasRefill,
         canRefresh: true,

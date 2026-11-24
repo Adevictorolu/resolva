@@ -3919,7 +3919,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   controller: bigisubCtrl,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    labelText: 'Bigisub API Token (Marketing Hub & Education)',
+                    labelText: 'Provider API Gateway Token (Social & Education)',
                     hintText: 'Paste token to rotate in Supabase Vault',
                     prefixIcon: Icon(Icons.token_rounded),
                   ),
